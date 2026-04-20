@@ -48,4 +48,41 @@ class PrestamoController extends Controller
 
         return redirect()->back()->with('success', 'Préstamo registrado correctamente.');
     }
+    // Función para MOSTRAR la pantalla de Préstamos Activos
+    public function activos()
+    {
+        // Traemos todos los detalles que NO tienen fecha de devolución (siguen prestados)
+        // y cargamos la información del activo y del usuario que lo pidió
+        $prestamosActivos = DetallePrestamo::with(['prestamo.usuario', 'activo'])
+                            ->whereNull('fecha_devolucion_real')
+                            ->get();
+
+        return view('prestamos_activos', compact('prestamosActivos'));
+    }
+
+    public function devolver(Request $request, $id_detalle)
+    {
+        // 1. Encontrar el detalle específico
+        $detalle = DetallePrestamo::findOrFail($id_detalle);
+
+        // 2. Registrar cómo lo regresan y la fecha/hora exacta
+        $detalle->estado_retorno = $request->estado_retorno;
+        $detalle->fecha_devolucion_real = now(); 
+        $detalle->save();
+
+        // 3. Lógica inteligente para el estado del activo
+        $activo = Activo::findOrFail($detalle->id_activo);
+
+        if ($request->estado_retorno === 'Dañado') {
+            // Si está dañado, el sistema lo marca como "Mantenimiento" y NO aparecerá como disponible
+            $activo->estado_actual = 'Mantenimiento';
+        } else {
+            // Si está bien o con desgaste menor, lo regresamos a "Disponible"
+            $activo->estado_actual = 'Disponible';
+        }
+        
+        $activo->save();
+
+        return redirect()->back()->with('success', 'Devolución procesada. El sistema ha ajustado el estado del activo.');
+    }
 }
