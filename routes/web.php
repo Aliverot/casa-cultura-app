@@ -45,6 +45,10 @@ Route::middleware('auth')->group(function () {
     // Rutas reales de Mantenimiento
     Route::get('/mantenimiento', [MantenimientoController::class, 'index'])->name('mantenimiento.index');
     Route::post('/mantenimiento', [MantenimientoController::class, 'store'])->name('mantenimiento.store');
+
+    Route::post('/prestamos/liquidar/{id}', [App\Http\Controllers\PrestamoController::class, 'liquidarPago'])->name('prestamos.liquidar');
+
+    Route::get('/historial', [App\Http\Controllers\PrestamoController::class, 'historial'])->name('prestamos.historial');
 });
 
 require __DIR__.'/auth.php';
