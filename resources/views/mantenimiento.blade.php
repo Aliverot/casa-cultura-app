@@ -7,20 +7,20 @@
 
     <div class="py-12 bg-gray-100 min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            
+
             <div class="bg-white p-4 rounded-lg flex flex-wrap justify-center gap-4 mb-8 shadow-sm border border-gray-200">
-                <a href="{{ route('catalogo') }}" class="text-gray-600 px-6 py-2 font-bold hover:text-blue-600 hover:bg-gray-50 rounded-md transition">Catálogo</a>
+                <a href="{{ route('activos.index') }}" class="text-gray-600 px-6 py-2 font-bold hover:text-blue-600 hover:bg-gray-50 rounded-md transition">Catálogo</a>
                 <a href="{{ route('activos.create') }}" class="text-gray-600 px-6 py-2 font-bold hover:text-blue-600 hover:bg-gray-50 rounded-md transition">Instrumentos Nuevos</a>
                 <a href="{{ route('prestamos.activos') }}" class="text-gray-600 px-6 py-2 font-bold hover:text-blue-600 hover:bg-gray-50 rounded-md transition">Devoluciones / Multas</a>
-                <a href="{{ route('mantenimiento.index') }}" class="bg-blue-600 text-white px-6 py-2 rounded-md shadow-md font-bold">Mantenimiento</a>
+                <a href="{{ route('mantenimientos.index') }}" class="bg-blue-600 text-white px-6 py-2 rounded-md shadow-md font-bold">Mantenimiento</a>
                 <a href="{{ route('prestamos.historial') }}" class="text-gray-600 px-6 py-2 font-bold hover:text-blue-600 hover:bg-gray-50 rounded-md transition">Historial (Log)</a>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
                 <div class="bg-white p-8 rounded-3xl shadow-xl border border-gray-200">
                     <h3 class="text-2xl font-black mb-6 text-gray-900 border-b border-gray-100 pb-4 uppercase tracking-tighter">Registrar Servicio</h3>
-                    
-                    <form action="{{ route('mantenimiento.store') }}" method="POST" class="space-y-6">
+
+                    <form action="{{ route('mantenimientos.store') }}" method="POST" class="space-y-6">
                         @csrf
                         <div>
                             <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">Instrumento:</label>

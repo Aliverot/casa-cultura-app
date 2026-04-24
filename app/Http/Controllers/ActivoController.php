@@ -43,10 +43,10 @@ class ActivoController extends Controller
             'estado_actual' => 'Disponible',
             'horas_uso' => 0,
             // Generamos un código único temporal de 6 números
-            'codigo_qr' => 'QR-' . rand(100000, 999999) 
+            'codigo_qr' => 'QR-' . rand(100000, 999999)
         ]);
 
-        return redirect()->route('catalogo')->with('success', 'Instrumento agregado correctamente.');
+        return redirect()->route('activos.index')->with('success', 'Instrumento agregado correctamente.');
     }
 
 }

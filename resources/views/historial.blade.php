@@ -7,12 +7,12 @@
 
     <div class="py-12 bg-gray-100 min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            
+
             <div class="bg-white p-4 rounded-lg flex flex-wrap justify-center gap-4 mb-8 shadow-sm border border-gray-200">
-                <a href="{{ route('catalogo') }}" class="text-gray-600 px-6 py-2 font-bold hover:text-blue-600 hover:bg-gray-50 rounded-md transition">Catálogo</a>
+                <a href="{{ route('activos.index') }}" class="text-gray-600 px-6 py-2 font-bold hover:text-blue-600 hover:bg-gray-50 rounded-md transition">Catálogo</a>
                 <a href="{{ route('activos.create') }}" class="text-gray-600 px-6 py-2 font-bold hover:text-blue-600 hover:bg-gray-50 rounded-md transition">Instrumentos Nuevos</a>
                 <a href="{{ route('prestamos.activos') }}" class="text-gray-600 px-6 py-2 font-bold hover:text-blue-600 hover:bg-gray-50 rounded-md transition">Devoluciones / Multas</a>
-                <a href="{{ route('mantenimiento.index') }}" class="text-gray-600 px-6 py-2 font-bold hover:text-blue-600 hover:bg-gray-50 rounded-md transition">Mantenimiento</a>
+                <a href="{{ route('mantenimientos.index') }}" class="text-gray-600 px-6 py-2 font-bold hover:text-blue-600 hover:bg-gray-50 rounded-md transition">Mantenimiento</a>
                 <a href="{{ route('prestamos.historial') }}" class="bg-blue-600 text-white px-6 py-2 rounded-md shadow-md font-bold">Historial (Log)</a>
             </div>
 
@@ -45,17 +45,17 @@
                                     <td class="p-4 text-sm text-gray-600 whitespace-nowrap">
                                         {{ \Carbon\Carbon::parse($log->prestamo->fecha_salida)->format('d/m/Y') }}
                                     </td>
-                                    
+
                                     <td class="p-4">
                                         <p class="font-black text-gray-900">{{ $log->activo->nombre }}</p>
                                         <p class="text-xs text-gray-400 font-mono">{{ $log->activo->codigo_qr }}</p>
                                     </td>
-                                    
+
                                     <td class="p-4">
                                         <p class="font-bold text-gray-700">{{ $log->prestamo->nombre_solicitante }}</p>
                                         <p class="text-xs text-gray-500">{{ $log->prestamo->contacto_solicitante }}</p>
                                     </td>
-                                    
+
                                     <td class="p-4">
                                         @if($esAtrasado)
                                             <span class="bg-red-100 text-red-700 px-3 py-1 rounded-md text-xs font-black uppercase">Con Atraso</span>
@@ -64,7 +64,7 @@
                                             <span class="bg-green-100 text-green-700 px-3 py-1 rounded-md text-xs font-black uppercase">A Tiempo</span>
                                         @endif
                                     </td>
-                                    
+
                                     <td class="p-4">
                                         @if($log->estado_retorno == 'Dañado')
                                             <span class="text-red-600 font-bold text-sm">⚠️ Dañado</span>

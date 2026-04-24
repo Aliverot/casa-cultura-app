@@ -42,6 +42,6 @@ class MantenimientoController extends Controller
         $activo->horas_uso = 0; // Reiniciamos el contador de desgaste
         $activo->save();
 
-        return redirect()->route('mantenimiento.index')->with('success', 'Mantenimiento registrado. El instrumento vuelve a estar disponible.');
+        return redirect()->route('mantenimientos.index')->with('success', 'Mantenimiento registrado. El instrumento vuelve a estar disponible.');
     }
 }
