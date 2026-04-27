@@ -41,7 +41,17 @@
                         [$estadoBorde, $estadoBadge] = match ($item->estado_actual) {
                             'Disponible' => ['border-green-500', 'bg-green-500 text-white'],
                             'Mantenimiento' => ['border-amber-500', 'bg-amber-500 text-white'],
+                            'Extraviado' => ['border-orange-500', 'bg-orange-500 text-white'],
+                            'Baja' => ['border-slate-400', 'bg-slate-500 text-white'],
                             default => ['border-red-500', 'bg-red-500 text-white'],
+                        };
+
+                        $mensajeEstado = match ($item->estado_actual) {
+                            'No disponible' => 'Este instrumento ya se encuentra prestado y no puede prestarse de nuevo por ahora.',
+                            'Mantenimiento' => 'Este instrumento esta en mantenimiento y no esta disponible para prestamo.',
+                            'Extraviado' => 'Este instrumento no esta disponible para prestamo.',
+                            'Baja' => 'Este instrumento fue dado de baja y ya no esta disponible para prestamo.',
+                            default => 'Este instrumento no esta disponible para prestamo.',
                         };
                     @endphp
 
@@ -72,6 +82,12 @@
                                 <div class="mt-4 text-gray-600 text-sm italic">
                                     Uso acumulado:
                                     <span class="font-bold text-gray-900">{{ number_format($item->horas_uso, 2) }} horas</span>
+                                </div>
+
+                                <div class="pt-2">
+                                    <a href="{{ route('activos.edit', $item->id_activo) }}" class="inline-flex items-center rounded-lg border border-cultura-200 bg-cultura-50 px-4 py-2 text-xs font-black uppercase tracking-widest text-cultura-700 transition hover:bg-cultura-100">
+                                        Modificar articulo
+                                    </a>
                                 </div>
                             </div>
 
@@ -144,7 +160,7 @@
                                         <span class="inline-block bg-white text-gray-700 font-black py-3 px-8 rounded-xl border-2 border-gray-200 uppercase text-sm shadow-sm">
                                             {{ $item->estado_actual }}
                                         </span>
-                                        <p class="text-sm text-gray-500 mt-4">Este instrumento no puede prestarse mientras permanezca en este estado.</p>
+                                        <p class="text-sm text-gray-500 mt-4">{{ $mensajeEstado }}</p>
                                     </div>
                                 @endif
                             </div>

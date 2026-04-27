@@ -93,3 +93,47 @@ it('does not force one hour of use when the return is immediate', function () {
         ->and($activo->horas_uso)->toBe(0.0)
         ->and($detalle->estado_retorno)->toBe('En tiempo y forma');
 });
+
+it('marks an instrument as extraviado when the return cannot be completed physically', function () {
+    Carbon::setTestNow('2026-04-27 12:00:00');
+
+    $user = User::factory()->create();
+    $activo = Activo::create([
+        'codigo_qr' => 'QR-100006',
+        'nombre' => 'Clarinete de prueba',
+        'categoria' => 'Instrumentos de Viento',
+        'estado_actual' => 'Disponible',
+        'horas_uso' => 0,
+        'limite_mantenimiento' => 100,
+    ]);
+
+    $prestamo = Prestamo::create([
+        'id_usuario' => $user->id_usuario,
+        'fecha_salida' => now()->subHours(2),
+        'fecha_devolucion_prevista' => now()->addHour(),
+        'nombre_solicitante' => 'Alumno Demo',
+        'contacto_solicitante' => 'MAT-003',
+        'condiciones_entrega' => 'En buen estado al salir',
+        'estado_pago' => 'Sin cargos',
+    ]);
+
+    $detalle = DetallePrestamo::create([
+        'id_prestamo' => $prestamo->id_prestamo,
+        'id_activo' => $activo->id_activo,
+        'estado_salida' => 'Prestado',
+    ]);
+
+    $activo->update(['estado_actual' => 'No disponible']);
+
+    $response = $this->actingAs($user)->post(route('prestamos.devolver', $detalle->id_detalle), [
+        'estado_equipo' => 'Extraviado',
+        'condiciones_devolucion' => 'El usuario reporta que el instrumento fue extraviado.',
+        'costo_reparacion' => 3500,
+    ]);
+
+    $response->assertRedirect(route('prestamos.activos'));
+
+    expect($activo->refresh()->estado_actual)->toBe('Extraviado')
+        ->and($detalle->refresh()->estado_retorno)->toBe('Extraviado')
+        ->and($prestamo->refresh()->estado_pago)->toBe('Pendiente');
+});
