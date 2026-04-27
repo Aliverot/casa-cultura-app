@@ -40,7 +40,8 @@
                                     $entregaATiempo = $real->lessThanOrEqualTo($prevista);
                                     $estadoRetorno = in_array($log->estado_retorno, ['Danado', 'Dañado', 'DaÃ±ado'], true)
                                         ? 'Da&ntilde;ado'
-                                        : $log->estado_retorno;
+                                        : ($log->estado_retorno === 'Perdida total' ? 'P&eacute;rdida total' : $log->estado_retorno);
+                                    $esIncidenciaMayor = in_array($log->estado_retorno, ['Danado', 'Dañado', 'DaÃ±ado', 'Extraviado', 'Perdida total'], true);
                                 @endphp
 
                                 <tr class="hover:bg-gray-50 transition">
@@ -62,7 +63,7 @@
 
                                     <td class="p-4">
                                         <span class="inline-flex px-3 py-1 rounded-full text-xs font-black uppercase
-                                            @if ($estadoRetorno === 'Da&ntilde;ado')
+                                            @if ($esIncidenciaMayor)
                                                 bg-red-100 text-red-700
                                             @elseif ($entregaATiempo)
                                                 bg-green-100 text-green-700

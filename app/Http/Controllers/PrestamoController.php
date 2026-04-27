@@ -95,7 +95,7 @@ class PrestamoController extends Controller
     {
         $request->validate([
             'condiciones_devolucion' => 'required|string',
-            'estado_equipo' => 'required|in:Buen estado,Danado',
+            'estado_equipo' => 'required|in:Buen estado,Danado,Extraviado,Perdida total',
             'costo_reparacion' => 'nullable|numeric|min:0',
         ]);
 
@@ -114,20 +114,33 @@ class PrestamoController extends Controller
             $fechaDevolucionReal = now();
             $horasUsadas = round($fechaSalida->diffInSeconds($fechaDevolucionReal) / 3600, 2);
             $instrumentoDanado = $request->estado_equipo === 'Danado';
+            $instrumentoExtraviado = $request->estado_equipo === 'Extraviado';
+            $instrumentoPerdidaTotal = $request->estado_equipo === 'Perdida total';
             $costoReparacion = $instrumentoDanado ? (float) ($request->costo_reparacion ?? 0) : 0.0;
+            $costoReposicion = ($instrumentoExtraviado || $instrumentoPerdidaTotal)
+                ? (float) ($request->costo_reparacion ?? 0)
+                : 0.0;
             $entregaATiempo = $fechaDevolucionReal->lessThanOrEqualTo(Carbon::parse($prestamo->fecha_devolucion_prevista));
 
             $activo->horas_uso = round(((float) $activo->horas_uso) + max(0, $horasUsadas), 2);
-            $activo->estado_actual = $instrumentoDanado ? 'Mantenimiento' : 'Disponible';
+            $activo->estado_actual = match (true) {
+                $instrumentoPerdidaTotal => 'Baja',
+                $instrumentoExtraviado => 'Extraviado',
+                $instrumentoDanado => 'Mantenimiento',
+                default => 'Disponible',
+            };
 
             $prestamo->condiciones_devolucion = trim($request->condiciones_devolucion);
-            $prestamo->costo_reparacion = $costoReparacion;
-            $prestamo->estado_pago = $instrumentoDanado && $costoReparacion > 0 ? 'Pendiente' : 'Sin cargos';
+            $prestamo->costo_reparacion = $instrumentoDanado ? $costoReparacion : $costoReposicion;
+            $prestamo->estado_pago = $prestamo->costo_reparacion > 0 ? 'Pendiente' : 'Sin cargos';
 
             $detalle->fecha_devolucion_real = $fechaDevolucionReal;
-            $detalle->estado_retorno = $instrumentoDanado
-                ? 'Danado'
-                : ($entregaATiempo ? 'En tiempo y forma' : 'Con atraso');
+            $detalle->estado_retorno = match (true) {
+                $instrumentoPerdidaTotal => 'Perdida total',
+                $instrumentoExtraviado => 'Extraviado',
+                $instrumentoDanado => 'Danado',
+                default => ($entregaATiempo ? 'En tiempo y forma' : 'Con atraso'),
+            };
 
             $prestamo->save();
             $activo->save();

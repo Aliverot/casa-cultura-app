@@ -8,7 +8,7 @@
                     <a href="{{ route('dashboard') }}">
                         <x-application-logo class="block h-9 w-auto fill-current text-white" />
                     </a>
-                    <span class="ml-3 text-white font-bold text-lg hidden md:block">CulturaGest</span>
+                    <span class="ml-3 text-white font-bold text-lg hidden md:block">Casa de la Cultura Cuilapam</span>
                 </div>
 
                 <!-- Navigation Links (Módulos Operativos) -->

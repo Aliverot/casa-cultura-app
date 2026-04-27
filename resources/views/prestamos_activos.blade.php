@@ -77,6 +77,8 @@
                                             <select name="estado_equipo" class="w-full rounded-lg border-gray-300 text-sm p-3 mt-1 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500" data-damage-toggle>
                                                 <option value="Buen estado">Buen estado</option>
                                                 <option value="Danado">Da&ntilde;ado</option>
+                                                <option value="Extraviado">Extraviado</option>
+                                                <option value="Perdida total">P&eacute;rdida total</option>
                                             </select>
                                         </div>
 
@@ -92,7 +94,7 @@
                                         </div>
 
                                         <div>
-                                            <label class="text-xs font-black text-gray-500 uppercase">Costo de reparacion</label>
+                                            <label class="text-xs font-black text-gray-500 uppercase">Costo de reparacion o reposicion</label>
                                             <div class="relative mt-1">
                                                 <span class="absolute left-3 top-3 text-gray-400">$</span>
                                                 <input
@@ -106,7 +108,7 @@
                                                     disabled
                                                 >
                                             </div>
-                                            <p class="text-xs text-gray-500 mt-2">Solo se habilita cuando el instrumento regresa da&ntilde;ado.</p>
+                                            <p class="text-xs text-gray-500 mt-2">Se habilita para da&ntilde;ado, extraviado o p&eacute;rdida total.</p>
                                         </div>
 
                                         <button type="submit" class="w-full bg-cultura-600 hover:bg-cultura-700 text-white font-black py-3 rounded-xl shadow-md uppercase text-xs tracking-widest">
@@ -141,7 +143,7 @@
                                 @php
                                     $estadoRetorno = in_array($multa->estado_retorno, ['Danado', 'Dañado', 'DaÃ±ado'], true)
                                         ? 'Da&ntilde;ado'
-                                        : $multa->estado_retorno;
+                                        : ($multa->estado_retorno === 'Perdida total' ? 'P&eacute;rdida total' : $multa->estado_retorno);
                                 @endphp
                                 <tr>
                                     <td class="py-4 font-bold text-gray-900">{{ $multa->activo->nombre }}</td>
@@ -179,10 +181,10 @@
             const costInput = select.closest('form').querySelector('[data-damage-cost]');
 
             const syncCostField = () => {
-                const damaged = select.value === 'Danado';
-                costInput.disabled = !damaged;
+                const requiresCost = ['Danado', 'Extraviado', 'Perdida total'].includes(select.value);
+                costInput.disabled = !requiresCost;
 
-                if (!damaged) {
+                if (!requiresCost) {
                     costInput.value = '0';
                 }
             };
