@@ -1,24 +1,26 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-// 1. IMPORTANTE: Que estas líneas estén hasta arriba
 use App\Http\Controllers\ActivoController;
-use App\Http\Controllers\PrestamoController;
 use App\Http\Controllers\MantenimientoController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PrestamoController;
+use App\Http\Controllers\ProfileController;
 use App\Models\Activo;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
 Route::get('/dashboard', function () {
+    $estadosPrestamo = ['En Prestamo', 'No disponible'];
+
     $stats = [
         'total' => Activo::count(),
-        'prestados' => Activo::where('estado_actual', 'En Prestamo')->count(),
+        'prestados' => Activo::whereIn('estado_actual', $estadosPrestamo)->count(),
         'mantenimiento' => Activo::where('estado_actual', 'Mantenimiento')->count(),
         'disponibles' => Activo::where('estado_actual', 'Disponible')->count(),
     ];
+
     return view('dashboard', compact('stats'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -27,28 +29,23 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // --- TUS RUTAS DE LA CASA DE LA CULTURA ---
-    
-    // 1. Catálogo
+    Route::get('/inventario', [ActivoController::class, 'index'])->name('activos.index');
     Route::get('/catalogo', [ActivoController::class, 'index'])->name('catalogo');
-    
-    // 2. Instrumentos Nuevos (ESTA ES LA QUE MARCABA ERROR)
+
     Route::get('/instrumentos/nuevo', [ActivoController::class, 'create'])->name('activos.create');
     Route::post('/instrumentos', [ActivoController::class, 'store'])->name('activos.store');
-    
-    // 3. Préstamos
-    Route::post('/prestamos', [PrestamoController::class, 'store'])->name('prestamos.store');
+
+    Route::get('/prestamos', [PrestamoController::class, 'activos'])->name('prestamos.index');
     Route::get('/prestamos-activos', [PrestamoController::class, 'activos'])->name('prestamos.activos');
+    Route::get('/prestamos/nuevo', [PrestamoController::class, 'create'])->name('prestamos.create');
+    Route::post('/prestamos', [PrestamoController::class, 'store'])->name('prestamos.store');
     Route::post('/prestamos/{id_detalle}/devolver', [PrestamoController::class, 'devolver'])->name('prestamos.devolver');
-    
-    // 4. Mantenimiento 
-    // Rutas reales de Mantenimiento
-    Route::get('/mantenimiento', [MantenimientoController::class, 'index'])->name('mantenimiento.index');
+    Route::post('/prestamos/liquidar/{id}', [PrestamoController::class, 'liquidarPago'])->name('prestamos.liquidar');
+    Route::get('/historial', [PrestamoController::class, 'historial'])->name('prestamos.historial');
+
+    Route::get('/mantenimiento', [MantenimientoController::class, 'index'])->name('mantenimientos.index');
     Route::post('/mantenimiento', [MantenimientoController::class, 'store'])->name('mantenimiento.store');
-
-    Route::post('/prestamos/liquidar/{id}', [App\Http\Controllers\PrestamoController::class, 'liquidarPago'])->name('prestamos.liquidar');
-
-    Route::get('/historial', [App\Http\Controllers\PrestamoController::class, 'historial'])->name('prestamos.historial');
+    Route::post('/mantenimientos/guardar', [MantenimientoController::class, 'store'])->name('mantenimientos.store');
 });
 
 require __DIR__.'/auth.php';

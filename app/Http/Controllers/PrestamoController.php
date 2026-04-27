@@ -2,111 +2,160 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Prestamo;
-use App\Models\DetallePrestamo;
 use App\Models\Activo;
+use App\Models\DetallePrestamo;
+use App\Models\Prestamo;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class PrestamoController extends Controller
 {
-    // Función para ver préstamos activos y multas
     public function activos()
     {
-        // Traemos detalles que no han sido devueltos O que tienen pagos pendientes
         $prestamosActivos = DetallePrestamo::with(['prestamo', 'activo'])
             ->whereNull('fecha_devolucion_real')
+            ->orderByDesc('created_at')
             ->get();
 
         $multasPendientes = DetallePrestamo::with(['prestamo', 'activo'])
-            ->whereHas('prestamo', function($q) {
-                $q->where('estado_pago', 'Pendiente');
-            })->get();
+            ->whereNotNull('fecha_devolucion_real')
+            ->whereHas('prestamo', function ($query) {
+                $query->where('estado_pago', 'Pendiente');
+            })
+            ->orderByDesc('fecha_devolucion_real')
+            ->get();
 
         return view('prestamos_activos', compact('prestamosActivos', 'multasPendientes'));
     }
 
+    public function create(Request $request)
+    {
+        $activos = Activo::where('estado_actual', 'Disponible')
+            ->orderBy('nombre')
+            ->get();
+        $activoSeleccionado = $request->integer('id_activo');
+
+        return view('prestamos.create', compact('activos', 'activoSeleccionado'));
+    }
+
     public function store(Request $request)
     {
-        // 1. EL ESCUDO: Validar que la fecha de devolución no sea en el pasado
         $request->validate([
-            'fecha_devolucion_prevista' => 'required|date|after_or_equal:now',
-        ], [
-            'fecha_devolucion_prevista.after_or_equal' => 'Error: La fecha de devolución no puede ser en el pasado.'
+            'fecha_devolucion_prevista' => 'required|date',
+            'id_activo' => 'required|exists:activos,id_activo',
+            'nombre_solicitante' => 'required|string|max:255',
+            'contacto_solicitante' => 'required|string|max:255',
+            'condiciones_entrega' => 'required|string',
         ]);
 
-        // 2. Registro del préstamo principal
-        $prestamo = new Prestamo();
-        $prestamo->id_usuario = $request->id_usuario;
-        $prestamo->fecha_salida = now();
-        $prestamo->fecha_devolucion_prevista = $request->fecha_devolucion_prevista;
-        $prestamo->nombre_solicitante = $request->nombre_solicitante;
-        $prestamo->contacto_solicitante = $request->contacto_solicitante;
-        $prestamo->condiciones_entrega = $request->condiciones_entrega;
-        $prestamo->save();
+        DB::transaction(function () use ($request) {
+            $activo = Activo::lockForUpdate()->findOrFail($request->id_activo);
 
-        // 3. Registro del detalle (Aquí arreglamos el crash)
-        $detalle = new DetallePrestamo();
-        $detalle->id_prestamo = $prestamo->id_prestamo;
-        $detalle->id_activo = $request->id_activo;
-        $detalle->estado_salida = 'Buen Estado'; // <--- ESTO FALTABA PARA EVITAR EL ERROR
-        $detalle->save();
+            if ($activo->estado_actual !== 'Disponible') {
+                throw ValidationException::withMessages([
+                    'id_activo' => 'El instrumento ya no esta disponible para prestamo.',
+                ]);
+            }
 
-        // 4. Actualizar estado del activo
-        $activo = Activo::find($request->id_activo);
-        $activo->estado_actual = 'En Prestamo';
-        $activo->save();
+            $fechaSalida = now();
+            $fechaDevolucionPrevista = Carbon::parse($request->fecha_devolucion_prevista);
 
-        return redirect()->route('catalogo')->with('success', 'Préstamo registrado correctamente.');
+            if ($fechaDevolucionPrevista->lt($fechaSalida->copy()->startOfMinute())) {
+                throw ValidationException::withMessages([
+                    'fecha_devolucion_prevista' => 'La fecha prevista debe ser igual o posterior a la hora actual.',
+                ]);
+            }
+
+            $prestamo = Prestamo::create([
+                'id_usuario' => Auth::id(),
+                'fecha_salida' => $fechaSalida,
+                'fecha_devolucion_prevista' => $fechaDevolucionPrevista,
+                'nombre_solicitante' => $request->nombre_solicitante,
+                'contacto_solicitante' => $request->contacto_solicitante,
+                'condiciones_entrega' => trim($request->condiciones_entrega),
+            ]);
+
+            DetallePrestamo::create([
+                'id_prestamo' => $prestamo->id_prestamo,
+                'id_activo' => $activo->id_activo,
+                'estado_salida' => 'Prestado',
+            ]);
+
+            $activo->estado_actual = 'No disponible';
+            $activo->save();
+        });
+
+        return redirect()->route('activos.index')->with('success', 'Prestamo registrado con exito.');
     }
 
     public function devolver(Request $request, $id_detalle)
     {
-        $detalle = DetallePrestamo::with('prestamo')->findOrFail($id_detalle);
-        $activo = Activo::findOrFail($detalle->id_activo);
-        $prestamo = $detalle->prestamo;
+        $request->validate([
+            'condiciones_devolucion' => 'required|string',
+            'estado_equipo' => 'required|in:Buen estado,Danado',
+            'costo_reparacion' => 'nullable|numeric|min:0',
+        ]);
 
-        // 1. Cálculo de horas de uso
-        $fechaSalida = Carbon::parse($prestamo->fecha_salida);
-        $horasUsadas = max(1, $fechaSalida->diffInHours(now()));
-        $activo->horas_uso += $horasUsadas;
+        DB::transaction(function () use ($request, $id_detalle) {
+            $detalle = DetallePrestamo::with('prestamo')->lockForUpdate()->findOrFail($id_detalle);
 
-        // 2. Registrar condiciones y costos
-        $prestamo->condiciones_devolucion = $request->condiciones_devolucion;
-        $prestamo->costo_reparacion = $request->costo_reparacion ?? 0;
+            if ($detalle->fecha_devolucion_real) {
+                throw ValidationException::withMessages([
+                    'devolucion' => 'Este prestamo ya fue procesado anteriormente.',
+                ]);
+            }
 
-        if ($request->costo_reparacion > 0) {
-            $prestamo->estado_pago = 'Pendiente';
-            $activo->estado_actual = 'Mantenimiento';
-        } else {
-            $prestamo->estado_pago = 'Sin cargos';
-            $activo->estado_actual = 'Disponible';
-        }
+            $activo = Activo::lockForUpdate()->findOrFail($detalle->id_activo);
+            $prestamo = $detalle->prestamo;
+            $fechaSalida = Carbon::parse($prestamo->fecha_salida);
+            $fechaDevolucionReal = now();
+            $horasUsadas = round($fechaSalida->diffInSeconds($fechaDevolucionReal) / 3600, 2);
+            $instrumentoDanado = $request->estado_equipo === 'Danado';
+            $costoReparacion = $instrumentoDanado ? (float) ($request->costo_reparacion ?? 0) : 0.0;
+            $entregaATiempo = $fechaDevolucionReal->lessThanOrEqualTo(Carbon::parse($prestamo->fecha_devolucion_prevista));
 
-        $prestamo->save();
-        $activo->save();
+            $activo->horas_uso = round(((float) $activo->horas_uso) + max(0, $horasUsadas), 2);
+            $activo->estado_actual = $instrumentoDanado ? 'Mantenimiento' : 'Disponible';
 
-        $detalle->fecha_devolucion_real = now();
-        $detalle->estado_retorno = $request->costo_reparacion > 0 ? 'Dañado' : 'Buen Estado';
-        $detalle->save();
+            $prestamo->condiciones_devolucion = trim($request->condiciones_devolucion);
+            $prestamo->costo_reparacion = $costoReparacion;
+            $prestamo->estado_pago = $instrumentoDanado && $costoReparacion > 0 ? 'Pendiente' : 'Sin cargos';
 
-        return redirect()->route('prestamos.activos')->with('success', 'Devolución procesada correctamente.');
+            $detalle->fecha_devolucion_real = $fechaDevolucionReal;
+            $detalle->estado_retorno = $instrumentoDanado
+                ? 'Danado'
+                : ($entregaATiempo ? 'En tiempo y forma' : 'Con atraso');
+
+            $prestamo->save();
+            $activo->save();
+            $detalle->save();
+        });
+
+        return redirect()->route('prestamos.activos')->with('success', 'Devolucion procesada correctamente.');
     }
 
     public function liquidarPago($id_prestamo)
     {
         $prestamo = Prestamo::findOrFail($id_prestamo);
+
+        if ($prestamo->estado_pago !== 'Pendiente') {
+            return redirect()->route('prestamos.activos')->with('success', 'Ese cargo ya no esta pendiente.');
+        }
+
         $prestamo->estado_pago = 'Pagado';
         $prestamo->save();
 
-        return redirect()->route('prestamos.activos')->with('success', 'El pago ha sido registrado. El folio queda liberado.');
+        return redirect()->route('prestamos.activos')->with('success', 'El pago ha sido registrado.');
     }
+
     public function historial()
     {
-        // Traemos el "Log" completo de todo lo que ya regresó a la institución
         $historial = DetallePrestamo::with(['prestamo', 'activo'])
             ->whereNotNull('fecha_devolucion_real')
-            ->orderBy('fecha_devolucion_real', 'desc')
+            ->orderByDesc('fecha_devolucion_real')
             ->get();
 
         return view('historial', compact('historial'));
