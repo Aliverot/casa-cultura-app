@@ -2,38 +2,39 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Activo;
+use Illuminate\Http\Request;
 
 class ActivoController extends Controller
 {
-    // Esta función carga la página principal del catálogo
     public function index(Request $request)
     {
-        // Obtenemos lo que el usuario escribió en el buscador
         $buscar = $request->input('buscar');
 
-        // Buscamos por nombre O por código QR
         $instrumentos = Activo::when($buscar, function ($query) use ($buscar) {
-            return $query->where('nombre', 'ilike', "%{$buscar}%")
-                         ->orWhere('codigo_qr', 'ilike', "%{$buscar}%");
-        })->get();
+            return $query->where(function ($subQuery) use ($buscar) {
+                $subQuery->where('nombre', 'ilike', "%{$buscar}%")
+                    ->orWhere('codigo_qr', 'ilike', "%{$buscar}%");
+            });
+        })
+            ->orderByRaw("CASE WHEN estado_actual = 'Disponible' THEN 0 ELSE 1 END")
+            ->orderBy('nombre')
+            ->get();
 
         return view('catalogo', compact('instrumentos'));
     }
-    // Mostrar el formulario
+
     public function create()
     {
         return view('instrumentos_nuevos');
     }
 
-    // Guardar los datos en PostgreSQL
     public function store(Request $request)
     {
         $request->validate([
             'nombre' => 'required|string|max:255',
             'categoria' => 'required|string|max:255',
-            'limite_mantenimiento' => 'required|numeric'
+            'limite_mantenimiento' => 'required|numeric',
         ]);
 
         Activo::create([
@@ -42,11 +43,9 @@ class ActivoController extends Controller
             'limite_mantenimiento' => $request->limite_mantenimiento,
             'estado_actual' => 'Disponible',
             'horas_uso' => 0,
-            // Generamos un código único temporal de 6 números
-            'codigo_qr' => 'QR-' . rand(100000, 999999)
+            'codigo_qr' => 'QR-' . rand(100000, 999999),
         ]);
 
         return redirect()->route('activos.index')->with('success', 'Instrumento agregado correctamente.');
     }
-
 }
