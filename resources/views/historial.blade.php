@@ -6,10 +6,10 @@
     </x-slot>
 
     <div class="py-12 bg-gray-100 min-h-screen">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="module-page-shell">
             <x-module-nav current="historial" />
 
-            <div class="bg-white rounded-3xl shadow-xl p-8 border border-gray-200">
+            <div class="module-card">
                 <h3 class="text-2xl font-black text-gray-900 mb-6">Registro historico de prestamos</h3>
 
                 <div class="mb-6 rounded-2xl border border-cultura-100 bg-cultura-50 p-4 text-sm text-cultura-900">

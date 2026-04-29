@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="py-12 bg-gray-100 min-h-screen">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="module-page-shell">
             <x-module-nav />
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
@@ -32,7 +32,7 @@
             </div>
 
             <div class="grid grid-cols-1 xl:grid-cols-[1.1fr_0.9fr] gap-8">
-                <section class="bg-white overflow-hidden shadow-xl rounded-3xl p-8 border border-gray-200">
+                <section class="module-card overflow-hidden">
                     <h3 class="text-2xl font-black mb-6 text-gray-900 border-b border-gray-100 pb-4 uppercase tracking-tighter">Acciones operativas</h3>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -62,7 +62,7 @@
                     </div>
                 </section>
 
-                <section class="bg-white overflow-hidden shadow-xl rounded-3xl p-8 border border-gray-200">
+                <section class="module-card overflow-hidden">
                     <div class="flex items-center justify-between gap-4 border-b border-gray-100 pb-4">
                         <div>
                             <h3 class="text-2xl font-black text-gray-900 uppercase tracking-tighter">Panel de metricas</h3>

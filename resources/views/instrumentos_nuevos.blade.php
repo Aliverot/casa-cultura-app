@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="min-h-screen bg-gray-100 py-12">
-        <div class="mx-auto max-w-4xl sm:px-6 lg:px-8">
+        <div class="module-page-shell">
             <x-module-nav current="instrumentos" />
 
             @if ($errors->any())
@@ -20,7 +20,7 @@
                 </div>
             @endif
 
-            <div class="overflow-hidden rounded-3xl border border-gray-200 bg-white p-8 shadow-xl">
+            <div class="module-card overflow-hidden">
                 <form action="{{ route('activos.store') }}" method="POST" class="space-y-6">
                     @csrf
 

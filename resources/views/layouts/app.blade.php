@@ -20,8 +20,8 @@
 
             <!-- Page Heading -->
             @isset($header)
-                <header class="bg-white dark:bg-gray-800 shadow border-b-2 border-cultura-500">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                <header class="border-b-2 border-cultura-500 bg-white shadow">
+                    <div class="module-page-shell py-8 [&_h2]:text-3xl [&_h2]:font-bold [&_h2]:leading-tight [&_h2]:tracking-tight [&_h2]:text-slate-900 sm:[&_h2]:text-4xl">
                         {{ $header }}
                     </div>
                 </header>
@@ -30,7 +30,7 @@
             <!-- TAREA: Mensajes de Confirmación (UI/UX) -->
             <!-- Este bloque detecta si el controlador envió un mensaje de 'success' -->
             @if (session('success'))
-                <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 mt-4">
+                <div class="module-page-shell mt-4">
                     <div class="bg-green-600 border-l-4 border-green-900 text-white p-4 rounded shadow-lg flex justify-between items-center transition-all duration-500">
                         <div class="flex items-center">
                             <!-- Icono de check para UX -->

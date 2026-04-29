@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="min-h-screen bg-gray-100 py-12">
-        <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div class="module-page-shell">
             <x-module-nav current="mantenimiento" />
 
             @if ($errors->any())
@@ -21,7 +21,7 @@
             @endif
 
             <div class="grid grid-cols-1 gap-8 xl:grid-cols-[1.05fr_0.95fr]">
-                <section class="rounded-3xl border border-gray-200 bg-white p-8 shadow-xl">
+                <section class="module-card">
                     <h3 class="border-b border-gray-100 pb-4 text-2xl font-black uppercase tracking-tight text-gray-900">
                         Finalizar Servicio y Liberar
                     </h3>
@@ -83,7 +83,7 @@
                 </section>
 
                 <section class="space-y-8">
-                    <div class="rounded-3xl border border-gray-200 bg-white p-8 shadow-xl">
+                    <div class="module-card">
                         <div class="flex items-center justify-between gap-3 border-b border-gray-100 pb-4">
                             <h3 class="text-2xl font-black uppercase tracking-tight text-gray-900">En Reparacion</h3>
                             <span class="rounded-full bg-red-100 px-3 py-1 text-xs font-black uppercase tracking-widest text-red-700">
@@ -125,7 +125,7 @@
                         </div>
                     </div>
 
-                    <div class="rounded-3xl border border-gray-200 bg-white p-8 shadow-xl">
+                    <div class="module-card">
                         <div class="flex items-center justify-between gap-3 border-b border-gray-100 pb-4">
                             <h3 class="text-2xl font-black uppercase tracking-tight text-gray-900">Por Atender</h3>
                             <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-black uppercase tracking-widest text-amber-700">
@@ -153,7 +153,7 @@
                 </section>
             </div>
 
-            <section class="mt-8 rounded-3xl border border-gray-200 bg-white p-8 shadow-xl">
+            <section class="module-card mt-8">
                 <h3 class="border-b border-gray-100 pb-4 text-2xl font-black uppercase tracking-tight text-gray-900">
                     Historial Reciente de Mantenimiento
                 </h3>

@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="py-12 bg-gray-100 min-h-screen">
-        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
+        <div class="module-page-shell">
             <x-module-nav current="prestamos" />
 
             @if ($errors->any())
@@ -20,7 +20,7 @@
                 </div>
             @endif
 
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-3xl p-8 border-t-4 border-acento-principal">
+            <div class="module-card overflow-hidden border-t-4 border-acento-principal">
                 @if ($activos->isEmpty())
                     <div class="text-center py-16">
                         <p class="text-2xl font-black text-gray-800">No hay instrumentos disponibles en este momento.</p>
