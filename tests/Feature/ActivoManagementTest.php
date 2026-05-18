@@ -2,6 +2,7 @@
 
 use App\Models\Activo;
 use App\Models\User;
+use App\Models\AlertaOperativa;
 
 it('updates an inventory article', function () {
     $user = User::factory()->create();
@@ -46,4 +47,84 @@ it('marks an inventory article as baja without deleting history', function () {
     $response->assertRedirect(route('activos.index'));
 
     expect($activo->refresh()->estado_actual)->toBe('Baja');
+});
+
+it('syncs standardized condition with operational status when editing inventory', function () {
+    $user = User::factory()->create();
+    $activo = Activo::create([
+        'codigo_qr' => 'QR-100011',
+        'nombre' => 'Guitarra para reparar',
+        'categoria' => 'Instrumentos de Cuerda',
+        'estado_actual' => 'Disponible',
+        'horas_uso' => 0,
+        'limite_mantenimiento' => 50,
+    ]);
+
+    $this->actingAs($user)->patch(route('activos.update', $activo->id_activo), [
+        'nombre' => 'Guitarra para reparar',
+        'categoria' => 'Instrumentos de Cuerda',
+        'limite_mantenimiento' => 50,
+        'estado_condicion' => 'En reparacion',
+    ])->assertRedirect(route('activos.index'));
+
+    expect($activo->refresh()->estado_actual)->toBe('Mantenimiento')
+        ->and($activo->estado_condicion)->toBe('En reparacion');
+});
+
+it('syncs baja definitiva with operational baja when editing inventory', function () {
+    $user = User::factory()->create();
+    $activo = Activo::create([
+        'codigo_qr' => 'QR-100013',
+        'nombre' => 'Vestuario para baja',
+        'categoria' => 'Vestuario',
+        'estado_actual' => 'Disponible',
+        'horas_uso' => 0,
+        'limite_mantenimiento' => 50,
+    ]);
+
+    $this->actingAs($user)->patch(route('activos.update', $activo->id_activo), [
+        'nombre' => 'Vestuario para baja',
+        'categoria' => 'Vestuario',
+        'limite_mantenimiento' => 50,
+        'estado_condicion' => 'Baja definitiva',
+    ])->assertRedirect(route('activos.index'));
+
+    expect($activo->refresh()->estado_actual)->toBe('Baja')
+        ->and($activo->estado_condicion)->toBe('Baja definitiva');
+});
+
+it('does not allow repair or baja condition while inventory article is loaned', function () {
+    $user = User::factory()->create();
+    $activo = Activo::create([
+        'codigo_qr' => 'QR-100014',
+        'nombre' => 'Clarinete prestado',
+        'categoria' => 'Instrumentos de Viento',
+        'estado_actual' => 'No disponible',
+        'horas_uso' => 0,
+        'limite_mantenimiento' => 50,
+    ]);
+
+    $this->actingAs($user)->from(route('activos.edit', $activo->id_activo))->patch(route('activos.update', $activo->id_activo), [
+        'nombre' => 'Clarinete prestado',
+        'categoria' => 'Instrumentos de Viento',
+        'limite_mantenimiento' => 50,
+        'estado_condicion' => 'En reparacion',
+    ])->assertSessionHasErrors('estado_condicion');
+
+    expect($activo->refresh()->estado_actual)->toBe('No disponible');
+});
+
+it('can resolve an operational alert manually', function () {
+    $user = User::factory()->create();
+    $alerta = AlertaOperativa::create([
+        'tipo' => 'Baja y Adquisicion',
+        'titulo' => 'Informe de Baja y Adquisicion',
+        'descripcion' => 'Prueba',
+        'estado' => 'Pendiente',
+    ]);
+
+    $this->actingAs($user)->post(route('alertas.resolver', $alerta->id_alerta))
+        ->assertRedirect();
+
+    expect($alerta->refresh()->estado)->toBe('Resuelta');
 });

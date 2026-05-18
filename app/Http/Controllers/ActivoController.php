@@ -51,7 +51,11 @@ class ActivoController extends Controller
             'categoria' => $request->categoria,
             'valor_original' => $request->filled('valor_original') ? $request->valor_original : null,
             'limite_mantenimiento' => $request->limite_mantenimiento,
-            'estado_actual' => 'Disponible',
+            'estado_actual' => match ($request->input('estado_condicion', 'Excelente')) {
+                'En reparacion' => 'Mantenimiento',
+                'Baja definitiva' => 'Baja',
+                default => 'Disponible',
+            },
             'estado_condicion' => $request->input('estado_condicion', 'Excelente'),
             'horas_uso' => 0,
             'codigo_qr' => 'QR-' . rand(100000, 999999),
@@ -81,12 +85,29 @@ class ActivoController extends Controller
             'estado_condicion' => 'nullable|in:' . implode(',', Activo::ESTADOS_CONDICION),
         ]);
 
+        $estadoCondicion = $request->input('estado_condicion', $activo->estado_condicion ?: 'Excelente');
+
+        if ($activo->estado_actual === 'No disponible' && in_array($estadoCondicion, ['En reparacion', 'Baja definitiva'], true)) {
+            throw ValidationException::withMessages([
+                'estado_condicion' => 'No puedes mandar a reparacion o baja un instrumento mientras tiene un prestamo activo.',
+            ]);
+        }
+
         $activo->nombre = trim($request->nombre);
         $activo->modelo = $request->filled('modelo') ? trim($request->modelo) : null;
         $activo->categoria = $request->categoria;
         $activo->valor_original = $request->filled('valor_original') ? $request->valor_original : null;
         $activo->limite_mantenimiento = $request->limite_mantenimiento;
-        $activo->estado_condicion = $request->input('estado_condicion', $activo->estado_condicion ?: 'Excelente');
+        $activo->estado_condicion = $estadoCondicion;
+
+        if ($activo->estado_actual !== 'No disponible') {
+            $activo->estado_actual = match ($activo->estado_condicion) {
+                'En reparacion' => 'Mantenimiento',
+                'Baja definitiva' => 'Baja',
+                default => $activo->estado_actual === 'Baja' ? 'Baja' : 'Disponible',
+            };
+        }
+
         $activo->save();
 
         return redirect()->route('activos.index')->with('success', 'Instrumento actualizado correctamente.');

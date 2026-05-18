@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Activo;
+use App\Models\AlertaOperativa;
 use App\Models\DetallePrestamo;
 use App\Models\Prestamo;
 use App\Models\User;
@@ -44,6 +45,35 @@ it('records maintenance and releases the instrument automatically', function () 
     expect($activo->refresh()->estado_actual)->toBe('Disponible')
         ->and($activo->estado_condicion)->toBe('Excelente')
         ->and($activo->horas_uso)->toBe(0.0);
+});
+
+it('resolves fragility alerts when maintenance is completed', function () {
+    $user = User::factory()->create();
+    $activo = Activo::create([
+        'codigo_qr' => 'QR-100012',
+        'nombre' => 'Violin fragil',
+        'categoria' => 'Instrumentos de Cuerda',
+        'estado_actual' => 'Mantenimiento',
+        'estado_condicion' => 'En reparacion',
+        'horas_uso' => 12,
+        'limite_mantenimiento' => 20,
+    ]);
+
+    $alerta = AlertaOperativa::create([
+        'id_activo' => $activo->id_activo,
+        'tipo' => 'Fragilidad/Mal Uso',
+        'titulo' => 'Alerta de Fragilidad/Mal Uso',
+        'descripcion' => 'Prueba',
+        'estado' => 'Pendiente',
+    ]);
+
+    $this->actingAs($user)->post(route('mantenimientos.store'), [
+        'id_activo' => $activo->id_activo,
+        'tipo' => 'Revision general',
+        'estado_condicion' => 'Excelente',
+    ])->assertRedirect(route('mantenimientos.index'));
+
+    expect($alerta->refresh()->estado)->toBe('Resuelta');
 });
 
 it('creates seasonal preparation alerts when recent demand increases', function () {
@@ -98,7 +128,7 @@ it('creates seasonal preparation alerts when recent demand increases', function 
     $this->actingAs($user)->get(route('mantenimientos.index'))->assertOk();
 
     $this->assertDatabaseHas('alertas_operativas', [
-        'id_activo' => $activo->id_activo,
+        'id_activo' => null,
         'tipo' => 'Preparacion de Temporada',
         'estado' => 'Pendiente',
     ]);
@@ -120,7 +150,7 @@ it('creates seasonal preparation alerts from base mexican dates without history'
     $this->actingAs($user)->get(route('mantenimientos.index'))->assertOk();
 
     $this->assertDatabaseHas('alertas_operativas', [
-        'id_activo' => $activo->id_activo,
+        'id_activo' => null,
         'tipo' => 'Preparacion de Temporada',
         'estado' => 'Pendiente',
     ]);

@@ -29,11 +29,16 @@ Pruebas:
   Baja y Adquisicion: ambar.
 - Las alertas remarcan el instrumento afectado.
 - Las alertas de baja/adquisicion muestran valor original, reparaciones y limite de 60%.
+- Cada alerta pendiente puede marcarse como resuelta desde el dashboard.
+- Las alertas son recomendaciones visuales: no mandan automaticamente instrumentos a mantenimiento.
+- Para mandar un instrumento a mantenimiento a voluntad, editarlo en inventario y seleccionar En reparacion.
+- Para sacarlo del uso operativo, editarlo y seleccionar Baja definitiva, o usar Dar de baja.
 
 Pruebas:
 - Generar danos recurrentes en un mismo activo y revisar dashboard.
 - Generar alerta de temporada y revisar dashboard.
 - Generar reparaciones que superen 60% del valor original y revisar dashboard.
+- Marcar una alerta como resuelta desde el dashboard y verificar que desaparece.
 - php artisan test
 
 3. Devoluciones e incidentes
@@ -71,6 +76,10 @@ Pruebas:
   o incremento historico de prestamos.
 - Si no hay historial, las fechas base permiten ver recomendaciones.
 - El historial se sigue usando para elegir recursos mas usados.
+- La alerta de temporada se muestra como una sola tarjeta general.
+- Considera como maximo los 5 recursos mas usados para sugerir mantenimiento preventivo.
+- Si la temporada ya no aplica, la alerta pendiente se marca como Resuelta.
+- No mueve automaticamente recursos a mantenimiento, porque solo es preparacion preventiva.
 
 Pruebas:
 - Insertar una temporada temporal cercana:
@@ -90,6 +99,7 @@ Pruebas:
 - Se integro modelo/referencia para agrupar activos parecidos.
 - Se suman costos de reparacion de prestamos y costos de mantenimiento.
 - La alerta explica visualmente el 60%.
+- Esta alerta se cierra manualmente con Marcar resuelta cuando ya se atendio la decision.
 
 Pruebas:
 - Crear activo con valor_original.
@@ -111,11 +121,16 @@ Pruebas:
   valor original,
   estado estandarizado.
 - Catalogo muestra modelo y condicion operativa.
+- Si el estado estandarizado se cambia a En reparacion, el activo pasa a Mantenimiento.
+- Si el estado estandarizado se cambia a Baja definitiva, el activo pasa a Baja.
+- Si el activo tiene prestamo activo, no se permite mandarlo a reparacion o baja desde edicion.
 
 Pruebas:
 - Crear activo con modelo, valor original y estado.
 - Buscarlo por modelo en catalogo.
-- Editar estado estandarizado.
+- Editar estado estandarizado a En reparacion y verificar que aparece en Mantenimiento.
+- Editar estado estandarizado a Baja definitiva y verificar que queda como Baja.
+- Intentar editar a En reparacion estando prestado: debe mostrar error y seguir No disponible.
 - Dar de baja y verificar Baja definitiva.
 - php artisan test
 
@@ -125,11 +140,13 @@ Pruebas:
 - Se agrego estado resultante al finalizar mantenimiento.
 - Historial reciente de mantenimiento muestra el costo.
 - El costo de mantenimiento se usa en el analisis de baja/adquisicion.
+- Finalizar mantenimiento resuelve automaticamente alertas de Fragilidad/Mal Uso de ese activo.
 
 Pruebas:
 - Registrar mantenimiento con costo, preventivo y estado resultante.
 - Verificar que el activo vuelve a Disponible.
 - Verificar que horas de uso vuelven a 0.
+- Verificar que una alerta de Fragilidad/Mal Uso del activo queda Resuelta al finalizar mantenimiento.
 - Verificar historial con costo.
 - php artisan test
 
@@ -193,4 +210,3 @@ git push -u origin mejoras-alertas-inventario
 
 Repositorio remoto detectado:
 https://github.com/Aliverot/casa-cultura-app.git
-

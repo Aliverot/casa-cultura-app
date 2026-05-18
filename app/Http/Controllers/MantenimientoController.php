@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Activo;
+use App\Models\AlertaOperativa;
 use App\Models\Mantenimiento;
 use App\Services\AlertasOperativasService;
 use Illuminate\Http\Request;
@@ -76,6 +77,11 @@ class MantenimientoController extends Controller
         $activo->estado_condicion = $request->input('estado_condicion', $request->filled('observaciones') ? 'Funcional con detalles' : 'Excelente');
         $activo->horas_uso = 0;
         $activo->save();
+
+        AlertaOperativa::where('id_activo', $activo->id_activo)
+            ->where('tipo', 'Fragilidad/Mal Uso')
+            ->where('estado', 'Pendiente')
+            ->update(['estado' => 'Resuelta']);
 
         return redirect()->route('mantenimientos.index')->with('success', 'Mantenimiento registrado. El instrumento vuelve a estar disponible.');
     }

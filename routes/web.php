@@ -5,6 +5,7 @@ use App\Http\Controllers\MantenimientoController;
 use App\Http\Controllers\PrestamoController;
 use App\Http\Controllers\ProfileController;
 use App\Models\Activo;
+use App\Models\AlertaOperativa;
 use App\Services\AlertasOperativasService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -71,6 +72,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/mantenimiento', [MantenimientoController::class, 'index'])->name('mantenimientos.index');
     Route::post('/mantenimiento', [MantenimientoController::class, 'store'])->name('mantenimiento.store');
     Route::post('/mantenimientos/guardar', [MantenimientoController::class, 'store'])->name('mantenimientos.store');
+
+    Route::post('/alertas/{id_alerta}/resolver', function ($id_alerta) {
+        $alerta = AlertaOperativa::findOrFail($id_alerta);
+        $alerta->estado = 'Resuelta';
+        $alerta->save();
+
+        return back()->with('success', 'Alerta marcada como resuelta.');
+    })->name('alertas.resolver');
 });
 
 require __DIR__.'/auth.php';

@@ -110,6 +110,8 @@ class AlertasOperativasService
             ->count();
 
         if ($prestamosAnteriores === 0 && ! $temporadaBase) {
+            $this->cerrarAlertasTemporada();
+
             return collect();
         }
 
@@ -118,41 +120,61 @@ class AlertasOperativasService
             : 0;
 
         if ($incremento < self::SEASON_INCREASE_PERCENT && ! $temporadaBase) {
+            $this->cerrarAlertasTemporada();
+
             return collect();
         }
 
         $metricas = $this->metricasRecursosTemporada();
         $activos = Activo::whereIn('id_activo', $metricas->pluck('id_activo'))->get()->keyBy('id_activo');
-
-        return $metricas->map(function ($metrica) use ($activos, $incremento, $prestamosActuales, $prestamosAnteriores, $temporadaBase) {
+        $recursos = $metricas->map(function ($metrica) use ($activos) {
             $activo = $activos->get($metrica->id_activo);
 
-            if (! $activo) {
-                return null;
-            }
+            return $activo ? [
+                'id_activo' => $activo->id_activo,
+                'nombre' => $activo->nombre,
+                'categoria' => $activo->categoria,
+                'total_prestamos' => (int) $metrica->total_prestamos,
+            ] : null;
+        })->filter()->values();
 
-            $motivo = $temporadaBase
-                ? "Se acerca {$temporadaBase['nombre']} ({$temporadaBase['rango']})"
-                : 'La demanda reciente subio '.round($incremento, 2).'%';
+        if ($recursos->isEmpty()) {
+            $this->cerrarAlertasTemporada();
 
-            $this->guardarAlerta(
-                'Preparacion de Temporada',
-                $activo,
-                'Preparacion de Temporada',
-                "{$motivo} y {$activo->nombre} esta entre los recursos mas usados.",
-                [
+            return collect();
+        }
+
+        $motivo = $temporadaBase
+            ? "Se acerca {$temporadaBase['nombre']} ({$temporadaBase['rango']})"
+            : 'La demanda reciente subio '.round($incremento, 2).'%';
+
+        AlertaOperativa::where('tipo', 'Preparacion de Temporada')
+            ->where('estado', 'Pendiente')
+            ->whereNotNull('id_activo')
+            ->update(['estado' => 'Resuelta']);
+
+        AlertaOperativa::updateOrCreate(
+            [
+                'tipo' => 'Preparacion de Temporada',
+                'id_activo' => null,
+                'estado' => 'Pendiente',
+            ],
+            [
+                'titulo' => 'Preparacion de Temporada',
+                'descripcion' => "{$motivo}. Se sugieren los ".self::SEASON_TOP_RESOURCES.' recursos mas usados para mantenimiento preventivo.',
+                'datos' => [
                     'incremento_porcentaje' => round($incremento, 2),
                     'prestamos_actuales' => $prestamosActuales,
                     'prestamos_anteriores' => $prestamosAnteriores,
-                    'total_prestamos_recurso' => (int) $metrica->total_prestamos,
                     'temporada_base' => $temporadaBase,
-                ]
-            );
+                    'limite_recursos' => self::SEASON_TOP_RESOURCES,
+                    'recursos' => $recursos->all(),
+                ],
+                'fecha_alerta' => now(),
+            ]
+        );
 
-            $activo->total_prestamos_temporada = (int) $metrica->total_prestamos;
-
-            return $activo;
-        })->filter()->values();
+        return $recursos;
     }
 
     public function alertasPendientes(int $limite = 6): Collection
@@ -227,6 +249,13 @@ class AlertasOperativasService
         }
 
         return null;
+    }
+
+    private function cerrarAlertasTemporada(): void
+    {
+        AlertaOperativa::where('tipo', 'Preparacion de Temporada')
+            ->where('estado', 'Pendiente')
+            ->update(['estado' => 'Resuelta']);
     }
 
     private function guardarAlerta(string $tipo, Activo $activo, string $titulo, string $descripcion, array $datos): AlertaOperativa

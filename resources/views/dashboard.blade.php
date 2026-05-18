@@ -83,6 +83,17 @@
                                         @else
                                             <p class="mt-1 font-bold text-gray-900">Incremento reciente: {{ $alerta->datos['incremento_porcentaje'] ?? 0 }}%</p>
                                         @endif
+                                        @if (! empty($alerta->datos['recursos']))
+                                            <div class="mt-3 space-y-2">
+                                                <p class="text-xs font-black uppercase tracking-widest text-gray-400">Recursos sugeridos (top {{ $alerta->datos['limite_recursos'] ?? 5 }})</p>
+                                                @foreach ($alerta->datos['recursos'] as $recurso)
+                                                    <div class="rounded-lg bg-blue-50 px-3 py-2">
+                                                        <p class="font-black text-blue-900">{{ $recurso['nombre'] }}</p>
+                                                        <p class="text-xs text-blue-700">{{ $recurso['categoria'] }} - {{ $recurso['total_prestamos'] }} prestamos</p>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
                                     </div>
                                 @elseif ($alerta->tipo === 'Fragilidad/Mal Uso' && is_array($alerta->datos))
                                     <div class="mt-4 rounded-xl bg-white p-3 text-sm">
@@ -90,6 +101,13 @@
                                         <p class="mt-1 font-bold text-gray-900">{{ $alerta->datos['danios_recientes'] ?? 0 }} en {{ $alerta->datos['periodo_dias'] ?? 90 }} dias</p>
                                     </div>
                                 @endif
+
+                                <form action="{{ route('alertas.resolver', $alerta->id_alerta) }}" method="POST" class="mt-4 text-right">
+                                    @csrf
+                                    <button type="submit" class="rounded-lg bg-white px-4 py-2 text-xs font-black uppercase tracking-widest text-gray-600 shadow-sm transition hover:bg-gray-900 hover:text-white">
+                                        Marcar resuelta
+                                    </button>
+                                </form>
                             </div>
                         @endforeach
                     </div>
