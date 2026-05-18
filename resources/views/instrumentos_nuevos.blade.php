@@ -37,6 +37,17 @@
                     </div>
 
                     <div>
+                        <label class="block text-sm font-medium text-gray-700">Modelo o referencia</label>
+                        <input
+                            type="text"
+                            name="modelo"
+                            value="{{ old('modelo') }}"
+                            placeholder="Ej. Yamaha C40, Huipil bordado regional"
+                            class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-cultura-500 focus:ring-cultura-500"
+                        >
+                    </div>
+
+                    <div>
                         <label class="block text-sm font-medium text-gray-700">Categoria</label>
                         <select name="categoria" required class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-cultura-500 focus:ring-cultura-500">
                             <option value="Instrumentos de Cuerda" @selected(old('categoria') === 'Instrumentos de Cuerda')>Instrumentos de Cuerda</option>
@@ -60,6 +71,32 @@
                             class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-cultura-500 focus:ring-cultura-500"
                         >
                         <p class="mt-1 text-xs text-gray-500">Horas estimadas de uso antes de requerir revision, afinacion o limpieza profunda.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Valor original aproximado</label>
+                            <input
+                                type="number"
+                                name="valor_original"
+                                value="{{ old('valor_original') }}"
+                                min="0"
+                                step="0.01"
+                                placeholder="Ej. 2500"
+                                class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-cultura-500 focus:ring-cultura-500"
+                            >
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Estado estandarizado</label>
+                            <select name="estado_condicion" required class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-cultura-500 focus:ring-cultura-500">
+                                @foreach ($estadosCondicion as $estadoCondicion)
+                                    <option value="{{ $estadoCondicion }}" @selected(old('estado_condicion', 'Excelente') === $estadoCondicion)>
+                                        {{ $estadoCondicion }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
 
                     <div class="flex justify-end">

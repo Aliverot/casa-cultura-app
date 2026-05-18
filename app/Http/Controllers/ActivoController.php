@@ -15,6 +15,7 @@ class ActivoController extends Controller
         $instrumentos = Activo::when($buscar, function ($query) use ($buscar) {
             return $query->where(function ($subQuery) use ($buscar) {
                 $subQuery->where('nombre', 'ilike', "%{$buscar}%")
+                    ->orWhere('modelo', 'ilike', "%{$buscar}%")
                     ->orWhere('codigo_qr', 'ilike', "%{$buscar}%");
             });
         })
@@ -28,22 +29,30 @@ class ActivoController extends Controller
 
     public function create()
     {
-        return view('instrumentos_nuevos');
+        $estadosCondicion = Activo::ESTADOS_CONDICION;
+
+        return view('instrumentos_nuevos', compact('estadosCondicion'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'nombre' => 'required|string|max:255',
+            'modelo' => 'nullable|string|max:255',
             'categoria' => 'required|string|max:255',
+            'valor_original' => 'nullable|numeric|min:0',
             'limite_mantenimiento' => 'required|numeric|min:1',
+            'estado_condicion' => 'nullable|in:' . implode(',', Activo::ESTADOS_CONDICION),
         ]);
 
         Activo::create([
             'nombre' => trim($request->nombre),
+            'modelo' => $request->filled('modelo') ? trim($request->modelo) : null,
             'categoria' => $request->categoria,
+            'valor_original' => $request->filled('valor_original') ? $request->valor_original : null,
             'limite_mantenimiento' => $request->limite_mantenimiento,
             'estado_actual' => 'Disponible',
+            'estado_condicion' => $request->input('estado_condicion', 'Excelente'),
             'horas_uso' => 0,
             'codigo_qr' => 'QR-' . rand(100000, 999999),
         ]);
@@ -54,8 +63,9 @@ class ActivoController extends Controller
     public function edit($id_activo)
     {
         $activo = Activo::findOrFail($id_activo);
+        $estadosCondicion = Activo::ESTADOS_CONDICION;
 
-        return view('activos.edit', compact('activo'));
+        return view('activos.edit', compact('activo', 'estadosCondicion'));
     }
 
     public function update(Request $request, $id_activo)
@@ -64,13 +74,19 @@ class ActivoController extends Controller
 
         $request->validate([
             'nombre' => 'required|string|max:255',
+            'modelo' => 'nullable|string|max:255',
             'categoria' => 'required|string|max:255',
+            'valor_original' => 'nullable|numeric|min:0',
             'limite_mantenimiento' => 'required|numeric|min:1',
+            'estado_condicion' => 'nullable|in:' . implode(',', Activo::ESTADOS_CONDICION),
         ]);
 
         $activo->nombre = trim($request->nombre);
+        $activo->modelo = $request->filled('modelo') ? trim($request->modelo) : null;
         $activo->categoria = $request->categoria;
+        $activo->valor_original = $request->filled('valor_original') ? $request->valor_original : null;
         $activo->limite_mantenimiento = $request->limite_mantenimiento;
+        $activo->estado_condicion = $request->input('estado_condicion', $activo->estado_condicion ?: 'Excelente');
         $activo->save();
 
         return redirect()->route('activos.index')->with('success', 'Instrumento actualizado correctamente.');
@@ -91,6 +107,7 @@ class ActivoController extends Controller
         }
 
         $activo->estado_actual = 'Baja';
+        $activo->estado_condicion = 'Baja definitiva';
         $activo->save();
 
         return redirect()->route('activos.index')->with('success', 'Instrumento dado de baja correctamente.');

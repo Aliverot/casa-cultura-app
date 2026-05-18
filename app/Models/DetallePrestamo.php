@@ -13,6 +13,9 @@ class DetallePrestamo extends Model
         'id_activo',
         'estado_salida',
         'estado_retorno',
+        'contexto_incidente',
+        'entorno_uso',
+        'accesorios_proteccion',
         'fecha_devolucion_real',
     ];
 

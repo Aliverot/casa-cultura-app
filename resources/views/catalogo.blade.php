@@ -9,13 +9,13 @@
         <div class="module-page-shell">
             <x-module-nav current="catalogo" />
 
-            <div class="mb-8 flex justify-center">
+                        <div class="mb-8 flex justify-center">
                 <form action="{{ route('activos.index') }}" method="GET" class="w-full md:w-1/2 flex shadow-md rounded-md overflow-hidden">
                     <input
                         type="text"
                         name="buscar"
                         value="{{ request('buscar') }}"
-                        placeholder="Buscar por nombre o codigo QR..."
+                        placeholder="Buscar por nombre, modelo o codigo QR..."
                         class="w-full border-gray-300 bg-white text-gray-900 placeholder-gray-400 p-4 text-lg focus:ring-2 focus:ring-cultura-500 focus:outline-none"
                     >
                     <button type="submit" class="bg-cultura-600 hover:bg-cultura-700 text-white px-8 py-2 font-black transition uppercase tracking-widest">
@@ -77,6 +77,15 @@
                                     <span class="px-6 py-2 rounded-full text-sm font-black uppercase tracking-widest shadow-sm {{ $estadoBadge }}">
                                         {{ $item->estado_actual }}
                                     </span>
+                                </div>
+
+                                <div class="mt-3 flex flex-wrap items-center gap-3">
+                                    <span class="rounded-full bg-slate-100 px-4 py-2 text-xs font-black uppercase tracking-widest text-slate-700">
+                                        {{ $item->estado_condicion ?? 'Excelente' }}
+                                    </span>
+                                    @if ($item->modelo)
+                                        <span class="text-xs font-bold uppercase tracking-widest text-gray-500">Modelo: {{ $item->modelo }}</span>
+                                    @endif
                                 </div>
 
                                 <div class="mt-4 text-gray-600 text-sm italic">

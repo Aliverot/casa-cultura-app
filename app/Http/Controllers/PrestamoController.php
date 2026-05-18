@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Activo;
 use App\Models\DetallePrestamo;
 use App\Models\Prestamo;
+use App\Services\AlertasOperativasService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -93,13 +94,21 @@ class PrestamoController extends Controller
 
     public function devolver(Request $request, $id_detalle)
     {
+        $detalleValidacion = DetallePrestamo::findOrFail($id_detalle);
+        $alertas = app(AlertasOperativasService::class);
+        $requiereDatosDanio = $request->estado_equipo === 'Danado'
+            && $alertas->requiereDatosDanioRecurrente($detalleValidacion);
+
         $request->validate([
             'condiciones_devolucion' => 'required|string',
             'estado_equipo' => 'required|in:Buen estado,Danado,Extraviado,Perdida total',
-            'costo_reparacion' => 'nullable|numeric|min:0',
+            'costo_reparacion' => 'nullable|required_if:estado_equipo,Danado,Extraviado,Perdida total|numeric|min:0',
+            'contexto_incidente' => [$requiereDatosDanio ? 'required' : 'nullable', 'string', 'max:2000'],
+            'entorno_uso' => [$requiereDatosDanio ? 'required' : 'nullable', 'string', 'max:255'],
+            'accesorios_proteccion' => [$requiereDatosDanio ? 'required' : 'nullable', 'string', 'max:2000'],
         ]);
 
-        DB::transaction(function () use ($request, $id_detalle) {
+        DB::transaction(function () use ($request, $id_detalle, $alertas) {
             $detalle = DetallePrestamo::with('prestamo')->lockForUpdate()->findOrFail($id_detalle);
 
             if ($detalle->fecha_devolucion_real) {
@@ -129,6 +138,11 @@ class PrestamoController extends Controller
                 $instrumentoDanado => 'Mantenimiento',
                 default => 'Disponible',
             };
+            $activo->estado_condicion = match (true) {
+                $instrumentoPerdidaTotal || $instrumentoExtraviado => 'Baja definitiva',
+                $instrumentoDanado => 'En reparacion',
+                default => 'Excelente',
+            };
 
             $prestamo->condiciones_devolucion = trim($request->condiciones_devolucion);
             $prestamo->costo_reparacion = $instrumentoDanado ? $costoReparacion : $costoReposicion;
@@ -141,10 +155,18 @@ class PrestamoController extends Controller
                 $instrumentoDanado => 'Danado',
                 default => ($entregaATiempo ? 'En tiempo y forma' : 'Con atraso'),
             };
+            $detalle->contexto_incidente = $instrumentoDanado && $request->filled('contexto_incidente') ? trim($request->contexto_incidente) : null;
+            $detalle->entorno_uso = $instrumentoDanado && $request->filled('entorno_uso') ? trim($request->entorno_uso) : null;
+            $detalle->accesorios_proteccion = $instrumentoDanado && $request->filled('accesorios_proteccion') ? trim($request->accesorios_proteccion) : null;
 
             $prestamo->save();
             $activo->save();
             $detalle->save();
+
+            if ($instrumentoDanado) {
+                $alertas->registrarDanioRecurrente($activo);
+                $alertas->registrarReposicionSiAplica($activo);
+            }
         });
 
         return redirect()->route('prestamos.activos')->with('success', 'Devolucion procesada correctamente.');

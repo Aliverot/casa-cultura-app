@@ -4,12 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Activo;
 use App\Models\Mantenimiento;
+use App\Services\AlertasOperativasService;
 use Illuminate\Http\Request;
 
 class MantenimientoController extends Controller
 {
     public function index()
     {
+        $alertas = app(AlertasOperativasService::class);
+        $alertas->registrarTemporadaSiAplica();
+
         $activosEnMantenimiento = Activo::with(['mantenimientos' => function ($query) {
             $query->latest('fecha_servicio');
         }])
@@ -34,12 +38,16 @@ class MantenimientoController extends Controller
             ->orderByDesc('fecha_servicio')
             ->limit(10)
             ->get();
+        $alertasOperativas = $alertas->alertasPendientes();
+        $estadosCondicion = Activo::ESTADOS_CONDICION;
 
         return view('mantenimiento', compact(
             'activosEnMantenimiento',
             'activosPorAtender',
             'activosCandidatos',
-            'historialMantenimiento'
+            'historialMantenimiento',
+            'alertasOperativas',
+            'estadosCondicion'
         ));
     }
 
@@ -48,6 +56,9 @@ class MantenimientoController extends Controller
         $request->validate([
             'id_activo' => 'required|exists:activos,id_activo',
             'tipo' => 'required|string|max:255',
+            'costo_servicio' => 'nullable|numeric|min:0',
+            'estado_condicion' => 'nullable|in:' . implode(',', Activo::ESTADOS_CONDICION),
+            'es_preventivo' => 'nullable|boolean',
             'observaciones' => 'nullable|string',
         ]);
 
@@ -55,11 +66,14 @@ class MantenimientoController extends Controller
             'id_activo' => $request->id_activo,
             'fecha_servicio' => now(),
             'tipo' => trim($request->tipo),
+            'costo_servicio' => $request->filled('costo_servicio') ? $request->costo_servicio : 0,
+            'es_preventivo' => $request->boolean('es_preventivo'),
             'observaciones' => $request->filled('observaciones') ? trim($request->observaciones) : null,
         ]);
 
         $activo = Activo::findOrFail($request->id_activo);
         $activo->estado_actual = 'Disponible';
+        $activo->estado_condicion = $request->input('estado_condicion', $request->filled('observaciones') ? 'Funcional con detalles' : 'Excelente');
         $activo->horas_uso = 0;
         $activo->save();
 

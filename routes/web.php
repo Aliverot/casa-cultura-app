@@ -5,6 +5,7 @@ use App\Http\Controllers\MantenimientoController;
 use App\Http\Controllers\PrestamoController;
 use App\Http\Controllers\ProfileController;
 use App\Models\Activo;
+use App\Services\AlertasOperativasService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
@@ -13,6 +14,8 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
+    $alertas = app(AlertasOperativasService::class);
+    $alertas->registrarTemporadaSiAplica();
     $estadosPrestamo = ['En Prestamo', 'No disponible'];
 
     $stats = [
@@ -38,8 +41,9 @@ Route::get('/dashboard', function () {
         });
 
     $maxPrestamos = max(1, (int) $metricasDemanda->max('total_prestamos'));
+    $alertasOperativas = $alertas->alertasPendientes();
 
-    return view('dashboard', compact('stats', 'metricasDemanda', 'maxPrestamos'));
+    return view('dashboard', compact('stats', 'metricasDemanda', 'maxPrestamos', 'alertasOperativas'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {

@@ -43,6 +43,16 @@
                     </div>
 
                     <div>
+                        <label class="block text-sm font-medium text-gray-700">Modelo o referencia</label>
+                        <input
+                            type="text"
+                            name="modelo"
+                            value="{{ old('modelo', $activo->modelo) }}"
+                            class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-cultura-500 focus:ring-cultura-500"
+                        >
+                    </div>
+
+                    <div>
                         <label class="block text-sm font-medium text-gray-700">Categoria</label>
                         <select name="categoria" required class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-cultura-500 focus:ring-cultura-500">
                             <option value="Instrumentos de Cuerda" @selected(old('categoria', $activo->categoria) === 'Instrumentos de Cuerda')>Instrumentos de Cuerda</option>
@@ -66,9 +76,35 @@
                         >
                     </div>
 
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Valor original aproximado</label>
+                            <input
+                                type="number"
+                                name="valor_original"
+                                value="{{ old('valor_original', $activo->valor_original) }}"
+                                min="0"
+                                step="0.01"
+                                class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-cultura-500 focus:ring-cultura-500"
+                            >
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Estado estandarizado</label>
+                            <select name="estado_condicion" required class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-cultura-500 focus:ring-cultura-500">
+                                @foreach ($estadosCondicion as $estadoCondicion)
+                                    <option value="{{ $estadoCondicion }}" @selected(old('estado_condicion', $activo->estado_condicion) === $estadoCondicion)>
+                                        {{ $estadoCondicion }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4">
                         <p class="text-xs font-black uppercase tracking-widest text-gray-500">Estado actual</p>
                         <p class="mt-2 text-base font-bold text-gray-900">{{ $activo->estado_actual }}</p>
+                        <p class="mt-1 text-sm text-gray-600">Condicion operativa: <span class="font-bold text-gray-900">{{ $activo->estado_condicion ?? 'Excelente' }}</span></p>
                         @if ($activo->estado_actual === 'Baja')
                             <p class="mt-1 text-sm text-gray-600">Este articulo ya fue dado de baja. Solo se permiten correcciones de registro y consulta de historial.</p>
                         @else

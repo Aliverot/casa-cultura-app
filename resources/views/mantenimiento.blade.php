@@ -61,6 +61,31 @@
                             </datalist>
                         </div>
 
+                        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                            <div>
+                                <label class="mb-2 block text-xs font-black uppercase tracking-widest text-gray-500">Costo del servicio</label>
+                                <input
+                                    type="number"
+                                    name="costo_servicio"
+                                    value="{{ old('costo_servicio', 0) }}"
+                                    min="0"
+                                    step="0.01"
+                                    class="w-full rounded-xl border-gray-300 bg-white p-4 text-base text-gray-900 shadow-sm focus:ring-2 focus:ring-cultura-500"
+                                >
+                            </div>
+
+                            <div>
+                                <label class="mb-2 block text-xs font-black uppercase tracking-widest text-gray-500">Estado resultante</label>
+                                <select name="estado_condicion" required class="w-full rounded-xl border-gray-300 bg-white p-4 text-base text-gray-900 shadow-sm focus:ring-2 focus:ring-cultura-500">
+                                    @foreach ($estadosCondicion as $estadoCondicion)
+                                        <option value="{{ $estadoCondicion }}" @selected(old('estado_condicion', 'Excelente') === $estadoCondicion)>
+                                            {{ $estadoCondicion }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
                         <div>
                             <label class="mb-2 block text-xs font-black uppercase tracking-widest text-gray-500">Observaciones</label>
                             <textarea
@@ -75,6 +100,11 @@
                             <p class="text-xs font-black uppercase tracking-widest text-cultura-700">Finalizar y liberar</p>
                             <p class="mt-2 text-sm text-cultura-900">Al guardar, el sistema registra la nota del mantenimiento, reinicia el contador de horas de uso y vuelve a poner el instrumento como <span class="font-black">Disponible</span>.</p>
                         </div>
+
+                        <label class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 p-4">
+                            <input type="checkbox" name="es_preventivo" value="1" class="rounded border-gray-300 text-cultura-600 focus:ring-cultura-500" @checked(old('es_preventivo'))>
+                            <span class="text-sm text-gray-700">Registrar como mantenimiento preventivo por temporada o alta demanda.</span>
+                        </label>
 
                         <button type="submit" class="w-full rounded-xl bg-cultura-600 py-4 text-sm font-black uppercase tracking-widest text-white shadow-lg transition hover:bg-cultura-700">
                             Finalizar mantenimiento
@@ -101,6 +131,7 @@
                                         <div>
                                             <p class="text-lg font-black text-red-800">{{ $item->nombre }}</p>
                                             <p class="mt-1 text-sm font-bold text-red-700">Estado: {{ $item->estado_actual }}</p>
+                                            <p class="mt-1 text-xs font-bold uppercase tracking-widest text-red-600">Condicion: {{ $item->estado_condicion }}</p>
                                         </div>
                                         <span class="rounded-full bg-white px-3 py-1 text-xs font-black uppercase tracking-widest text-red-700 shadow-sm">
                                             {{ number_format($item->horas_uso, 2) }} h
@@ -111,6 +142,7 @@
                                         <div class="mt-4 rounded-xl border border-red-100 bg-white p-4">
                                             <p class="text-xs font-black uppercase tracking-widest text-gray-400">Ultima nota registrada</p>
                                             <p class="mt-2 text-sm font-bold text-gray-900">{{ $ultimoServicio->tipo }}</p>
+                                            <p class="mt-1 text-xs text-gray-500">Costo: ${{ number_format((float) $ultimoServicio->costo_servicio, 2) }}</p>
                                             @if ($ultimoServicio->observaciones)
                                                 <p class="mt-1 text-sm text-gray-600">{{ $ultimoServicio->observaciones }}</p>
                                             @endif
@@ -165,6 +197,7 @@
                                 <th class="pb-4">Fecha</th>
                                 <th class="pb-4">Instrumento</th>
                                 <th class="pb-4">Trabajo realizado</th>
+                                <th class="pb-4">Costo</th>
                                 <th class="pb-4">Observaciones</th>
                             </tr>
                         </thead>
@@ -174,11 +207,12 @@
                                     <td class="py-4 text-sm text-gray-600">{{ $registro->fecha_servicio->format('d/m/Y H:i') }}</td>
                                     <td class="py-4 font-bold text-gray-900">{{ $registro->activo?->nombre ?? 'Instrumento eliminado' }}</td>
                                     <td class="py-4 text-sm font-semibold text-gray-800">{{ $registro->tipo }}</td>
+                                    <td class="py-4 text-sm text-gray-600">${{ number_format((float) $registro->costo_servicio, 2) }}</td>
                                     <td class="py-4 text-sm text-gray-600">{{ $registro->observaciones ?: 'Sin observaciones' }}</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="py-10 text-center text-gray-400">Todavia no hay mantenimientos registrados.</td>
+                                    <td colspan="5" class="py-10 text-center text-gray-400">Todavia no hay mantenimientos registrados.</td>
                                 </tr>
                             @endforelse
                         </tbody>

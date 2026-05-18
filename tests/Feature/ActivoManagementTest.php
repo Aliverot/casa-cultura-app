@@ -16,13 +16,17 @@ it('updates an inventory article', function () {
 
     $response = $this->actingAs($user)->patch(route('activos.update', $activo->id_activo), [
         'nombre' => 'Trompeta actualizada',
+        'modelo' => 'Yamaha YTR',
         'categoria' => 'Instrumentos de Viento',
+        'estado_condicion' => 'Funcional con detalles',
         'limite_mantenimiento' => 75,
     ]);
 
     $response->assertRedirect(route('activos.index'));
 
     expect($activo->refresh()->nombre)->toBe('Trompeta actualizada')
+        ->and($activo->modelo)->toBe('Yamaha YTR')
+        ->and($activo->estado_condicion)->toBe('Funcional con detalles')
         ->and($activo->limite_mantenimiento)->toBe(75.0);
 });
 

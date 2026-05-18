@@ -31,6 +31,71 @@
                 </div>
             </div>
 
+            @if ($alertasOperativas->isNotEmpty())
+                <section class="module-card mb-8">
+                    <div class="flex items-center justify-between gap-4 border-b border-gray-100 pb-4">
+                        <h3 class="text-2xl font-black text-gray-900 uppercase tracking-tighter">Alertas operativas</h3>
+                        <span class="rounded-full bg-red-100 px-3 py-1 text-xs font-black uppercase tracking-widest text-red-700">
+                            {{ $alertasOperativas->count() }} pendientes
+                        </span>
+                    </div>
+
+                    <div class="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                        @foreach ($alertasOperativas as $alerta)
+                            @php
+                                [$alertaBorde, $alertaFondo, $alertaTexto, $alertaCaja] = match ($alerta->tipo) {
+                                    'Fragilidad/Mal Uso' => ['border-red-100', 'bg-red-50', 'text-red-700', 'border-red-200'],
+                                    'Preparacion de Temporada' => ['border-blue-100', 'bg-blue-50', 'text-blue-700', 'border-blue-200'],
+                                    'Baja y Adquisicion' => ['border-amber-100', 'bg-amber-50', 'text-amber-700', 'border-amber-200'],
+                                    default => ['border-slate-100', 'bg-slate-50', 'text-slate-700', 'border-slate-200'],
+                                };
+                            @endphp
+                            <div class="rounded-2xl border {{ $alertaBorde }} {{ $alertaFondo }} p-5">
+                                @if ($alerta->activo)
+                                    <div class="mb-4 rounded-xl border {{ $alertaCaja }} bg-white px-4 py-3">
+                                        <p class="text-xs font-black uppercase tracking-widest text-gray-500">Instrumento afectado</p>
+                                        <p class="mt-1 text-xl font-black {{ $alertaTexto }}">{{ $alerta->activo->nombre }}</p>
+                                    </div>
+                                @endif
+                                <p class="text-xs font-black uppercase tracking-widest {{ $alertaTexto }}">{{ $alerta->tipo }}</p>
+                                <p class="mt-2 text-lg font-black text-gray-900">{{ $alerta->titulo }}</p>
+                                <p class="mt-1 text-sm text-gray-700">{{ $alerta->descripcion }}</p>
+                                @if ($alerta->tipo === 'Baja y Adquisicion' && is_array($alerta->datos))
+                                    <div class="mt-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
+                                        <div class="rounded-xl bg-white p-3">
+                                            <p class="text-xs font-black uppercase tracking-widest text-gray-400">Valor original</p>
+                                            <p class="mt-1 font-black text-gray-900">${{ number_format((float) ($alerta->datos['valor_original'] ?? 0), 2) }}</p>
+                                        </div>
+                                        <div class="rounded-xl bg-white p-3">
+                                            <p class="text-xs font-black uppercase tracking-widest text-gray-400">Reparaciones</p>
+                                            <p class="mt-1 font-black text-gray-900">${{ number_format((float) ($alerta->datos['costo_reparaciones'] ?? 0), 2) }}</p>
+                                        </div>
+                                        <div class="rounded-xl bg-white p-3">
+                                            <p class="text-xs font-black uppercase tracking-widest text-gray-400">Limite</p>
+                                            <p class="mt-1 font-black text-gray-900">{{ $alerta->datos['porcentaje_limite'] ?? 60 }}%</p>
+                                        </div>
+                                    </div>
+                                @elseif ($alerta->tipo === 'Preparacion de Temporada' && is_array($alerta->datos))
+                                    <div class="mt-4 rounded-xl bg-white p-3 text-sm">
+                                        <p class="text-xs font-black uppercase tracking-widest text-gray-400">Base de alerta</p>
+                                        @if (! empty($alerta->datos['temporada_base']))
+                                            <p class="mt-1 font-bold text-gray-900">{{ $alerta->datos['temporada_base']['nombre'] }}: {{ $alerta->datos['temporada_base']['rango'] }}</p>
+                                        @else
+                                            <p class="mt-1 font-bold text-gray-900">Incremento reciente: {{ $alerta->datos['incremento_porcentaje'] ?? 0 }}%</p>
+                                        @endif
+                                    </div>
+                                @elseif ($alerta->tipo === 'Fragilidad/Mal Uso' && is_array($alerta->datos))
+                                    <div class="mt-4 rounded-xl bg-white p-3 text-sm">
+                                        <p class="text-xs font-black uppercase tracking-widest text-gray-400">Danos recientes</p>
+                                        <p class="mt-1 font-bold text-gray-900">{{ $alerta->datos['danios_recientes'] ?? 0 }} en {{ $alerta->datos['periodo_dias'] ?? 90 }} dias</p>
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
+
             <div class="grid grid-cols-1 xl:grid-cols-[1.1fr_0.9fr] gap-8">
                 <section class="module-card overflow-hidden">
                     <h3 class="text-2xl font-black mb-6 text-gray-900 border-b border-gray-100 pb-4 uppercase tracking-tighter">Acciones operativas</h3>

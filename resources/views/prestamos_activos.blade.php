@@ -94,6 +94,39 @@
                                         </div>
 
                                         <div>
+                                            <label class="text-xs font-black text-gray-500 uppercase">Contexto del incidente</label>
+                                            <textarea
+                                                name="contexto_incidente"
+                                                rows="2"
+                                                class="w-full rounded-lg border-gray-300 text-sm p-3 mt-1 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500"
+                                                placeholder="Como ocurrio el dano"
+                                                data-damage-detail
+                                            >{{ old('contexto_incidente') }}</textarea>
+                                        </div>
+
+                                        <div>
+                                            <label class="text-xs font-black text-gray-500 uppercase">Entorno de uso</label>
+                                            <select name="entorno_uso" class="w-full rounded-lg border-gray-300 text-sm p-3 mt-1 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500" data-damage-detail>
+                                                <option value="">Seleccionar</option>
+                                                <option value="Ensayo" @selected(old('entorno_uso') === 'Ensayo')>Ensayo</option>
+                                                <option value="Evento exterior" @selected(old('entorno_uso') === 'Evento exterior')>Evento exterior</option>
+                                                <option value="Transporte" @selected(old('entorno_uso') === 'Transporte')>Transporte</option>
+                                                <option value="Otro" @selected(old('entorno_uso') === 'Otro')>Otro</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label class="text-xs font-black text-gray-500 uppercase">Accesorios de proteccion</label>
+                                            <textarea
+                                                name="accesorios_proteccion"
+                                                rows="2"
+                                                class="w-full rounded-lg border-gray-300 text-sm p-3 mt-1 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500"
+                                                placeholder="Estuches, fundas o protecciones"
+                                                data-damage-detail
+                                            >{{ old('accesorios_proteccion') }}</textarea>
+                                        </div>
+
+                                        <div>
                                             <label class="text-xs font-black text-gray-500 uppercase">Costo de reparacion o reposicion</label>
                                             <div class="relative mt-1">
                                                 <span class="absolute left-3 top-3 text-gray-400">$</span>
@@ -178,11 +211,21 @@
 
     <script>
         document.querySelectorAll('[data-damage-toggle]').forEach((select) => {
-            const costInput = select.closest('form').querySelector('[data-damage-cost]');
+            const form = select.closest('form');
+            const costInput = form.querySelector('[data-damage-cost]');
+            const damageDetails = form.querySelectorAll('[data-damage-detail]');
 
             const syncCostField = () => {
                 const requiresCost = ['Danado', 'Extraviado', 'Perdida total'].includes(select.value);
+                const requiresDamageDetails = select.value === 'Danado';
                 costInput.disabled = !requiresCost;
+                damageDetails.forEach((field) => {
+                    field.disabled = !requiresDamageDetails;
+
+                    if (!requiresDamageDetails) {
+                        field.value = '';
+                    }
+                });
 
                 if (!requiresCost) {
                     costInput.value = '0';

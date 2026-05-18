@@ -12,11 +12,15 @@ class Mantenimiento extends Model
         'id_activo',
         'fecha_servicio',
         'tipo',
+        'costo_servicio',
+        'es_preventivo',
         'observaciones',
     ];
 
     protected $casts = [
         'fecha_servicio' => 'datetime',
+        'costo_servicio' => 'decimal:2',
+        'es_preventivo' => 'boolean',
     ];
 
     public function activo()
