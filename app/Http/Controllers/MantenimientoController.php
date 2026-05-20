@@ -15,9 +15,17 @@ class MantenimientoController extends Controller
         $alertas = app(AlertasOperativasService::class);
         $alertas->registrarTemporadaSiAplica();
 
-        $activosEnMantenimiento = Activo::with(['mantenimientos' => function ($query) {
-            $query->latest('fecha_servicio');
-        }])
+        $activosEnMantenimiento = Activo::with([
+            'mantenimientos' => function ($query) {
+                $query->latest('fecha_servicio');
+            },
+            'detallesPrestamo' => function ($query) {
+                $query->with('prestamo')
+                    ->whereNotNull('fecha_devolucion_real')
+                    ->whereIn('estado_retorno', ['Danado', 'Dañado', 'DaÃ±ado', 'Extraviado', 'Perdida total'])
+                    ->latest('fecha_devolucion_real');
+            },
+        ])
             ->where('estado_actual', 'Mantenimiento')
             ->orderBy('nombre')
             ->get();
@@ -40,6 +48,11 @@ class MantenimientoController extends Controller
             ->limit(10)
             ->get();
         $alertasOperativas = $alertas->alertasPendientes();
+        $informesBajaAdquisicion = AlertaOperativa::with('activo')
+            ->where('tipo', 'Baja y Adquisicion')
+            ->where('estado', 'Pendiente')
+            ->orderByDesc('fecha_alerta')
+            ->get();
         $estadosCondicion = Activo::ESTADOS_CONDICION;
 
         return view('mantenimiento', compact(
@@ -48,6 +61,7 @@ class MantenimientoController extends Controller
             'activosCandidatos',
             'historialMantenimiento',
             'alertasOperativas',
+            'informesBajaAdquisicion',
             'estadosCondicion'
         ));
     }
@@ -82,6 +96,8 @@ class MantenimientoController extends Controller
             ->where('tipo', 'Fragilidad/Mal Uso')
             ->where('estado', 'Pendiente')
             ->update(['estado' => 'Resuelta']);
+
+        app(AlertasOperativasService::class)->registrarReposicionSiAplica($activo);
 
         return redirect()->route('mantenimientos.index')->with('success', 'Mantenimiento registrado. El instrumento vuelve a estar disponible.');
     }

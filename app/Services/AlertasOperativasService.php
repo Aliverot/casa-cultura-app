@@ -18,9 +18,45 @@ class AlertasOperativasService
     private const DAMAGE_PERIOD_DAYS = 90;
     private const SEASON_INCREASE_PERCENT = 25;
     private const SEASON_TOP_RESOURCES = 5;
+    private const SEASON_MIN_PREVIOUS_LOANS = 2;
+    private const SEASON_MIN_CURRENT_LOANS = 3;
     private const REPAIR_COST_PERCENT = 60;
     private const FAILURE_LIMIT = 3;
     private const FAILURE_PERIOD_DAYS = 365;
+
+    public function precargarTemporadasBase(): int
+    {
+        if (! Schema::hasTable('temporadas_base')) {
+            return 0;
+        }
+
+        $temporadas = $this->fechasBaseTemporada();
+
+        foreach ($temporadas as $temporada) {
+            $existe = DB::table('temporadas_base')
+                ->where('nombre', $temporada['nombre'])
+                ->exists();
+
+            if ($existe) {
+                DB::table('temporadas_base')
+                    ->where('nombre', $temporada['nombre'])
+                    ->update(array_merge($temporada, [
+                        'activa' => true,
+                        'updated_at' => now(),
+                    ]));
+
+                continue;
+            }
+
+            DB::table('temporadas_base')->insert(array_merge($temporada, [
+                'activa' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]));
+        }
+
+        return count($temporadas);
+    }
 
     public function requiereDatosDanioRecurrente(DetallePrestamo $detalle): bool
     {
@@ -68,6 +104,12 @@ class AlertasOperativasService
         $totalFallas = (clone $fallas)->count();
         $costoIncidentes = (float) (clone $fallas)->sum('prestamos.costo_reparacion');
         $costoMantenimientos = (float) Mantenimiento::whereIn('id_activo', $idsActivos)->sum('costo_servicio');
+        $costoMantenimientosPreventivos = (float) Mantenimiento::whereIn('id_activo', $idsActivos)
+            ->where('es_preventivo', true)
+            ->sum('costo_servicio');
+        $mantenimientosPreventivos = Mantenimiento::whereIn('id_activo', $idsActivos)
+            ->where('es_preventivo', true)
+            ->count();
         $costoTotal = $costoIncidentes + $costoMantenimientos;
         $valorOriginal = (float) Activo::whereIn('id_activo', $idsActivos)->avg('valor_original');
         $rebasaCosto = $valorOriginal > 0 && $costoTotal >= ($valorOriginal * self::REPAIR_COST_PERCENT / 100);
@@ -92,6 +134,8 @@ class AlertasOperativasService
                 'costo_reparaciones' => $costoTotal,
                 'costo_incidentes' => $costoIncidentes,
                 'costo_mantenimientos' => $costoMantenimientos,
+                'costo_mantenimientos_preventivos' => $costoMantenimientosPreventivos,
+                'mantenimientos_preventivos' => $mantenimientosPreventivos,
                 'valor_original' => $valorOriginal,
                 'porcentaje_limite' => self::REPAIR_COST_PERCENT,
                 'periodo_dias' => self::FAILURE_PERIOD_DAYS,
@@ -102,51 +146,32 @@ class AlertasOperativasService
     public function registrarTemporadaSiAplica(): Collection
     {
         $temporadaBase = $this->temporadaBaseVigente();
-        $inicioActual = now()->subDays(30);
-        $inicioAnterior = now()->subDays(60);
-        $prestamosActuales = Prestamo::where('fecha_salida', '>=', $inicioActual)->count();
-        $prestamosAnteriores = Prestamo::where('fecha_salida', '>=', $inicioAnterior)
-            ->where('fecha_salida', '<', $inicioActual)
-            ->count();
-
-        if ($prestamosAnteriores === 0 && ! $temporadaBase) {
-            $this->cerrarAlertasTemporada();
-
-            return collect();
-        }
-
-        $incremento = $prestamosAnteriores > 0
-            ? (($prestamosActuales - $prestamosAnteriores) / $prestamosAnteriores) * 100
-            : 0;
-
-        if ($incremento < self::SEASON_INCREASE_PERCENT && ! $temporadaBase) {
-            $this->cerrarAlertasTemporada();
-
-            return collect();
-        }
-
+        $datosHistoricos = $this->datosIncrementoHistorico();
         $metricas = $this->metricasRecursosTemporada();
-        $activos = Activo::whereIn('id_activo', $metricas->pluck('id_activo'))->get()->keyBy('id_activo');
-        $recursos = $metricas->map(function ($metrica) use ($activos) {
-            $activo = $activos->get($metrica->id_activo);
-
-            return $activo ? [
-                'id_activo' => $activo->id_activo,
-                'nombre' => $activo->nombre,
-                'categoria' => $activo->categoria,
-                'total_prestamos' => (int) $metrica->total_prestamos,
-            ] : null;
-        })->filter()->values();
+        $recursos = $this->recursosDesdeMetricas($metricas);
 
         if ($recursos->isEmpty()) {
             $this->cerrarAlertasTemporada();
+            $this->cerrarAlertasIncrementoHistorico();
 
             return collect();
         }
 
-        $motivo = $temporadaBase
-            ? "Se acerca {$temporadaBase['nombre']} ({$temporadaBase['rango']})"
-            : 'La demanda reciente subio '.round($incremento, 2).'%';
+        $this->registrarTemporadaBase($temporadaBase, $recursos);
+        $this->registrarIncrementoHistorico($datosHistoricos, $recursos);
+
+        return $recursos;
+    }
+
+    private function registrarTemporadaBase(?array $temporadaBase, Collection $recursos): void
+    {
+        if (! $temporadaBase) {
+            $this->cerrarAlertasTemporada();
+
+            return;
+        }
+
+        $motivo = "Se acerca {$temporadaBase['nombre']} ({$temporadaBase['rango']})";
 
         AlertaOperativa::where('tipo', 'Preparacion de Temporada')
             ->where('estado', 'Pendiente')
@@ -163,9 +188,6 @@ class AlertasOperativasService
                 'titulo' => 'Preparacion de Temporada',
                 'descripcion' => "{$motivo}. Se sugieren los ".self::SEASON_TOP_RESOURCES.' recursos mas usados para mantenimiento preventivo.',
                 'datos' => [
-                    'incremento_porcentaje' => round($incremento, 2),
-                    'prestamos_actuales' => $prestamosActuales,
-                    'prestamos_anteriores' => $prestamosAnteriores,
                     'temporada_base' => $temporadaBase,
                     'limite_recursos' => self::SEASON_TOP_RESOURCES,
                     'recursos' => $recursos->all(),
@@ -173,8 +195,32 @@ class AlertasOperativasService
                 'fecha_alerta' => now(),
             ]
         );
+    }
 
-        return $recursos;
+    private function registrarIncrementoHistorico(array $datosHistoricos, Collection $recursos): void
+    {
+        if (! $datosHistoricos['aplica_por_incremento']) {
+            $this->cerrarAlertasIncrementoHistorico();
+
+            return;
+        }
+
+        AlertaOperativa::updateOrCreate(
+            [
+                'tipo' => 'Incremento Historico de Prestamos',
+                'id_activo' => null,
+                'estado' => 'Pendiente',
+            ],
+            [
+                'titulo' => 'Incremento Historico de Prestamos',
+                'descripcion' => "La demanda reciente subio {$datosHistoricos['incremento_porcentaje']}% frente al periodo anterior. Se sugieren los ".self::SEASON_TOP_RESOURCES.' recursos mas usados para mantenimiento preventivo.',
+                'datos' => array_merge($datosHistoricos, [
+                    'limite_recursos' => self::SEASON_TOP_RESOURCES,
+                    'recursos' => $recursos->all(),
+                ]),
+                'fecha_alerta' => now(),
+            ]
+        );
     }
 
     public function alertasPendientes(int $limite = 6): Collection
@@ -194,6 +240,64 @@ class AlertasOperativasService
             ->where('fecha_devolucion_real', '>=', now()->subDays(self::DAMAGE_PERIOD_DAYS))
             ->when($exceptoDetalle, fn ($query) => $query->where('id_detalle', '<>', $exceptoDetalle))
             ->count();
+    }
+
+    private function datosIncrementoHistorico(): array
+    {
+        $ahora = now();
+        $inicioActual = $ahora->copy()->subDays(30);
+        $inicioAnterior = $ahora->copy()->subDays(60);
+        $prestamosActuales = Prestamo::where('fecha_salida', '>=', $inicioActual)->count();
+        $prestamosAnteriores = Prestamo::where('fecha_salida', '>=', $inicioAnterior)
+            ->where('fecha_salida', '<', $inicioActual)
+            ->count();
+        $diferencia = $prestamosActuales - $prestamosAnteriores;
+        $incremento = $prestamosAnteriores > 0
+            ? ($diferencia / $prestamosAnteriores) * 100
+            : 0;
+        $factor = $prestamosAnteriores > 0
+            ? $prestamosActuales / $prestamosAnteriores
+            : null;
+        $cumpleMuestra = $prestamosAnteriores >= self::SEASON_MIN_PREVIOUS_LOANS
+            && $prestamosActuales >= self::SEASON_MIN_CURRENT_LOANS;
+
+        return [
+            'incremento_porcentaje' => round($incremento, 2),
+            'prestamos_actuales' => $prestamosActuales,
+            'prestamos_anteriores' => $prestamosAnteriores,
+            'diferencia_prestamos' => $diferencia,
+            'factor_crecimiento' => $factor ? round($factor, 2) : null,
+            'umbral_incremento' => self::SEASON_INCREASE_PERCENT,
+            'minimo_prestamos_anteriores' => self::SEASON_MIN_PREVIOUS_LOANS,
+            'minimo_prestamos_actuales' => self::SEASON_MIN_CURRENT_LOANS,
+            'cumple_muestra_minima' => $cumpleMuestra,
+            'aplica_por_incremento' => $cumpleMuestra && $incremento >= self::SEASON_INCREASE_PERCENT,
+            'periodo_actual' => [
+                'inicio' => $inicioActual->toDateString(),
+                'fin' => $ahora->toDateString(),
+            ],
+            'periodo_anterior' => [
+                'inicio' => $inicioAnterior->toDateString(),
+                'fin' => $inicioActual->toDateString(),
+            ],
+            'formula' => '((prestamos_actuales - prestamos_anteriores) / prestamos_anteriores) * 100',
+        ];
+    }
+
+    private function recursosDesdeMetricas(Collection $metricas): Collection
+    {
+        $activos = Activo::whereIn('id_activo', $metricas->pluck('id_activo'))->get()->keyBy('id_activo');
+
+        return $metricas->map(function ($metrica) use ($activos) {
+            $activo = $activos->get($metrica->id_activo);
+
+            return $activo ? [
+                'id_activo' => $activo->id_activo,
+                'nombre' => $activo->nombre,
+                'categoria' => $activo->categoria,
+                'total_prestamos' => (int) $metrica->total_prestamos,
+            ] : null;
+        })->filter()->values();
     }
 
     private function metricasRecursosTemporada(): Collection
@@ -251,9 +355,30 @@ class AlertasOperativasService
         return null;
     }
 
+    private function fechasBaseTemporada(): array
+    {
+        return [
+            ['nombre' => 'Ano Nuevo', 'fecha_inicio' => '01-01', 'fecha_fin' => '01-01', 'dias_anticipacion' => 30],
+            ['nombre' => 'Dia de la Constitucion', 'fecha_inicio' => '02-05', 'fecha_fin' => '02-05', 'dias_anticipacion' => 30],
+            ['nombre' => 'Natalicio de Benito Juarez', 'fecha_inicio' => '03-21', 'fecha_fin' => '03-21', 'dias_anticipacion' => 30],
+            ['nombre' => 'Dia del Trabajo', 'fecha_inicio' => '05-01', 'fecha_fin' => '05-01', 'dias_anticipacion' => 30],
+            ['nombre' => 'Independencia de Mexico', 'fecha_inicio' => '09-16', 'fecha_fin' => '09-16', 'dias_anticipacion' => 30],
+            ['nombre' => 'Dia de Muertos', 'fecha_inicio' => '11-01', 'fecha_fin' => '11-02', 'dias_anticipacion' => 30],
+            ['nombre' => 'Revolucion Mexicana', 'fecha_inicio' => '11-20', 'fecha_fin' => '11-20', 'dias_anticipacion' => 30],
+            ['nombre' => 'Temporada decembrina', 'fecha_inicio' => '12-12', 'fecha_fin' => '01-06', 'dias_anticipacion' => 30],
+        ];
+    }
+
     private function cerrarAlertasTemporada(): void
     {
         AlertaOperativa::where('tipo', 'Preparacion de Temporada')
+            ->where('estado', 'Pendiente')
+            ->update(['estado' => 'Resuelta']);
+    }
+
+    private function cerrarAlertasIncrementoHistorico(): void
+    {
+        AlertaOperativa::where('tipo', 'Incremento Historico de Prestamos')
             ->where('estado', 'Pendiente')
             ->update(['estado' => 'Resuelta']);
     }

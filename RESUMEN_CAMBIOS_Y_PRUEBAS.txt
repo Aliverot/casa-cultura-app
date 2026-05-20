@@ -1,156 +1,271 @@
 RESUMEN DE CAMBIOS Y PRUEBAS
 Proyecto: casa-cultura-app
 
-1. Autenticacion y perfil
-- Login revisado: ya validaba correo, contrasena y bloqueo por intentos.
-- Registro, cambio y restablecimiento de contrasena ahora exigen:
-  minimo 8 caracteres, mayusculas, minusculas y numeros.
-- El simbolo ya no es obligatorio, aunque se puede usar.
-- Se agregaron mensajes de validacion en espanol.
-- Se tradujo la pantalla de perfil a espanol.
-- Se corrigio la validacion de correo unico en perfil usando la llave real id_usuario.
-- Se corrigieron pruebas de verificacion de correo para usuarios con id_usuario.
+Este documento explica, en palabras simples, que se agrego y como probarlo.
 
-Pruebas:
-- Registrar usuario con password debe fallar en espanol.
-- Registrar usuario con Password1 debe pasar.
-- Registrar correo repetido debe mostrar que el correo ya esta registrado.
-- En /profile, cambiar a un correo repetido debe fallar en espanol.
-- Cambiar contrasena desde perfil con Password1 debe pasar.
-- php artisan test
+1. Autenticacion y perfil
+
+Que se hizo:
+- El login ya validaba correo, contrasena y bloqueo por intentos.
+- El registro, cambio y restablecimiento de contrasena piden:
+  minimo 8 caracteres, mayusculas, minusculas y numeros.
+- El simbolo ya no es obligatorio.
+- Los mensajes de validacion estan en espanol.
+- La pantalla de perfil esta en espanol.
+- Se corrigio la validacion de correo repetido usando la llave real id_usuario.
+
+Como probar:
+- Registrar un usuario con una contrasena debil debe mostrar error.
+- Registrar un usuario con Password1 debe funcionar.
+- Usar un correo repetido debe mostrar error.
+- Cambiar la contrasena desde perfil con Password1 debe funcionar.
+
 
 2. Alertas operativas
-- Se agrego tabla alertas_operativas.
-- Se agrego modelo App\Models\AlertaOperativa.
-- Se agrego servicio App\Services\AlertasOperativasService.
-- Dashboard muestra alertas pendientes con color por tipo:
+
+Que se hizo:
+- Se agrego la tabla alertas_operativas.
+- Se agrego el modelo AlertaOperativa.
+- Se agrego el servicio AlertasOperativasService.
+- El dashboard muestra alertas pendientes.
+- Cada alerta tiene color segun su tipo:
   Fragilidad/Mal Uso: rojo.
   Preparacion de Temporada: azul.
+  Incremento Historico de Prestamos: verde.
   Baja y Adquisicion: ambar.
-- Las alertas remarcan el instrumento afectado.
-- Las alertas de baja/adquisicion muestran valor original, reparaciones y limite de 60%.
+- Las alertas son recomendaciones. No mandan instrumentos automaticamente a mantenimiento ni a baja.
 - Cada alerta pendiente puede marcarse como resuelta desde el dashboard.
-- Las alertas son recomendaciones visuales: no mandan automaticamente instrumentos a mantenimiento.
-- Para mandar un instrumento a mantenimiento a voluntad, editarlo en inventario y seleccionar En reparacion.
-- Para sacarlo del uso operativo, editarlo y seleccionar Baja definitiva, o usar Dar de baja.
 
-Pruebas:
-- Generar danos recurrentes en un mismo activo y revisar dashboard.
-- Generar alerta de temporada y revisar dashboard.
-- Generar reparaciones que superen 60% del valor original y revisar dashboard.
-- Marcar una alerta como resuelta desde el dashboard y verificar que desaparece.
-- php artisan test
+Como probar:
+- Entrar al dashboard y revisar la seccion Alertas operativas.
+- Marcar una alerta como resuelta y verificar que desaparece.
+
 
 3. Devoluciones e incidentes
-- En devolucion, los campos de incidente solo se habilitan cuando el estado es Danado:
+
+Que se hizo:
+- En devoluciones, los campos de incidente solo aplican cuando el estado es Danado.
+- Si se selecciona Buen estado, esos campos se limpian y no se usan.
+- Si un instrumento acumula danos recurrentes, los datos del incidente se vuelven obligatorios.
+- Al devolver como Danado, el activo pasa a Mantenimiento y condicion En reparacion.
+- Al devolver como Extraviado, queda como Extraviado.
+- Al devolver como Perdida total, queda como Baja y Baja definitiva.
+- Las condiciones de retorno ahora se ven en /historial.
+- Cuando la devolucion fue por dano, en /historial tambien se ve:
   contexto del incidente,
   entorno de uso,
   accesorios de proteccion.
-- Si se selecciona Buen estado, esos campos se deshabilitan y se limpian.
-- Backend ignora esos campos si el estado no es Danado.
-- Si hay dano recurrente, esos datos se vuelven obligatorios.
-- Al devolver como Danado, el activo pasa a Mantenimiento y condicion En reparacion.
-- Al devolver como Extraviado, queda Extraviado.
-- Al devolver como Perdida total, queda Baja y Baja definitiva.
+- Si el instrumento queda en Mantenimiento, esos datos tambien aparecen en /mantenimiento como Motivo de reparacion.
 
-Pruebas:
-- En /prestamos-activos seleccionar Buen estado: campos de incidente quedan bloqueados.
-- Seleccionar Danado: campos de incidente se habilitan.
-- Intentar tercer dano recurrente sin datos de incidente: debe marcar error.
-- Completar datos: debe guardar y crear alerta.
-- php artisan test
+Como probar:
+- En /prestamos-activos seleccionar Buen estado y revisar que los campos de incidente no se usen.
+- Seleccionar Danado y revisar que los campos de incidente se habiliten.
+- Generar varios danos en el mismo instrumento y verificar que se piden mas datos.
+- Entrar a /historial y revisar la columna Resultado.
+- Entrar a /mantenimiento y revisar la seccion En Reparacion.
 
-4. Temporadas altas
-- Se agrego tabla temporadas_base con fechas mexicanas precargadas.
-- Fechas base incluidas:
-  Ano Nuevo,
-  Dia de la Constitucion,
-  Natalicio de Benito Juarez,
-  Dia del Trabajo,
-  Independencia de Mexico,
-  Dia de Muertos,
-  Revolucion Mexicana,
+
+4. Temporadas y calendario
+
+Que se hizo:
+- Se agrego la tabla temporadas_base.
+- La migracion carga fechas mexicanas base:
+  Ano Nuevo.
+  Dia de la Constitucion.
+  Natalicio de Benito Juarez.
+  Dia del Trabajo.
+  Independencia de Mexico.
+  Dia de Muertos.
+  Revolucion Mexicana.
   Temporada decembrina.
-- El sistema crea alerta de Preparacion de Temporada por:
-  calendario base,
-  o incremento historico de prestamos.
-- Si no hay historial, las fechas base permiten ver recomendaciones.
-- El historial se sigue usando para elegir recursos mas usados.
-- La alerta de temporada se muestra como una sola tarjeta general.
-- Considera como maximo los 5 recursos mas usados para sugerir mantenimiento preventivo.
-- Si la temporada ya no aplica, la alerta pendiente se marca como Resuelta.
-- No mueve automaticamente recursos a mantenimiento, porque solo es preparacion preventiva.
+- Se agrego la pantalla /temporadas-base.
+- En esa pantalla se pueden:
+  agregar fechas,
+  editar fechas,
+  cambiar nombre,
+  cambiar fecha de inicio,
+  cambiar fecha de fin,
+  cambiar dias de anticipacion,
+  activar o desactivar una temporada.
+- Se quito el boton visible de Cargar fechas mexicanas porque solo era de prueba.
+- Si una fecha activa aplica, el sistema crea una alerta azul llamada Preparacion de Temporada.
 
-Pruebas:
-- Insertar una temporada temporal cercana:
-  INSERT INTO temporadas_base
-  (nombre, fecha_inicio, fecha_fin, dias_anticipacion, activa, created_at, updated_at)
-  VALUES
-  ('Prueba visual', '05-18', '05-20', 30, true, NOW(), NOW());
-- Abrir dashboard o mantenimiento.
+Como funciona la alerta por calendario:
+- Cada temporada tiene inicio, fin y dias de anticipacion.
+- Si hoy esta entre "inicio menos dias de anticipacion" y "fin", aparece alerta.
+- Ejemplo:
+  inicio: 05-25
+  dias de anticipacion: 30
+  la alerta puede aparecer desde 04-25.
+
+Como probar:
+- Entrar a /temporadas-base.
+- Agregar una fecha cercana a hoy.
+- Entrar al dashboard.
 - Debe aparecer Preparacion de Temporada.
-- Borrar la fila de prueba si ya no se necesita.
-- php artisan test
+- Editar esa fecha y verificar que el cambio se guarda.
 
-5. Baja y adquisicion
-- Se recomienda compra cuando:
-  el costo acumulado de reparaciones/mantenimientos supera 60% del valor original,
-  o la frecuencia de fallas afecta disponibilidad.
-- Se integro modelo/referencia para agrupar activos parecidos.
-- Se suman costos de reparacion de prestamos y costos de mantenimiento.
-- La alerta explica visualmente el 60%.
-- Esta alerta se cierra manualmente con Marcar resuelta cuando ya se atendio la decision.
 
-Pruebas:
-- Crear activo con valor_original.
-- Registrar danos con costo_reparacion.
-- Registrar mantenimientos con costo_servicio.
-- Al superar 60%, revisar dashboard.
-- php artisan test
+5. Incremento historico de prestamos
 
-6. Inventario
+Que se hizo:
+- Esta alerta ahora es independiente de las fechas importantes.
+- Ya no se mezcla con Preparacion de Temporada.
+- Si aplica, aparece como una tarjeta verde llamada Incremento Historico de Prestamos.
+- Puede verse al mismo tiempo que la alerta azul de temporada.
+
+Como funciona el algoritmo:
+- Compara dos periodos:
+  periodo anterior: de hace 60 dias a hace 30 dias.
+  periodo reciente: ultimos 30 dias.
+- Cuenta cuantos prestamos hubo en cada periodo.
+- Calcula el incremento con esta formula:
+  ((prestamos_recientes - prestamos_anteriores) / prestamos_anteriores) * 100
+- Para evitar alertas por datos muy pequenos, pide minimo:
+  2 prestamos en el periodo anterior.
+  3 prestamos en el periodo reciente.
+- El incremento debe ser de 25% o mas.
+
+Ejemplo:
+- Periodo anterior: 8 prestamos.
+- Periodo reciente: 33 prestamos.
+- Diferencia: 25 prestamos.
+- Incremento:
+  ((33 - 8) / 8) * 100 = 312.5%
+- Como 312.5% es mayor que 25%, se crea la alerta.
+
+Que muestra la tarjeta:
+- Periodo anterior.
+- Periodo reciente.
+- Diferencia.
+- Incremento.
+- Factor de crecimiento.
+- Regla usada.
+- Recursos sugeridos.
+
+Como probar:
+- Ejecutar el archivo demo_temporada_alta_incremento.sql en PostgreSQL.
+- Entrar al dashboard.
+- Debe aparecer una tarjeta verde de Incremento Historico de Prestamos.
+- Los prestamos demo ya quedan devueltos, por eso no deben llenar la pantalla de devoluciones.
+- Los instrumentos demo quedan con cantidades distintas de prestamos para que se vea mas real:
+  Teclado Demo Temporada: 10.
+  Guitarra Demo Temporada: 8.
+  Saxofon Demo Temporada: 6.
+  Violin Demo Temporada: 3.
+  Tambor Demo Temporada: 1.
+
+Comando de ejemplo:
+psql -h 127.0.0.1 -p 5432 -d control_articulos -U TU_USUARIO -f demo_temporada_alta_incremento.sql
+
+
+6. Recursos sugeridos para temporada o alta demanda
+
+Que se hizo:
+- Las alertas de temporada y de incremento historico sugieren como maximo 5 recursos.
+- Esos recursos salen de los instrumentos con mas prestamos registrados.
+- No se mueven automaticamente a mantenimiento.
+- Solo son recomendaciones para que el usuario decida si conviene hacer mantenimiento preventivo.
+
+Como probar:
+- Revisar la tarjeta azul o verde en el dashboard.
+- Deben aparecer recursos sugeridos con su cantidad de prestamos.
+
+
+7. Inventario
+
+Que se hizo:
 - Se agrego campo modelo o referencia.
 - El buscador del catalogo busca por nombre, modelo o codigo QR.
-- Se agrego estado estandarizado:
-  Excelente,
-  Funcional con detalles,
-  En reparacion,
+- Se agrego estado de condicion:
+  Excelente.
+  Funcional con detalles.
+  En reparacion.
   Baja definitiva.
-- Alta y edicion de activos permiten capturar:
+- Al crear o editar un activo se puede capturar:
   modelo,
   valor original,
-  estado estandarizado.
-- Catalogo muestra modelo y condicion operativa.
-- Si el estado estandarizado se cambia a En reparacion, el activo pasa a Mantenimiento.
-- Si el estado estandarizado se cambia a Baja definitiva, el activo pasa a Baja.
-- Si el activo tiene prestamo activo, no se permite mandarlo a reparacion o baja desde edicion.
+  estado de condicion.
+- Si la condicion se cambia a En reparacion, el activo pasa a Mantenimiento.
+- Si la condicion se cambia a Baja definitiva, el activo pasa a Baja.
+- Si el activo tiene un prestamo activo, no se permite mandarlo a reparacion o baja desde edicion.
 
-Pruebas:
-- Crear activo con modelo, valor original y estado.
-- Buscarlo por modelo en catalogo.
-- Editar estado estandarizado a En reparacion y verificar que aparece en Mantenimiento.
-- Editar estado estandarizado a Baja definitiva y verificar que queda como Baja.
-- Intentar editar a En reparacion estando prestado: debe mostrar error y seguir No disponible.
-- Dar de baja y verificar Baja definitiva.
-- php artisan test
+Como probar:
+- Crear un activo con modelo y valor original.
+- Buscarlo por modelo.
+- Editarlo a En reparacion y revisar que aparece en mantenimiento.
+- Editarlo a Baja definitiva y revisar que queda como baja.
+- Intentar mandarlo a reparacion mientras esta prestado: debe mostrar error.
 
-7. Mantenimiento
+
+8. Mantenimiento
+
+Que se hizo:
 - Se agrego costo del servicio.
-- Se agrego checkbox de mantenimiento preventivo.
-- Se agrego estado resultante al finalizar mantenimiento.
-- Historial reciente de mantenimiento muestra el costo.
-- El costo de mantenimiento se usa en el analisis de baja/adquisicion.
-- Finalizar mantenimiento resuelve automaticamente alertas de Fragilidad/Mal Uso de ese activo.
+- Se agrego estado resultante.
+- Se agrego el checkbox:
+  Mantenimiento preventivo por temporada o alta demanda.
+- Ese checkbox guarda el mantenimiento como preventivo.
+- En el historial de mantenimiento ahora aparece una etiqueta Preventivo cuando aplica.
+- Al finalizar mantenimiento:
+  el activo vuelve a Disponible,
+  las horas de uso vuelven a 0,
+  se guarda el costo,
+  se guarda si fue preventivo,
+  se resuelven alertas de Fragilidad/Mal Uso del activo.
+- En la seccion En Reparacion se muestra el ultimo motivo de reparacion tomado de la devolucion:
+  condiciones de retorno,
+  contexto,
+  entorno,
+  accesorios de proteccion.
 
-Pruebas:
-- Registrar mantenimiento con costo, preventivo y estado resultante.
-- Verificar que el activo vuelve a Disponible.
-- Verificar que horas de uso vuelven a 0.
-- Verificar que una alerta de Fragilidad/Mal Uso del activo queda Resuelta al finalizar mantenimiento.
-- Verificar historial con costo.
-- php artisan test
+Para que sirve el checkbox preventivo:
+- Sirve para marcar que el trabajo no fue por una falla urgente, sino por preparacion.
+- Por ejemplo:
+  antes de una temporada alta,
+  despues de detectar alta demanda,
+  o como revision preventiva.
+- Tambien se usa en el informe de baja/adquisicion para saber cuanto se ha gastado en mantenimiento preventivo.
 
-8. Base de datos
+Como probar:
+- Entrar a /mantenimiento.
+- Registrar un mantenimiento y marcar el checkbox preventivo.
+- Revisar el historial.
+- Debe aparecer la etiqueta Preventivo.
+
+
+9. Informe de baja y adquisicion
+
+Que se hizo:
+- El sistema recomienda revisar compra o reemplazo cuando:
+  el costo acumulado de reparaciones/mantenimientos supera 60% del valor original,
+  o la frecuencia de fallas es alta.
+- Se agrupan activos parecidos por modelo o referencia.
+- Se suman:
+  costos de reparacion de prestamos,
+  costos de mantenimiento,
+  costos de mantenimiento preventivo.
+- En /mantenimiento aparece el informe de Baja y Adquisicion cuando hay alertas pendientes.
+- El informe muestra:
+  modelo o referencia,
+  categoria,
+  costo acumulado,
+  porcentaje contra valor original,
+  fallas recientes,
+  costo preventivo,
+  dictamen.
+- El sistema no da de baja automaticamente. Solo recomienda.
+
+Como probar:
+- Crear un activo con valor original.
+- Registrar danos con costo de reparacion.
+- Registrar mantenimientos con costo.
+- Al superar 60% del valor original, revisar dashboard o /mantenimiento.
+- Debe aparecer el informe de Baja y Adquisicion.
+
+
+10. Base de datos
+
 Migraciones nuevas que deben aplicarse:
 - database/migrations/2026_05_18_000001_agregar_alertas_operativas_y_estados_a_activos.php
 - database/migrations/2026_05_18_000002_create_temporadas_base_table.php
@@ -159,7 +274,7 @@ Migraciones nuevas que deben aplicarse:
 Comando:
 php artisan migrate
 
-Tablas/campos principales agregados:
+Tablas y campos principales:
 - alertas_operativas
 - temporadas_base
 - activos.valor_original
@@ -171,26 +286,63 @@ Tablas/campos principales agregados:
 - mantenimientos.costo_servicio
 - mantenimientos.es_preventivo
 
-9. Archivos nuevos importantes
+
+11. Archivos importantes
+
 - app/Models/AlertaOperativa.php
 - app/Services/AlertasOperativasService.php
+- resources/views/temporadas_base.blade.php
+- demo_temporada_alta_incremento.sql
 - lang/es/auth.php
 - lang/es/validation.php
 - database/migrations/2026_05_18_000001_agregar_alertas_operativas_y_estados_a_activos.php
 - database/migrations/2026_05_18_000002_create_temporadas_base_table.php
 - database/migrations/2026_05_18_000003_agregar_modelo_y_costos_mantenimiento.php
 
-10. Verificacion general recomendada
+
+12. Pruebas automatizadas
+
+Comando general:
+php artisan test
+
+Resultado esperado al momento de este resumen:
+47 pruebas correctas.
+
+Pruebas cubiertas:
+- Autenticacion.
+- Perfil.
+- Inventario.
+- Prestamos.
+- Devoluciones.
+- Alertas por danos.
+- Alertas por temporada.
+- Alertas por incremento historico.
+- Alta y edicion de temporadas.
+- Mantenimiento preventivo.
+- Informe de baja y adquisicion.
+
+
+13. Verificacion rapida recomendada
+
 Ejecutar:
 php artisan optimize:clear
 php artisan migrate
 php artisan test
 
-11. Comandos para subir a Git en otra rama
+Revisar en navegador:
+- /dashboard
+- /temporadas-base
+- /mantenimiento
+- /prestamos-activos
+- /inventario
+
+
+14. Comandos para subir a Git en otra rama
+
 Revisar estado:
 git status
 
-Crear rama nueva desde el estado actual:
+Crear rama nueva:
 git switch -c mejoras-alertas-inventario
 
 Agregar cambios:
@@ -199,13 +351,7 @@ git add .
 Confirmar commit:
 git commit -m "Agrega alertas operativas y mejoras de inventario"
 
-Subir rama al repo principal:
-git push -u origin mejoras-alertas-inventario
-
-Si la rama ya existe localmente:
-git switch mejoras-alertas-inventario
-git add .
-git commit -m "Agrega alertas operativas y mejoras de inventario"
+Subir rama:
 git push -u origin mejoras-alertas-inventario
 
 Repositorio remoto detectado:

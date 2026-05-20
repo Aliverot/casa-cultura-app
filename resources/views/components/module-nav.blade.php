@@ -7,6 +7,7 @@
         ['key' => 'prestamos', 'label' => 'Nuevo Prestamo', 'route' => route('prestamos.create')],
         ['key' => 'devoluciones', 'label' => 'Devoluciones / Multas', 'route' => route('prestamos.activos')],
         ['key' => 'mantenimiento', 'label' => 'Mantenimiento', 'route' => route('mantenimientos.index')],
+        ['key' => 'temporadas', 'label' => 'Temporadas', 'route' => route('temporadas-base.index')],
         ['key' => 'historial', 'label' => 'Historial', 'route' => route('prestamos.historial')],
     ];
 @endphp

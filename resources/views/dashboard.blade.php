@@ -46,6 +46,7 @@
                                 [$alertaBorde, $alertaFondo, $alertaTexto, $alertaCaja] = match ($alerta->tipo) {
                                     'Fragilidad/Mal Uso' => ['border-red-100', 'bg-red-50', 'text-red-700', 'border-red-200'],
                                     'Preparacion de Temporada' => ['border-blue-100', 'bg-blue-50', 'text-blue-700', 'border-blue-200'],
+                                    'Incremento Historico de Prestamos' => ['border-green-100', 'bg-green-50', 'text-green-700', 'border-green-200'],
                                     'Baja y Adquisicion' => ['border-amber-100', 'bg-amber-50', 'text-amber-700', 'border-amber-200'],
                                     default => ['border-slate-100', 'bg-slate-50', 'text-slate-700', 'border-slate-200'],
                                 };
@@ -81,7 +82,7 @@
                                         @if (! empty($alerta->datos['temporada_base']))
                                             <p class="mt-1 font-bold text-gray-900">{{ $alerta->datos['temporada_base']['nombre'] }}: {{ $alerta->datos['temporada_base']['rango'] }}</p>
                                         @else
-                                            <p class="mt-1 font-bold text-gray-900">Incremento reciente: {{ $alerta->datos['incremento_porcentaje'] ?? 0 }}%</p>
+                                            <p class="mt-1 font-bold text-gray-900">Sin calendario base asociado.</p>
                                         @endif
                                         @if (! empty($alerta->datos['recursos']))
                                             <div class="mt-3 space-y-2">
@@ -90,6 +91,54 @@
                                                     <div class="rounded-lg bg-blue-50 px-3 py-2">
                                                         <p class="font-black text-blue-900">{{ $recurso['nombre'] }}</p>
                                                         <p class="text-xs text-blue-700">{{ $recurso['categoria'] }} - {{ $recurso['total_prestamos'] }} prestamos</p>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </div>
+                                @elseif ($alerta->tipo === 'Incremento Historico de Prestamos' && is_array($alerta->datos))
+                                    <div class="mt-4 rounded-xl bg-white p-3 text-sm">
+                                        <p class="text-xs font-black uppercase tracking-widest text-gray-400">Comparacion historica</p>
+                                        <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                            <div class="rounded-lg bg-green-50 px-3 py-2">
+                                                <p class="text-xs font-black uppercase tracking-widest text-green-500">Periodo anterior</p>
+                                                <p class="mt-1 font-black text-green-900">{{ $alerta->datos['prestamos_anteriores'] ?? 0 }} prestamos</p>
+                                                @if (! empty($alerta->datos['periodo_anterior']))
+                                                    <p class="text-xs text-green-700">{{ $alerta->datos['periodo_anterior']['inicio'] }} a {{ $alerta->datos['periodo_anterior']['fin'] }}</p>
+                                                @endif
+                                            </div>
+                                            <div class="rounded-lg bg-green-50 px-3 py-2">
+                                                <p class="text-xs font-black uppercase tracking-widest text-green-500">Periodo reciente</p>
+                                                <p class="mt-1 font-black text-green-900">{{ $alerta->datos['prestamos_actuales'] ?? 0 }} prestamos</p>
+                                                @if (! empty($alerta->datos['periodo_actual']))
+                                                    <p class="text-xs text-green-700">{{ $alerta->datos['periodo_actual']['inicio'] }} a {{ $alerta->datos['periodo_actual']['fin'] }}</p>
+                                                @endif
+                                            </div>
+                                            <div class="rounded-lg bg-green-50 px-3 py-2">
+                                                <p class="text-xs font-black uppercase tracking-widest text-green-500">Diferencia</p>
+                                                <p class="mt-1 font-black text-green-900">{{ $alerta->datos['diferencia_prestamos'] ?? 0 }} prestamos</p>
+                                            </div>
+                                            <div class="rounded-lg bg-green-50 px-3 py-2">
+                                                <p class="text-xs font-black uppercase tracking-widest text-green-500">Incremento</p>
+                                                <p class="mt-1 font-black text-green-900">{{ $alerta->datos['incremento_porcentaje'] ?? 0 }}%</p>
+                                            </div>
+                                            <div class="rounded-lg bg-green-50 px-3 py-2">
+                                                <p class="text-xs font-black uppercase tracking-widest text-green-500">Factor</p>
+                                                <p class="mt-1 font-black text-green-900">{{ $alerta->datos['factor_crecimiento'] ?? 0 }}x</p>
+                                            </div>
+                                            <div class="rounded-lg bg-green-50 px-3 py-2">
+                                                <p class="text-xs font-black uppercase tracking-widest text-green-500">Regla</p>
+                                                <p class="mt-1 font-black text-green-900">{{ $alerta->datos['umbral_incremento'] ?? 25 }}% minimo</p>
+                                                <p class="text-xs text-green-700">Muestra minima: {{ $alerta->datos['minimo_prestamos_anteriores'] ?? 2 }} anteriores y {{ $alerta->datos['minimo_prestamos_actuales'] ?? 3 }} recientes</p>
+                                            </div>
+                                        </div>
+                                        @if (! empty($alerta->datos['recursos']))
+                                            <div class="mt-3 space-y-2">
+                                                <p class="text-xs font-black uppercase tracking-widest text-gray-400">Recursos sugeridos (top {{ $alerta->datos['limite_recursos'] ?? 5 }})</p>
+                                                @foreach ($alerta->datos['recursos'] as $recurso)
+                                                    <div class="rounded-lg bg-green-50 px-3 py-2">
+                                                        <p class="font-black text-green-900">{{ $recurso['nombre'] }}</p>
+                                                        <p class="text-xs text-green-700">{{ $recurso['categoria'] }} - {{ $recurso['total_prestamos'] }} prestamos</p>
                                                     </div>
                                                 @endforeach
                                             </div>
@@ -141,6 +190,12 @@
                             <span class="text-4xl mb-3">Servicio</span>
                             <p class="font-black text-amber-900 uppercase tracking-widest text-sm">Mantenimiento</p>
                             <p class="text-xs text-amber-700 mt-1">Atender reparaciones y liberar equipo</p>
+                        </a>
+
+                        <a href="{{ route('temporadas-base.index') }}" class="flex flex-col items-center p-6 bg-blue-50 rounded-2xl border border-blue-100 hover:bg-blue-100 hover:scale-105 hover:shadow-md transition transform text-center">
+                            <span class="text-4xl mb-3">Calendario</span>
+                            <p class="font-black text-blue-900 uppercase tracking-widest text-sm">Fechas base</p>
+                            <p class="text-xs text-blue-700 mt-1">Administrar temporadas y alertas preventivas</p>
                         </a>
                     </div>
                 </section>

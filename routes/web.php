@@ -7,6 +7,7 @@ use App\Http\Controllers\ProfileController;
 use App\Models\Activo;
 use App\Models\AlertaOperativa;
 use App\Services\AlertasOperativasService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
@@ -72,6 +73,90 @@ Route::middleware('auth')->group(function () {
     Route::get('/mantenimiento', [MantenimientoController::class, 'index'])->name('mantenimientos.index');
     Route::post('/mantenimiento', [MantenimientoController::class, 'store'])->name('mantenimiento.store');
     Route::post('/mantenimientos/guardar', [MantenimientoController::class, 'store'])->name('mantenimientos.store');
+
+    Route::get('/temporadas-base', function () {
+        $temporadas = DB::table('temporadas_base')
+            ->orderBy('fecha_inicio')
+            ->orderBy('nombre')
+            ->get();
+
+        return view('temporadas_base', compact('temporadas'));
+    })->name('temporadas-base.index');
+
+    Route::post('/temporadas-base', function (Request $request, AlertasOperativasService $alertas) {
+        $data = $request->validate([
+            'nombre' => 'required|string|max:255|unique:temporadas_base,nombre',
+            'fecha_inicio' => 'required|date_format:m-d',
+            'fecha_fin' => 'required|date_format:m-d',
+            'dias_anticipacion' => 'required|integer|min:0|max:365',
+            'activa' => 'nullable|boolean',
+        ]);
+
+        DB::table('temporadas_base')->insert([
+            'nombre' => trim($data['nombre']),
+            'fecha_inicio' => $data['fecha_inicio'],
+            'fecha_fin' => $data['fecha_fin'],
+            'dias_anticipacion' => (int) $data['dias_anticipacion'],
+            'activa' => $request->boolean('activa'),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $alertas->registrarTemporadaSiAplica();
+
+        return redirect()->route('temporadas-base.index')->with('success', 'Fecha de temporada agregada correctamente.');
+    })->name('temporadas-base.store');
+
+    Route::patch('/temporadas-base/{id_temporada}', function ($id_temporada, Request $request, AlertasOperativasService $alertas) {
+        $temporada = DB::table('temporadas_base')->where('id_temporada', $id_temporada)->first();
+        abort_if(! $temporada, 404);
+
+        $data = $request->validate([
+            'nombre' => 'required|string|max:255|unique:temporadas_base,nombre,'.$id_temporada.',id_temporada',
+            'fecha_inicio' => 'required|date_format:m-d',
+            'fecha_fin' => 'required|date_format:m-d',
+            'dias_anticipacion' => 'required|integer|min:0|max:365',
+            'activa' => 'nullable|boolean',
+        ]);
+
+        DB::table('temporadas_base')
+            ->where('id_temporada', $id_temporada)
+            ->update([
+                'nombre' => trim($data['nombre']),
+                'fecha_inicio' => $data['fecha_inicio'],
+                'fecha_fin' => $data['fecha_fin'],
+                'dias_anticipacion' => (int) $data['dias_anticipacion'],
+                'activa' => $request->boolean('activa'),
+                'updated_at' => now(),
+            ]);
+
+        $alertas->registrarTemporadaSiAplica();
+
+        return redirect()->route('temporadas-base.index')->with('success', 'Fecha de temporada actualizada correctamente.');
+    })->name('temporadas-base.update');
+
+    Route::post('/temporadas-base/{id_temporada}/estado', function ($id_temporada, AlertasOperativasService $alertas) {
+        $temporada = DB::table('temporadas_base')->where('id_temporada', $id_temporada)->first();
+        abort_if(! $temporada, 404);
+
+        DB::table('temporadas_base')
+            ->where('id_temporada', $id_temporada)
+            ->update([
+                'activa' => ! (bool) $temporada->activa,
+                'updated_at' => now(),
+            ]);
+
+        $alertas->registrarTemporadaSiAplica();
+
+        return back()->with('success', 'Estado de temporada actualizado.');
+    })->name('temporadas-base.estado');
+
+    Route::post('/temporadas-base/precargar', function (AlertasOperativasService $alertas) {
+        $total = $alertas->precargarTemporadasBase();
+        $alertas->registrarTemporadaSiAplica();
+
+        return redirect()->route('temporadas-base.index')->with('success', "Fechas base de temporada actualizadas: {$total} registros.");
+    })->name('temporadas-base.precargar');
 
     Route::post('/alertas/{id_alerta}/resolver', function ($id_alerta) {
         $alerta = AlertaOperativa::findOrFail($id_alerta);

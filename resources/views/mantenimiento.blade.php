@@ -103,7 +103,7 @@
 
                         <label class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 p-4">
                             <input type="checkbox" name="es_preventivo" value="1" class="rounded border-gray-300 text-cultura-600 focus:ring-cultura-500" @checked(old('es_preventivo'))>
-                            <span class="text-sm text-gray-700">Registrar como mantenimiento preventivo por temporada o alta demanda.</span>
+                            <span class="text-sm text-gray-700">Mantenimiento preventivo por temporada o alta demanda.</span>
                         </label>
 
                         <button type="submit" class="w-full rounded-xl bg-cultura-600 py-4 text-sm font-black uppercase tracking-widest text-white shadow-lg transition hover:bg-cultura-700">
@@ -125,6 +125,7 @@
                             @forelse ($activosEnMantenimiento as $item)
                                 @php
                                     $ultimoServicio = $item->mantenimientos->sortByDesc('fecha_servicio')->first();
+                                    $ultimoIncidente = $item->detallesPrestamo->sortByDesc('fecha_devolucion_real')->first();
                                 @endphp
                                 <div class="rounded-2xl border border-red-200 bg-red-50 p-5">
                                     <div class="flex items-start justify-between gap-4">
@@ -137,6 +138,27 @@
                                             {{ number_format($item->horas_uso, 2) }} h
                                         </span>
                                     </div>
+
+                                    @if ($ultimoIncidente)
+                                        <div class="mt-4 rounded-xl border border-red-100 bg-white p-4">
+                                            <p class="text-xs font-black uppercase tracking-widest text-gray-400">Motivo de reparacion</p>
+                                            <p class="mt-2 text-sm font-bold text-gray-900">{{ $ultimoIncidente->prestamo?->condiciones_devolucion ?: 'Sin condiciones de retorno registradas' }}</p>
+                                            <div class="mt-3 grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
+                                                <div>
+                                                    <p class="text-xs font-black uppercase tracking-widest text-gray-400">Contexto</p>
+                                                    <p class="mt-1 text-gray-700">{{ $ultimoIncidente->contexto_incidente ?: 'Sin contexto registrado' }}</p>
+                                                </div>
+                                                <div>
+                                                    <p class="text-xs font-black uppercase tracking-widest text-gray-400">Entorno</p>
+                                                    <p class="mt-1 text-gray-700">{{ $ultimoIncidente->entorno_uso ?: 'Sin entorno registrado' }}</p>
+                                                </div>
+                                                <div class="md:col-span-2">
+                                                    <p class="text-xs font-black uppercase tracking-widest text-gray-400">Accesorios de proteccion</p>
+                                                    <p class="mt-1 text-gray-700">{{ $ultimoIncidente->accesorios_proteccion ?: 'Sin accesorios registrados' }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
 
                                     @if ($ultimoServicio)
                                         <div class="mt-4 rounded-xl border border-red-100 bg-white p-4">
@@ -206,13 +228,67 @@
                                 <tr>
                                     <td class="py-4 text-sm text-gray-600">{{ $registro->fecha_servicio->format('d/m/Y H:i') }}</td>
                                     <td class="py-4 font-bold text-gray-900">{{ $registro->activo?->nombre ?? 'Instrumento eliminado' }}</td>
-                                    <td class="py-4 text-sm font-semibold text-gray-800">{{ $registro->tipo }}</td>
+                                    <td class="py-4 text-sm font-semibold text-gray-800">
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <span>{{ $registro->tipo }}</span>
+                                            @if ($registro->es_preventivo)
+                                                <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-black uppercase tracking-widest text-green-700">Preventivo</span>
+                                            @endif
+                                        </div>
+                                    </td>
                                     <td class="py-4 text-sm text-gray-600">${{ number_format((float) $registro->costo_servicio, 2) }}</td>
                                     <td class="py-4 text-sm text-gray-600">{{ $registro->observaciones ?: 'Sin observaciones' }}</td>
                                 </tr>
                             @empty
                                 <tr>
                                     <td colspan="5" class="py-10 text-center text-gray-400">Todavia no hay mantenimientos registrados.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="module-card mt-8">
+                <h3 class="border-b border-gray-100 pb-4 text-2xl font-black uppercase tracking-tight text-gray-900">
+                    Informe de Baja y Adquisicion
+                </h3>
+
+                <div class="mt-6 overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="border-b-2 border-gray-100 text-xs uppercase tracking-widest text-gray-400">
+                                <th class="pb-4">Modelo / Referencia</th>
+                                <th class="pb-4">Categoria</th>
+                                <th class="pb-4">Costo acumulado</th>
+                                <th class="pb-4">% vs valor original</th>
+                                <th class="pb-4">Fallas recientes</th>
+                                <th class="pb-4">Dictamen</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @forelse ($informesBajaAdquisicion as $informe)
+                                @php
+                                    $datos = is_array($informe->datos) ? $informe->datos : [];
+                                    $valorOriginal = (float) ($datos['valor_original'] ?? 0);
+                                    $costoTotal = (float) ($datos['costo_reparaciones'] ?? 0);
+                                    $porcentajeCosto = $valorOriginal > 0 ? ($costoTotal / $valorOriginal) * 100 : 0;
+                                    $preventivos = (int) ($datos['mantenimientos_preventivos'] ?? 0);
+                                @endphp
+                                <tr>
+                                    <td class="py-4 font-bold text-gray-900">{{ $datos['referencia_modelo'] ?? ($informe->activo?->modelo ?: $informe->activo?->nombre ?? 'Sin referencia') }}</td>
+                                    <td class="py-4 text-sm text-gray-600">{{ $informe->activo?->categoria ?? 'Sin categoria' }}</td>
+                                    <td class="py-4 text-sm text-gray-600">
+                                        <p class="font-black text-gray-900">${{ number_format($costoTotal, 2) }}</p>
+                                        <p class="text-xs text-gray-500">Preventivo: ${{ number_format((float) ($datos['costo_mantenimientos_preventivos'] ?? 0), 2) }} · {{ $preventivos }} servicios</p>
+                                    </td>
+                                    <td class="py-4 text-sm font-black text-gray-900">{{ number_format($porcentajeCosto, 1) }}%</td>
+                                    <td class="py-4 text-sm text-gray-600">{{ $datos['fallas'] ?? 0 }} en {{ $datos['periodo_dias'] ?? 365 }} dias</td>
+                                    <td class="py-4 text-sm text-gray-700">{{ $informe->descripcion }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="py-10 text-center text-gray-400">No hay modelos que ameriten reemplazo con los criterios actuales.</td>
                                 </tr>
                             @endforelse
                         </tbody>

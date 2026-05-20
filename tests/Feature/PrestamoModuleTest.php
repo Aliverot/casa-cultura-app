@@ -229,6 +229,14 @@ it('requires incident details and creates a fragility alert after recurrent dama
         'entorno_uso' => 'Transporte',
         'accesorios_proteccion' => 'La funda venia abierta.',
     ]);
+
+    $this->actingAs($user)->get(route('prestamos.historial'))
+        ->assertOk()
+        ->assertSee('Condiciones de retorno')
+        ->assertSee('Regresa con una fisura.')
+        ->assertSee('Se golpeo durante el traslado.')
+        ->assertSee('Transporte')
+        ->assertSee('La funda venia abierta.');
 });
 
 it('creates a replacement report when repairs exceed the configured value limit', function () {

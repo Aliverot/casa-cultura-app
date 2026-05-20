@@ -73,7 +73,17 @@
                                         ">
                                             {!! $estadoRetorno !!}
                                         </span>
-                                        <p class="text-xs text-gray-500 mt-2">{{ $log->prestamo->condiciones_devolucion }}</p>
+                                        <div class="mt-3 rounded-xl border border-gray-100 bg-white p-3">
+                                            <p class="text-xs font-black uppercase tracking-widest text-gray-400">Condiciones de retorno</p>
+                                            <p class="mt-1 text-sm text-gray-700">{{ $log->prestamo->condiciones_devolucion ?: 'Sin condiciones registradas' }}</p>
+                                            @if ($esIncidenciaMayor)
+                                                <div class="mt-3 space-y-2 text-xs text-gray-600">
+                                                    <p><span class="font-black uppercase tracking-widest text-gray-400">Contexto:</span> {{ $log->contexto_incidente ?: 'Sin contexto registrado' }}</p>
+                                                    <p><span class="font-black uppercase tracking-widest text-gray-400">Entorno:</span> {{ $log->entorno_uso ?: 'Sin entorno registrado' }}</p>
+                                                    <p><span class="font-black uppercase tracking-widest text-gray-400">Proteccion:</span> {{ $log->accesorios_proteccion ?: 'Sin accesorios registrados' }}</p>
+                                                </div>
+                                            @endif
+                                        </div>
                                     </td>
 
                                     <td class="p-4">
