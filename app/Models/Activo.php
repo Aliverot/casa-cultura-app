@@ -47,4 +47,17 @@ class Activo extends Model
     {
         return $this->hasMany(AlertaOperativa::class, 'id_activo', 'id_activo');
     }
+
+    public static function etiquetaEstadoCondicion(?string $estado): string
+    {
+        return match ($estado) {
+            'En reparacion', 'En reparación' => 'En reparación',
+            default => $estado ?: 'Excelente',
+        };
+    }
+
+    public function estadoCondicionLegible(): string
+    {
+        return self::etiquetaEstadoCondicion($this->estado_condicion);
+    }
 }

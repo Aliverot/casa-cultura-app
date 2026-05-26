@@ -6,7 +6,7 @@
                     <a href="{{ route('dashboard') }}">
                         <x-application-logo class="block h-9 w-auto fill-current text-white" />
                     </a>
-                    <span class="ml-3 hidden text-lg font-bold text-white md:block">Casa de la Cultura Cuilapam</span>
+                    <span class="ml-3 hidden text-lg font-bold text-white md:block">Casa de la Cultura Cuilápam</span>
                 </div>
             </div>
 
@@ -32,7 +32,7 @@
                             @csrf
                             <x-dropdown-link :href="route('logout')"
                                 onclick="event.preventDefault(); this.closest('form').submit();">
-                                {{ __('Cerrar Sesión') }}
+                                {{ __('Cerrar sesión') }}
                             </x-dropdown-link>
                         </form>
                     </x-slot>
@@ -64,7 +64,7 @@
                     @csrf
                     <x-responsive-nav-link :href="route('logout')" class="text-white"
                         onclick="event.preventDefault(); this.closest('form').submit();">
-                        {{ __('Cerrar Sesión') }}
+                        {{ __('Cerrar sesión') }}
                     </x-responsive-nav-link>
                 </form>
             </div>

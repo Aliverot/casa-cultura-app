@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Modificar Articulo del Inventario') }}
+            {{ __('Modificar artículo del inventario') }}
         </h2>
     </x-slot>
 
@@ -11,7 +11,7 @@
 
             @if ($errors->any())
                 <div class="mb-8 rounded-r border-l-4 border-red-500 bg-red-100 p-4 text-red-800 shadow-sm">
-                    <p class="mb-2 font-black uppercase tracking-widest">No se pudo actualizar el articulo</p>
+                    <p class="mb-2 font-black uppercase tracking-widest">No se pudo actualizar el artículo</p>
                     <ul class="list-disc list-inside text-sm font-medium">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
@@ -22,9 +22,9 @@
 
             <div class="module-card overflow-hidden">
                 <div class="mb-6 border-b border-gray-100 pb-4">
-                    <p class="text-xs font-black uppercase tracking-widest text-gray-500">Articulo</p>
+                    <p class="text-xs font-black uppercase tracking-widest text-gray-500">Artículo</p>
                     <h3 class="mt-2 text-2xl font-black text-gray-900">{{ $activo->nombre }}</h3>
-                    <p class="mt-1 text-sm text-gray-500">Codigo QR: {{ $activo->codigo_qr }}</p>
+                    <p class="mt-1 text-sm text-gray-500">Código QR: {{ $activo->codigo_qr }}</p>
                 </div>
 
                 <form action="{{ route('activos.update', $activo->id_activo) }}" method="POST" class="space-y-6">
@@ -53,7 +53,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Categoria</label>
+                        <label class="block text-sm font-medium text-gray-700">Categoría</label>
                         <select name="categoria" required class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-cultura-500 focus:ring-cultura-500">
                             <option value="Instrumentos de Cuerda" @selected(old('categoria', $activo->categoria) === 'Instrumentos de Cuerda')>Instrumentos de Cuerda</option>
                             <option value="Instrumentos de Viento" @selected(old('categoria', $activo->categoria) === 'Instrumentos de Viento')>Instrumentos de Viento</option>
@@ -64,7 +64,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Limite de horas para mantenimiento</label>
+                        <label class="block text-sm font-medium text-gray-700">Límite de horas para mantenimiento</label>
                         <input
                             type="number"
                             name="limite_mantenimiento"
@@ -79,14 +79,18 @@
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Valor original aproximado</label>
-                            <input
-                                type="number"
-                                name="valor_original"
-                                value="{{ old('valor_original', $activo->valor_original) }}"
-                                min="0"
-                                step="0.01"
-                                class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-cultura-500 focus:ring-cultura-500"
-                            >
+                            <div class="relative mt-1">
+                                <span class="absolute left-4 top-3 text-gray-500">$</span>
+                                <input
+                                    type="number"
+                                    name="valor_original"
+                                    value="{{ old('valor_original', $activo->valor_original) }}"
+                                    min="0"
+                                    step="0.01"
+                                    class="block w-full rounded-xl border-gray-300 pl-9 pr-20 shadow-sm focus:border-cultura-500 focus:ring-cultura-500"
+                                >
+                                <span class="absolute right-4 top-3 text-xs font-black uppercase tracking-widest text-gray-500">MXN</span>
+                            </div>
                         </div>
 
                         <div>
@@ -94,7 +98,7 @@
                             <select name="estado_condicion" required class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-cultura-500 focus:ring-cultura-500">
                                 @foreach ($estadosCondicion as $estadoCondicion)
                                     <option value="{{ $estadoCondicion }}" @selected(old('estado_condicion', $activo->estado_condicion) === $estadoCondicion)>
-                                        {{ $estadoCondicion }}
+                                        {{ \App\Models\Activo::etiquetaEstadoCondicion($estadoCondicion) }}
                                     </option>
                                 @endforeach
                             </select>
@@ -104,11 +108,11 @@
                     <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4">
                         <p class="text-xs font-black uppercase tracking-widest text-gray-500">Estado actual</p>
                         <p class="mt-2 text-base font-bold text-gray-900">{{ $activo->estado_actual }}</p>
-                        <p class="mt-1 text-sm text-gray-600">Condicion operativa: <span class="font-bold text-gray-900">{{ $activo->estado_condicion ?? 'Excelente' }}</span></p>
+                        <p class="mt-1 text-sm text-gray-600">Condición operativa: <span class="font-bold text-gray-900">{{ $activo->estadoCondicionLegible() }}</span></p>
                         @if ($activo->estado_actual === 'Baja')
-                            <p class="mt-1 text-sm text-gray-600">Este articulo ya fue dado de baja. Solo se permiten correcciones de registro y consulta de historial.</p>
+                            <p class="mt-1 text-sm text-gray-600">Este artículo ya fue dado de baja. Solo se permiten correcciones de registro y consulta de historial.</p>
                         @else
-                            <p class="mt-1 text-sm text-gray-600">Las modificaciones del articulo no alteran su historial de prestamos ni mantenimientos.</p>
+                            <p class="mt-1 text-sm text-gray-600">Las modificaciones del artículo no alteran su historial de préstamos ni mantenimientos.</p>
                         @endif
                     </div>
 
@@ -125,8 +129,8 @@
                         @csrf
                         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <div>
-                                <p class="text-sm font-black text-red-700">Dar de baja articulo</p>
-                                <p class="text-sm text-gray-500">Esta accion conserva el historial y evita que el instrumento vuelva a prestarse.</p>
+                                <p class="text-sm font-black text-red-700">Dar de baja artículo</p>
+                                <p class="text-sm text-gray-500">Esta acción conserva el historial y evita que el instrumento vuelva a prestarse.</p>
                             </div>
                             <button type="submit" class="rounded-xl border border-red-200 bg-red-50 px-5 py-3 text-sm font-black uppercase tracking-widest text-red-700 transition hover:bg-red-100">
                                 Dar de baja

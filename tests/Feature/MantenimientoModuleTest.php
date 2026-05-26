@@ -116,7 +116,7 @@ it('shows return incident details for instruments in maintenance', function () {
 
     $this->actingAs($user)->get(route('mantenimientos.index'))
         ->assertOk()
-        ->assertSee('Motivo de reparacion')
+        ->assertSee('Motivo de reparación')
         ->assertSee('Regresa con abolladura en la boquilla.')
         ->assertSee('Se cayo durante el traslado al salon.')
         ->assertSee('Traslado interno')
@@ -284,7 +284,7 @@ it('preloads mexican base seasons without showing the test button in the calenda
 
     $this->actingAs($user)->get(route('temporadas-base.index'))
         ->assertOk()
-        ->assertSee('Agregar Temporada')
+        ->assertSee('Agregar temporada')
         ->assertDontSee('Cargar fechas mexicanas');
 
     $this->actingAs($user)->post(route('temporadas-base.precargar'))
@@ -294,7 +294,7 @@ it('preloads mexican base seasons without showing the test button in the calenda
     expect(DB::table('temporadas_base')->count())->toBe(8);
 
     $this->assertDatabaseHas('temporadas_base', [
-        'nombre' => 'Independencia de Mexico',
+        'nombre' => 'Independencia de México',
         'fecha_inicio' => '09-16',
         'fecha_fin' => '09-16',
         'dias_anticipacion' => 30,
@@ -405,7 +405,7 @@ it('shows pending replacement reports in maintenance', function () {
     AlertaOperativa::create([
         'id_activo' => $activo->id_activo,
         'tipo' => 'Baja y Adquisicion',
-        'titulo' => 'Informe de Baja y Adquisicion',
+        'titulo' => 'Informe de baja y adquisición',
         'descripcion' => 'Se recomienda evaluar la compra de nuevas unidades de TR-2026.',
         'estado' => 'Pendiente',
         'datos' => [
@@ -421,8 +421,8 @@ it('shows pending replacement reports in maintenance', function () {
 
     $this->actingAs($user)->get(route('mantenimientos.index'))
         ->assertOk()
-        ->assertSee('Informe de Baja y Adquisicion')
+        ->assertSee('Informe de baja y adquisición')
         ->assertSee('TR-2026')
         ->assertSee('75.0%')
-        ->assertSee('Preventivo: $150.00');
+        ->assertSee('Preventivo: $150.00 MXN');
 });

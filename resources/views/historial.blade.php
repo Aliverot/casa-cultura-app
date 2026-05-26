@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Bitacora General de Prestamos') }}
+            {{ __('Bitácora general de préstamos') }}
         </h2>
     </x-slot>
 
@@ -10,12 +10,12 @@
             <x-module-nav current="historial" />
 
             <div class="module-card">
-                <h3 class="text-2xl font-black text-gray-900 mb-6">Registro historico de prestamos</h3>
+                <h3 class="text-2xl font-black text-gray-900 mb-6">Registro histórico de préstamos</h3>
 
                 <div class="mb-6 rounded-2xl border border-cultura-100 bg-cultura-50 p-4 text-sm text-cultura-900">
-                    <p><span class="font-black">Prestamo registrado:</span> momento en que el instrumento salio.</p>
-                    <p class="mt-1"><span class="font-black">Fecha limite de devolucion:</span> cuando debia regresar.</p>
-                    <p class="mt-1"><span class="font-black">Devolucion recibida:</span> cuando realmente fue entregado.</p>
+                    <p><span class="font-black">Préstamo registrado:</span> momento en que el instrumento salió.</p>
+                    <p class="mt-1"><span class="font-black">Fecha límite de devolución:</span> cuando debía regresar.</p>
+                    <p class="mt-1"><span class="font-black">Devolución recibida:</span> cuando realmente fue entregado.</p>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -38,17 +38,17 @@
                                     $real = $log->fecha_devolucion_real;
                                     $horasPrestamo = round($salida->diffInSeconds($real) / 3600, 2);
                                     $entregaATiempo = $real->lessThanOrEqualTo($prevista);
-                                    $estadoRetorno = in_array($log->estado_retorno, ['Danado', 'Dañado', 'DaÃ±ado'], true)
-                                        ? 'Da&ntilde;ado'
-                                        : ($log->estado_retorno === 'Perdida total' ? 'P&eacute;rdida total' : $log->estado_retorno);
-                                    $esIncidenciaMayor = in_array($log->estado_retorno, ['Danado', 'Dañado', 'DaÃ±ado', 'Extraviado', 'Perdida total'], true);
+                                    $estadoRetorno = in_array($log->estado_retorno, ['Danado', 'Dañado'], true)
+                                        ? 'Dañado'
+                                        : ($log->estado_retorno === 'Perdida total' ? 'Pérdida total' : $log->estado_retorno);
+                                    $esIncidenciaMayor = in_array($log->estado_retorno, ['Danado', 'Dañado', 'Extraviado', 'Perdida total'], true);
                                 @endphp
 
                                 <tr class="hover:bg-gray-50 transition">
                                     <td class="p-4 text-sm text-gray-600 whitespace-nowrap">
-                                        <p><span class="font-bold text-gray-900">Prestamo registrado:</span> {{ $salida->format('d/m/Y H:i') }}</p>
-                                        <p class="mt-1"><span class="font-bold text-gray-900">Fecha limite:</span> {{ $prevista->format('d/m/Y H:i') }}</p>
-                                        <p class="mt-1"><span class="font-bold text-gray-900">Devolucion recibida:</span> {{ $real->format('d/m/Y H:i') }}</p>
+                                        <p><span class="font-bold text-gray-900">Préstamo registrado:</span> {{ $salida->format('d/m/Y H:i') }}</p>
+                                        <p class="mt-1"><span class="font-bold text-gray-900">Fecha límite:</span> {{ $prevista->format('d/m/Y H:i') }}</p>
+                                        <p class="mt-1"><span class="font-bold text-gray-900">Devolución recibida:</span> {{ $real->format('d/m/Y H:i') }}</p>
                                     </td>
 
                                     <td class="p-4">
@@ -71,7 +71,7 @@
                                                 bg-yellow-100 text-yellow-700
                                             @endif
                                         ">
-                                            {!! $estadoRetorno !!}
+                                            {{ $estadoRetorno }}
                                         </span>
                                         <div class="mt-3 rounded-xl border border-gray-100 bg-white p-3">
                                             <p class="text-xs font-black uppercase tracking-widest text-gray-400">Condiciones de retorno</p>
@@ -80,7 +80,7 @@
                                                 <div class="mt-3 space-y-2 text-xs text-gray-600">
                                                     <p><span class="font-black uppercase tracking-widest text-gray-400">Contexto:</span> {{ $log->contexto_incidente ?: 'Sin contexto registrado' }}</p>
                                                     <p><span class="font-black uppercase tracking-widest text-gray-400">Entorno:</span> {{ $log->entorno_uso ?: 'Sin entorno registrado' }}</p>
-                                                    <p><span class="font-black uppercase tracking-widest text-gray-400">Proteccion:</span> {{ $log->accesorios_proteccion ?: 'Sin accesorios registrados' }}</p>
+                                                    <p><span class="font-black uppercase tracking-widest text-gray-400">Protección:</span> {{ $log->accesorios_proteccion ?: 'Sin accesorios registrados' }}</p>
                                                 </div>
                                             @endif
                                         </div>
@@ -95,7 +95,7 @@
 
                                     <td class="p-4">
                                         @if ((float) $log->prestamo->costo_reparacion > 0)
-                                            <p class="font-black text-red-600">${{ number_format((float) $log->prestamo->costo_reparacion, 2) }}</p>
+                                            <p class="font-black text-red-600">${{ number_format((float) $log->prestamo->costo_reparacion, 2) }} MXN</p>
                                             <p class="text-xs font-bold {{ $log->prestamo->estado_pago === 'Pagado' ? 'text-green-500' : 'text-orange-500' }}">
                                                 {{ $log->prestamo->estado_pago }}
                                             </p>
@@ -107,7 +107,7 @@
                             @empty
                                 <tr>
                                     <td colspan="6" class="p-10 text-center text-gray-400 font-medium text-lg">
-                                        Aun no hay registros en la bitacora.
+                                        Aún no hay registros en la bitácora.
                                     </td>
                                 </tr>
                             @endforelse

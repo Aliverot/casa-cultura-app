@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Gestion de Mantenimiento') }}
+            {{ __('Gestión de mantenimiento') }}
         </h2>
     </x-slot>
 
@@ -64,14 +64,18 @@
                         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                             <div>
                                 <label class="mb-2 block text-xs font-black uppercase tracking-widest text-gray-500">Costo del servicio</label>
-                                <input
-                                    type="number"
-                                    name="costo_servicio"
-                                    value="{{ old('costo_servicio', 0) }}"
-                                    min="0"
-                                    step="0.01"
-                                    class="w-full rounded-xl border-gray-300 bg-white p-4 text-base text-gray-900 shadow-sm focus:ring-2 focus:ring-cultura-500"
-                                >
+                                <div class="relative">
+                                    <span class="absolute left-4 top-4 text-gray-500">$</span>
+                                    <input
+                                        type="number"
+                                        name="costo_servicio"
+                                        value="{{ old('costo_servicio', 0) }}"
+                                        min="0"
+                                        step="0.01"
+                                        class="w-full rounded-xl border-gray-300 bg-white p-4 pl-9 pr-20 text-base text-gray-900 shadow-sm focus:ring-2 focus:ring-cultura-500"
+                                    >
+                                    <span class="absolute right-4 top-4 text-xs font-black uppercase tracking-widest text-gray-500">MXN</span>
+                                </div>
                             </div>
 
                             <div>
@@ -79,7 +83,7 @@
                                 <select name="estado_condicion" required class="w-full rounded-xl border-gray-300 bg-white p-4 text-base text-gray-900 shadow-sm focus:ring-2 focus:ring-cultura-500">
                                     @foreach ($estadosCondicion as $estadoCondicion)
                                         <option value="{{ $estadoCondicion }}" @selected(old('estado_condicion', 'Excelente') === $estadoCondicion)>
-                                            {{ $estadoCondicion }}
+                                            {{ \App\Models\Activo::etiquetaEstadoCondicion($estadoCondicion) }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -92,7 +96,7 @@
                                 name="observaciones"
                                 rows="4"
                                 class="w-full rounded-xl border-gray-300 bg-white p-4 text-base text-gray-900 shadow-sm focus:ring-2 focus:ring-cultura-500"
-                                placeholder="Describe el trabajo realizado, piezas reemplazadas o cualquier observacion relevante."
+                                placeholder="Describe el trabajo realizado, piezas reemplazadas o cualquier observación relevante."
                             >{{ old('observaciones') }}</textarea>
                         </div>
 
@@ -115,7 +119,7 @@
                 <section class="space-y-8">
                     <div class="module-card">
                         <div class="flex items-center justify-between gap-3 border-b border-gray-100 pb-4">
-                            <h3 class="text-2xl font-black uppercase tracking-tight text-gray-900">En Reparacion</h3>
+                            <h3 class="text-2xl font-black uppercase tracking-tight text-gray-900">En reparación</h3>
                             <span class="rounded-full bg-red-100 px-3 py-1 text-xs font-black uppercase tracking-widest text-red-700">
                                 {{ $activosEnMantenimiento->count() }} activos
                             </span>
@@ -132,7 +136,7 @@
                                         <div>
                                             <p class="text-lg font-black text-red-800">{{ $item->nombre }}</p>
                                             <p class="mt-1 text-sm font-bold text-red-700">Estado: {{ $item->estado_actual }}</p>
-                                            <p class="mt-1 text-xs font-bold uppercase tracking-widest text-red-600">Condicion: {{ $item->estado_condicion }}</p>
+                                            <p class="mt-1 text-xs font-bold uppercase tracking-widest text-red-600">Condición: {{ $item->estadoCondicionLegible() }}</p>
                                         </div>
                                         <span class="rounded-full bg-white px-3 py-1 text-xs font-black uppercase tracking-widest text-red-700 shadow-sm">
                                             {{ number_format($item->horas_uso, 2) }} h
@@ -141,7 +145,7 @@
 
                                     @if ($ultimoIncidente)
                                         <div class="mt-4 rounded-xl border border-red-100 bg-white p-4">
-                                            <p class="text-xs font-black uppercase tracking-widest text-gray-400">Motivo de reparacion</p>
+                                            <p class="text-xs font-black uppercase tracking-widest text-gray-400">Motivo de reparación</p>
                                             <p class="mt-2 text-sm font-bold text-gray-900">{{ $ultimoIncidente->prestamo?->condiciones_devolucion ?: 'Sin condiciones de retorno registradas' }}</p>
                                             <div class="mt-3 grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
                                                 <div>
@@ -153,7 +157,7 @@
                                                     <p class="mt-1 text-gray-700">{{ $ultimoIncidente->entorno_uso ?: 'Sin entorno registrado' }}</p>
                                                 </div>
                                                 <div class="md:col-span-2">
-                                                    <p class="text-xs font-black uppercase tracking-widest text-gray-400">Accesorios de proteccion</p>
+                                                    <p class="text-xs font-black uppercase tracking-widest text-gray-400">Accesorios de protección</p>
                                                     <p class="mt-1 text-gray-700">{{ $ultimoIncidente->accesorios_proteccion ?: 'Sin accesorios registrados' }}</p>
                                                 </div>
                                             </div>
@@ -164,7 +168,7 @@
                                         <div class="mt-4 rounded-xl border border-red-100 bg-white p-4">
                                             <p class="text-xs font-black uppercase tracking-widest text-gray-400">Ultima nota registrada</p>
                                             <p class="mt-2 text-sm font-bold text-gray-900">{{ $ultimoServicio->tipo }}</p>
-                                            <p class="mt-1 text-xs text-gray-500">Costo: ${{ number_format((float) $ultimoServicio->costo_servicio, 2) }}</p>
+                                            <p class="mt-1 text-xs text-gray-500">Costo: ${{ number_format((float) $ultimoServicio->costo_servicio, 2) }} MXN</p>
                                             @if ($ultimoServicio->observaciones)
                                                 <p class="mt-1 text-sm text-gray-600">{{ $ultimoServicio->observaciones }}</p>
                                             @endif
@@ -173,7 +177,7 @@
                                 </div>
                             @empty
                                 <div class="rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 py-10 text-center">
-                                    <p class="font-bold text-gray-500">No hay equipos en servicio tecnico en este momento.</p>
+                                    <p class="font-bold text-gray-500">No hay equipos en servicio técnico en este momento.</p>
                                 </div>
                             @endforelse
                         </div>
@@ -236,12 +240,12 @@
                                             @endif
                                         </div>
                                     </td>
-                                    <td class="py-4 text-sm text-gray-600">${{ number_format((float) $registro->costo_servicio, 2) }}</td>
+                                    <td class="py-4 text-sm text-gray-600">${{ number_format((float) $registro->costo_servicio, 2) }} MXN</td>
                                     <td class="py-4 text-sm text-gray-600">{{ $registro->observaciones ?: 'Sin observaciones' }}</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="py-10 text-center text-gray-400">Todavia no hay mantenimientos registrados.</td>
+                                    <td colspan="5" class="py-10 text-center text-gray-400">Todavía no hay mantenimientos registrados.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -251,7 +255,7 @@
 
             <section class="module-card mt-8">
                 <h3 class="border-b border-gray-100 pb-4 text-2xl font-black uppercase tracking-tight text-gray-900">
-                    Informe de Baja y Adquisicion
+                    Informe de baja y adquisición
                 </h3>
 
                 <div class="mt-6 overflow-x-auto">
@@ -259,7 +263,7 @@
                         <thead>
                             <tr class="border-b-2 border-gray-100 text-xs uppercase tracking-widest text-gray-400">
                                 <th class="pb-4">Modelo / Referencia</th>
-                                <th class="pb-4">Categoria</th>
+                                <th class="pb-4">Categoría</th>
                                 <th class="pb-4">Costo acumulado</th>
                                 <th class="pb-4">% vs valor original</th>
                                 <th class="pb-4">Fallas recientes</th>
@@ -277,13 +281,13 @@
                                 @endphp
                                 <tr>
                                     <td class="py-4 font-bold text-gray-900">{{ $datos['referencia_modelo'] ?? ($informe->activo?->modelo ?: $informe->activo?->nombre ?? 'Sin referencia') }}</td>
-                                    <td class="py-4 text-sm text-gray-600">{{ $informe->activo?->categoria ?? 'Sin categoria' }}</td>
+                                    <td class="py-4 text-sm text-gray-600">{{ $informe->activo?->categoria ?? 'Sin categoría' }}</td>
                                     <td class="py-4 text-sm text-gray-600">
-                                        <p class="font-black text-gray-900">${{ number_format($costoTotal, 2) }}</p>
-                                        <p class="text-xs text-gray-500">Preventivo: ${{ number_format((float) ($datos['costo_mantenimientos_preventivos'] ?? 0), 2) }} · {{ $preventivos }} servicios</p>
+                                        <p class="font-black text-gray-900">${{ number_format($costoTotal, 2) }} MXN</p>
+                                        <p class="text-xs text-gray-500">Preventivo: ${{ number_format((float) ($datos['costo_mantenimientos_preventivos'] ?? 0), 2) }} MXN · {{ $preventivos }} servicios</p>
                                     </td>
                                     <td class="py-4 text-sm font-black text-gray-900">{{ number_format($porcentajeCosto, 1) }}%</td>
-                                    <td class="py-4 text-sm text-gray-600">{{ $datos['fallas'] ?? 0 }} en {{ $datos['periodo_dias'] ?? 365 }} dias</td>
+                                    <td class="py-4 text-sm text-gray-600">{{ $datos['fallas'] ?? 0 }} en {{ $datos['periodo_dias'] ?? 365 }} días</td>
                                     <td class="py-4 text-sm text-gray-700">{{ $informe->descripcion }}</td>
                                 </tr>
                             @empty

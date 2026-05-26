@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Centro de Devoluciones y Pagos') }}
+            {{ __('Centro de devoluciones y pagos') }}
         </h2>
     </x-slot>
 
@@ -11,7 +11,7 @@
 
             @if ($errors->any())
                 <div class="mb-8 bg-red-100 border-l-4 border-red-500 text-red-800 p-4 rounded-r shadow-sm">
-                    <p class="font-black uppercase tracking-widest mb-2">No se pudo procesar la devolucion</p>
+                    <p class="font-black uppercase tracking-widest mb-2">No se pudo procesar la devolución</p>
                     <ul class="list-disc list-inside text-sm font-medium">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
@@ -21,7 +21,7 @@
             @endif
 
             <div class="module-card mb-10">
-                <h3 class="text-2xl font-black text-gray-900 mb-6">Prestamos en curso</h3>
+                <h3 class="text-2xl font-black text-gray-900 mb-6">Préstamos en curso</h3>
 
                 <div class="grid grid-cols-1 gap-6">
                     @forelse ($prestamosActivos as $item)
@@ -49,16 +49,16 @@
                                         </div>
 
                                         <div class="bg-white p-4 rounded-xl border border-gray-200">
-                                            <p class="text-xs font-black text-gray-400 uppercase">Devolucion prevista</p>
+                                            <p class="text-xs font-black text-gray-400 uppercase">Devolución prevista</p>
                                             <p class="text-lg font-black text-gray-800 mt-1">{{ $fechaPrevista->format('d/m/Y H:i') }}</p>
                                         </div>
 
                                         <div class="bg-white p-4 rounded-xl border border-gray-200">
-                                            <p class="text-xs font-black text-gray-400 uppercase">Comparacion actual</p>
+                                            <p class="text-xs font-black text-gray-400 uppercase">Comparación actual</p>
                                             <span class="inline-flex mt-2 px-3 py-1 rounded-full text-xs font-black uppercase {{ $estaAtrasado ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700' }}">
                                                 {{ $estaAtrasado ? 'Fuera de tiempo' : 'En tiempo y forma' }}
                                             </span>
-                                            <p class="text-xs text-gray-500 mt-2">La entrega real se registra al confirmar la devolucion.</p>
+                                            <p class="text-xs text-gray-500 mt-2">La entrega real se registra al confirmar la devolución.</p>
                                         </div>
                                     </div>
 
@@ -76,9 +76,9 @@
                                             <label class="text-xs font-black text-gray-500 uppercase">Estado del equipo al volver</label>
                                             <select name="estado_equipo" class="w-full rounded-lg border-gray-300 text-sm p-3 mt-1 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500" data-damage-toggle>
                                                 <option value="Buen estado">Buen estado</option>
-                                                <option value="Danado">Da&ntilde;ado</option>
+                                                <option value="Danado">Dañado</option>
                                                 <option value="Extraviado">Extraviado</option>
-                                                <option value="Perdida total">P&eacute;rdida total</option>
+                                                <option value="Perdida total">Pérdida total</option>
                                             </select>
                                         </div>
 
@@ -89,7 +89,7 @@
                                                 required
                                                 rows="3"
                                                 class="w-full rounded-lg border-gray-300 text-sm p-3 mt-1 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500"
-                                                placeholder="Ej. Regresa limpio, con desgaste normal, o describe el dano encontrado."
+                                                placeholder="Ej. Regresa limpio, con desgaste normal, o describe el daño encontrado."
                                             ></textarea>
                                         </div>
 
@@ -99,7 +99,7 @@
                                                 name="contexto_incidente"
                                                 rows="2"
                                                 class="w-full rounded-lg border-gray-300 text-sm p-3 mt-1 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500"
-                                                placeholder="Como ocurrio el dano"
+                                                placeholder="Cómo ocurrió el daño"
                                                 data-damage-detail
                                             >{{ old('contexto_incidente') }}</textarea>
                                         </div>
@@ -116,7 +116,7 @@
                                         </div>
 
                                         <div>
-                                            <label class="text-xs font-black text-gray-500 uppercase">Accesorios de proteccion</label>
+                                            <label class="text-xs font-black text-gray-500 uppercase">Accesorios de protección</label>
                                             <textarea
                                                 name="accesorios_proteccion"
                                                 rows="2"
@@ -127,38 +127,39 @@
                                         </div>
 
                                         <div>
-                                            <label class="text-xs font-black text-gray-500 uppercase">Costo de reparacion o reposicion</label>
+                                            <label class="text-xs font-black text-gray-500 uppercase">Costo de reparación o reposición</label>
                                             <div class="relative mt-1">
-                                                <span class="absolute left-3 top-3 text-gray-400">$</span>
+                                                <span class="absolute left-3 top-3 text-gray-500">$</span>
                                                 <input
                                                     type="number"
                                                     name="costo_reparacion"
                                                     value="0"
                                                     min="0"
                                                     step="0.01"
-                                                    class="w-full rounded-lg border-gray-300 pl-7 p-3 text-sm bg-white text-gray-900 focus:ring-2 focus:ring-blue-500"
+                                                    class="w-full rounded-lg border-gray-300 p-3 pl-7 pr-16 text-sm bg-white text-gray-900 focus:ring-2 focus:ring-blue-500"
                                                     data-damage-cost
                                                     disabled
                                                 >
+                                                <span class="absolute right-3 top-3 text-xs font-black uppercase tracking-widest text-gray-500">MXN</span>
                                             </div>
-                                            <p class="text-xs text-gray-500 mt-2">Se habilita para da&ntilde;ado, extraviado o p&eacute;rdida total.</p>
+                                            <p class="text-xs text-gray-500 mt-2">Se habilita para dañado, extraviado o pérdida total.</p>
                                         </div>
 
                                         <button type="submit" class="w-full bg-cultura-600 hover:bg-cultura-700 text-white font-black py-3 rounded-xl shadow-md uppercase text-xs tracking-widest">
-                                            Procesar devolucion
+                                            Procesar devolución
                                         </button>
                                     </form>
                                 </div>
                             </div>
                         </div>
                     @empty
-                        <p class="text-center text-gray-400 py-10 font-medium">No hay instrumentos fuera de la institucion actualmente.</p>
+                        <p class="text-center text-gray-400 py-10 font-medium">No hay instrumentos fuera de la institución actualmente.</p>
                     @endforelse
                 </div>
             </div>
 
             <div class="module-card">
-                <h3 class="text-2xl font-black text-gray-900 mb-6">Cobros pendientes por reparacion</h3>
+                <h3 class="text-2xl font-black text-gray-900 mb-6">Cobros pendientes por reparación</h3>
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
@@ -168,25 +169,25 @@
                                 <th class="pb-4">Responsable</th>
                                 <th class="pb-4">Entrega registrada</th>
                                 <th class="pb-4">Monto</th>
-                                <th class="pb-4 text-right">Accion</th>
+                                <th class="pb-4 text-right">Acción</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-50">
                             @forelse ($multasPendientes as $multa)
                                 @php
-                                    $estadoRetorno = in_array($multa->estado_retorno, ['Danado', 'Dañado', 'DaÃ±ado'], true)
-                                        ? 'Da&ntilde;ado'
-                                        : ($multa->estado_retorno === 'Perdida total' ? 'P&eacute;rdida total' : $multa->estado_retorno);
+                                    $estadoRetorno = in_array($multa->estado_retorno, ['Danado', 'Dañado'], true)
+                                        ? 'Dañado'
+                                        : ($multa->estado_retorno === 'Perdida total' ? 'Pérdida total' : $multa->estado_retorno);
                                 @endphp
                                 <tr>
                                     <td class="py-4 font-bold text-gray-900">{{ $multa->activo->nombre }}</td>
                                     <td class="py-4 text-sm text-gray-600">{{ $multa->prestamo->nombre_solicitante }}</td>
                                     <td class="py-4 text-sm text-gray-600">
-                                        <p class="font-semibold">{!! $estadoRetorno !!}</p>
+                                        <p class="font-semibold">{{ $estadoRetorno }}</p>
                                         <p class="text-xs text-gray-500 mt-1">{{ $multa->prestamo->condiciones_devolucion }}</p>
                                     </td>
                                     <td class="py-4">
-                                        <span class="text-red-600 font-black text-lg">${{ number_format((float) $multa->prestamo->costo_reparacion, 2) }}</span>
+                                        <span class="text-red-600 font-black text-lg">${{ number_format((float) $multa->prestamo->costo_reparacion, 2) }} MXN</span>
                                     </td>
                                     <td class="py-4 text-right">
                                         <form action="{{ route('prestamos.liquidar', $multa->prestamo->id_prestamo) }}" method="POST">

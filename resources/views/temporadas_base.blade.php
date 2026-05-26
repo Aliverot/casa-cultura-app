@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Calendario de Temporadas') }}
+            {{ __('Calendario de temporadas') }}
         </h2>
     </x-slot>
 
@@ -23,7 +23,7 @@
             <div class="grid grid-cols-1 gap-8 xl:grid-cols-[0.9fr_1.1fr]">
                 <section class="module-card">
                     <div class="border-b border-gray-100 pb-4">
-                        <h3 class="text-2xl font-black uppercase tracking-tight text-gray-900">Agregar Temporada</h3>
+                        <h3 class="text-2xl font-black uppercase tracking-tight text-gray-900">Agregar temporada</h3>
                         <p class="mt-1 text-sm text-gray-500">Registra una fecha anual para que el sistema prepare mantenimiento preventivo antes de que llegue.</p>
                     </div>
 
@@ -73,7 +73,7 @@
                         </div>
 
                         <div>
-                            <label class="mb-2 block text-xs font-black uppercase tracking-widest text-gray-500">Dias de anticipacion</label>
+                            <label class="mb-2 block text-xs font-black uppercase tracking-widest text-gray-500">Días de anticipación</label>
                             <input
                                 type="number"
                                 name="dias_anticipacion"
@@ -99,8 +99,8 @@
                 <section class="module-card">
                     <div class="flex items-center justify-between gap-4 border-b border-gray-100 pb-4">
                         <div>
-                            <h3 class="text-2xl font-black uppercase tracking-tight text-gray-900">Temporadas Registradas</h3>
-                            <p class="mt-1 text-sm text-gray-500">Las fechas activas se usan junto con el incremento reciente de prestamos.</p>
+                            <h3 class="text-2xl font-black uppercase tracking-tight text-gray-900">Temporadas registradas</h3>
+                            <p class="mt-1 text-sm text-gray-500">Las fechas activas se usan junto con el incremento reciente de préstamos.</p>
                         </div>
                         <span class="rounded-full bg-blue-100 px-3 py-1 text-xs font-black uppercase tracking-widest text-blue-700">
                             {{ $temporadas->count() }} fechas
@@ -162,7 +162,7 @@
                                         </div>
 
                                         <div>
-                                            <label class="mb-1 block text-xs font-black uppercase tracking-widest text-gray-400">Dias</label>
+                                            <label class="mb-1 block text-xs font-black uppercase tracking-widest text-gray-400">Días</label>
                                             <input
                                                 type="number"
                                                 name="dias_anticipacion"
@@ -192,7 +192,7 @@
                             </div>
                         @empty
                             <div class="rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 py-12 text-center">
-                                <p class="font-bold text-gray-500">Todavia no hay fechas de temporada registradas.</p>
+                                <p class="font-bold text-gray-500">Todavía no hay fechas de temporada registradas.</p>
                             </div>
                         @endforelse
                     </div>

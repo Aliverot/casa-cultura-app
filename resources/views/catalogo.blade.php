@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-white leading-tight">
-            {{ __('Gestion de Inventario - Casa de la Cultura') }}
+            {{ __('Gestión de inventario - Casa de la Cultura') }}
         </h2>
     </x-slot>
 
@@ -15,7 +15,7 @@
                         type="text"
                         name="buscar"
                         value="{{ request('buscar') }}"
-                        placeholder="Buscar por nombre, modelo o codigo QR..."
+                        placeholder="Buscar por nombre, modelo o código QR..."
                         class="w-full border-gray-300 bg-white text-gray-900 placeholder-gray-400 p-4 text-lg focus:ring-2 focus:ring-cultura-500 focus:outline-none"
                     >
                     <button type="submit" class="bg-cultura-600 hover:bg-cultura-700 text-white px-8 py-2 font-black transition uppercase tracking-widest">
@@ -48,10 +48,10 @@
 
                         $mensajeEstado = match ($item->estado_actual) {
                             'No disponible' => 'Este instrumento ya se encuentra prestado y no puede prestarse de nuevo por ahora.',
-                            'Mantenimiento' => 'Este instrumento esta en mantenimiento y no esta disponible para prestamo.',
-                            'Extraviado' => 'Este instrumento no esta disponible para prestamo.',
-                            'Baja' => 'Este instrumento fue dado de baja y ya no esta disponible para prestamo.',
-                            default => 'Este instrumento no esta disponible para prestamo.',
+                            'Mantenimiento' => 'Este instrumento está en mantenimiento y no está disponible para préstamo.',
+                            'Extraviado' => 'Este instrumento no está disponible para préstamo.',
+                            'Baja' => 'Este instrumento fue dado de baja y ya no está disponible para préstamo.',
+                            default => 'Este instrumento no está disponible para préstamo.',
                         };
                     @endphp
 
@@ -81,7 +81,7 @@
 
                                 <div class="mt-3 flex flex-wrap items-center gap-3">
                                     <span class="rounded-full bg-slate-100 px-4 py-2 text-xs font-black uppercase tracking-widest text-slate-700">
-                                        {{ $item->estado_condicion ?? 'Excelente' }}
+                                        {{ $item->estadoCondicionLegible() }}
                                     </span>
                                     @if ($item->modelo)
                                         <span class="text-xs font-bold uppercase tracking-widest text-gray-500">Modelo: {{ $item->modelo }}</span>
@@ -95,7 +95,7 @@
 
                                 <div class="pt-2">
                                     <a href="{{ route('activos.edit', $item->id_activo) }}" class="inline-flex items-center rounded-lg border border-cultura-200 bg-cultura-50 px-4 py-2 text-xs font-black uppercase tracking-widest text-cultura-700 transition hover:bg-cultura-100">
-                                        Modificar articulo
+                                        Modificar artículo
                                     </a>
                                 </div>
                             </div>
@@ -123,15 +123,15 @@
                                                 type="text"
                                                 name="contacto_solicitante"
                                                 required
-                                                placeholder="Telefono, matricula o control"
+                                                placeholder="Teléfono, matrícula o control"
                                                 class="block w-full rounded-lg border-gray-300 bg-white text-gray-900 p-3 mt-1 focus:ring-2 focus:ring-cultura-500 focus:border-cultura-500 shadow-sm"
                                             >
                                         </div>
 
                                         <div class="rounded-xl border border-cultura-100 bg-white px-4 py-3">
-                                            <p class="text-xs font-black text-gray-500 uppercase tracking-widest">Salida automatica</p>
+                                            <p class="text-xs font-black text-gray-500 uppercase tracking-widest">Salida automática</p>
                                             <p class="text-lg font-black text-gray-800 mt-1">{{ now()->format('d/m/Y H:i') }}</p>
-                                            <p class="text-xs text-gray-500 mt-1">La fecha y hora exactas se guardan automaticamente al confirmar.</p>
+                                            <p class="text-xs text-gray-500 mt-1">La fecha y hora exactas se guardan automáticamente al confirmar.</p>
                                         </div>
 
                                         <div>
@@ -146,7 +146,7 @@
                                         </div>
 
                                         <div>
-                                            <label class="text-xs font-black text-gray-500 uppercase tracking-widest">Devolucion prevista</label>
+                                            <label class="text-xs font-black text-gray-500 uppercase tracking-widest">Devolución prevista</label>
                                             <input
                                                 type="datetime-local"
                                                 name="fecha_devolucion_prevista"
@@ -157,7 +157,7 @@
                                         </div>
 
                                         <button type="submit" class="w-full bg-acento-principal hover:bg-acento-hover text-white font-black py-4 rounded-xl shadow-lg transition transform active:scale-95 text-lg uppercase tracking-widest">
-                                            Confirmar Prestamo
+                                            Confirmar préstamo
                                         </button>
                                     </form>
 

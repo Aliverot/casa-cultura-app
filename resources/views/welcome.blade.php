@@ -14,7 +14,7 @@
             @if (Route::has('login'))
                 <div class="sm:fixed sm:top-0 sm:right-0 p-6 text-right z-10">
                     @auth
-                        <a href="{{ url('/dashboard') }}" class="font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500 text-lg">Panel de Control</a>
+                        <a href="{{ url('/dashboard') }}" class="font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500 text-lg">Panel de control</a>
                     @else
                         <a href="{{ route('login') }}" class="font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500 text-lg">Ingresar</a>
 
@@ -32,7 +32,7 @@
 
                 <div class="mt-8">
                     <h1 class="text-4xl font-black text-gray-900 dark:text-white sm:text-6xl tracking-tight">
-                        Sistema de Control de Activos
+                        Sistema de control de activos
                     </h1>
                     <p class="mt-4 text-xl text-gray-600 dark:text-gray-400 font-medium italic">
                         Casa de la Cultura de Cuilápam de Guerrero
@@ -41,7 +41,7 @@
 
                 <div class="mt-10 flex items-center justify-center gap-x-6">
                     <a href="{{ route('login') }}" class="rounded-xl bg-blue-600 px-10 py-4 text-xl font-black text-white shadow-xl hover:bg-blue-500 transition transform hover:scale-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 uppercase tracking-widest">
-                        Acceder al Sistema
+                        Acceder al sistema
                     </a>
                 </div>
 

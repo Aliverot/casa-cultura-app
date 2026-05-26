@@ -118,7 +118,7 @@ it('can resolve an operational alert manually', function () {
     $user = User::factory()->create();
     $alerta = AlertaOperativa::create([
         'tipo' => 'Baja y Adquisicion',
-        'titulo' => 'Informe de Baja y Adquisicion',
+        'titulo' => 'Informe de baja y adquisición',
         'descripcion' => 'Prueba',
         'estado' => 'Pendiente',
     ]);

@@ -57,7 +57,7 @@ class PrestamoController extends Controller
 
             if ($activo->estado_actual !== 'Disponible') {
                 throw ValidationException::withMessages([
-                    'id_activo' => 'El instrumento ya no esta disponible para prestamo.',
+                    'id_activo' => 'El instrumento ya no está disponible para préstamo.',
                 ]);
             }
 
@@ -89,7 +89,7 @@ class PrestamoController extends Controller
             $activo->save();
         });
 
-        return redirect()->route('activos.index')->with('success', 'Prestamo registrado con exito.');
+        return redirect()->route('activos.index')->with('success', 'Préstamo registrado con éxito.');
     }
 
     public function devolver(Request $request, $id_detalle)
@@ -113,7 +113,7 @@ class PrestamoController extends Controller
 
             if ($detalle->fecha_devolucion_real) {
                 throw ValidationException::withMessages([
-                    'devolucion' => 'Este prestamo ya fue procesado anteriormente.',
+                    'devolucion' => 'Este préstamo ya fue procesado anteriormente.',
                 ]);
             }
 
@@ -169,7 +169,7 @@ class PrestamoController extends Controller
             }
         });
 
-        return redirect()->route('prestamos.activos')->with('success', 'Devolucion procesada correctamente.');
+        return redirect()->route('prestamos.activos')->with('success', 'Devolución procesada correctamente.');
     }
 
     public function liquidarPago($id_prestamo)
@@ -177,7 +177,7 @@ class PrestamoController extends Controller
         $prestamo = Prestamo::findOrFail($id_prestamo);
 
         if ($prestamo->estado_pago !== 'Pendiente') {
-            return redirect()->route('prestamos.activos')->with('success', 'Ese cargo ya no esta pendiente.');
+            return redirect()->route('prestamos.activos')->with('success', 'Ese cargo ya no está pendiente.');
         }
 
         $prestamo->estado_pago = 'Pagado';

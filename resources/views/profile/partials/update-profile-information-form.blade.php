@@ -1,11 +1,11 @@
 <section>
     <header>
         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-            {{ __('Informacion del perfil') }}
+            {{ __('Información del perfil') }}
         </h2>
 
         <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            {{ __('Actualiza la informacion de tu cuenta y correo electronico.') }}
+            {{ __('Actualiza la información de tu cuenta y correo electrónico.') }}
         </p>
     </header>
 
@@ -24,23 +24,23 @@
         </div>
 
         <div>
-            <x-input-label for="email" :value="__('Correo electronico')" />
+            <x-input-label for="email" :value="__('Correo electrónico')" />
             <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
             @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
                 <div>
                     <p class="text-sm mt-2 text-gray-800 dark:text-gray-200">
-                        {{ __('Tu correo electronico no esta verificado.') }}
+                        {{ __('Tu correo electrónico no está verificado.') }}
 
                         <button form="send-verification" class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
-                            {{ __('Haz clic aqui para reenviar el correo de verificacion.') }}
+                            {{ __('Haz clic aquí para reenviar el correo de verificación.') }}
                         </button>
                     </p>
 
                     @if (session('status') === 'verification-link-sent')
                         <p class="mt-2 font-medium text-sm text-green-600 dark:text-green-400">
-                            {{ __('Se envio un nuevo enlace de verificacion a tu correo electronico.') }}
+                            {{ __('Se envió un nuevo enlace de verificación a tu correo electrónico.') }}
                         </p>
                     @endif
                 </div>

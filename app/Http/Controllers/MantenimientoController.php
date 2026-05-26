@@ -22,7 +22,7 @@ class MantenimientoController extends Controller
             'detallesPrestamo' => function ($query) {
                 $query->with('prestamo')
                     ->whereNotNull('fecha_devolucion_real')
-                    ->whereIn('estado_retorno', ['Danado', 'Dañado', 'DaÃ±ado', 'Extraviado', 'Perdida total'])
+                    ->whereIn('estado_retorno', ['Danado', 'Dañado', 'Extraviado', 'Perdida total'])
                     ->latest('fecha_devolucion_real');
             },
         ])

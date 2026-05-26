@@ -75,7 +75,7 @@ class AlertasOperativasService
             'Fragilidad/Mal Uso',
             $activo,
             'Alerta de Fragilidad/Mal Uso',
-            "El recurso {$activo->nombre} suma {$totalDanios} devoluciones con dano en los ultimos ".self::DAMAGE_PERIOD_DAYS.' dias.',
+            "El recurso {$activo->nombre} suma {$totalDanios} devoluciones con daño en los últimos ".self::DAMAGE_PERIOD_DAYS.' días.',
             [
                 'danios_recientes' => $totalDanios,
                 'limite_danios' => self::DAMAGE_LIMIT,
@@ -126,7 +126,7 @@ class AlertasOperativasService
         return $this->guardarAlerta(
             'Baja y Adquisicion',
             $activo,
-            'Informe de Baja y Adquisicion',
+            'Informe de baja y adquisición',
             "Se recomienda evaluar la compra de nuevas unidades de {$referencia} porque {$motivo}.",
             [
                 'referencia_modelo' => $referencia,
@@ -185,8 +185,8 @@ class AlertasOperativasService
                 'estado' => 'Pendiente',
             ],
             [
-                'titulo' => 'Preparacion de Temporada',
-                'descripcion' => "{$motivo}. Se sugieren los ".self::SEASON_TOP_RESOURCES.' recursos mas usados para mantenimiento preventivo.',
+                'titulo' => 'Preparación de temporada',
+                'descripcion' => "{$motivo}. Se sugieren los ".self::SEASON_TOP_RESOURCES.' recursos más usados para mantenimiento preventivo.',
                 'datos' => [
                     'temporada_base' => $temporadaBase,
                     'limite_recursos' => self::SEASON_TOP_RESOURCES,
@@ -212,8 +212,8 @@ class AlertasOperativasService
                 'estado' => 'Pendiente',
             ],
             [
-                'titulo' => 'Incremento Historico de Prestamos',
-                'descripcion' => "La demanda reciente subio {$datosHistoricos['incremento_porcentaje']}% frente al periodo anterior. Se sugieren los ".self::SEASON_TOP_RESOURCES.' recursos mas usados para mantenimiento preventivo.',
+                'titulo' => 'Incremento histórico de préstamos',
+                'descripcion' => "La demanda reciente subió {$datosHistoricos['incremento_porcentaje']}% frente al periodo anterior. Se sugieren los ".self::SEASON_TOP_RESOURCES.' recursos más usados para mantenimiento preventivo.',
                 'datos' => array_merge($datosHistoricos, [
                     'limite_recursos' => self::SEASON_TOP_RESOURCES,
                     'recursos' => $recursos->all(),
@@ -358,13 +358,13 @@ class AlertasOperativasService
     private function fechasBaseTemporada(): array
     {
         return [
-            ['nombre' => 'Ano Nuevo', 'fecha_inicio' => '01-01', 'fecha_fin' => '01-01', 'dias_anticipacion' => 30],
-            ['nombre' => 'Dia de la Constitucion', 'fecha_inicio' => '02-05', 'fecha_fin' => '02-05', 'dias_anticipacion' => 30],
-            ['nombre' => 'Natalicio de Benito Juarez', 'fecha_inicio' => '03-21', 'fecha_fin' => '03-21', 'dias_anticipacion' => 30],
-            ['nombre' => 'Dia del Trabajo', 'fecha_inicio' => '05-01', 'fecha_fin' => '05-01', 'dias_anticipacion' => 30],
-            ['nombre' => 'Independencia de Mexico', 'fecha_inicio' => '09-16', 'fecha_fin' => '09-16', 'dias_anticipacion' => 30],
-            ['nombre' => 'Dia de Muertos', 'fecha_inicio' => '11-01', 'fecha_fin' => '11-02', 'dias_anticipacion' => 30],
-            ['nombre' => 'Revolucion Mexicana', 'fecha_inicio' => '11-20', 'fecha_fin' => '11-20', 'dias_anticipacion' => 30],
+            ['nombre' => 'Año Nuevo', 'fecha_inicio' => '01-01', 'fecha_fin' => '01-01', 'dias_anticipacion' => 30],
+            ['nombre' => 'Día de la Constitución', 'fecha_inicio' => '02-05', 'fecha_fin' => '02-05', 'dias_anticipacion' => 30],
+            ['nombre' => 'Natalicio de Benito Juárez', 'fecha_inicio' => '03-21', 'fecha_fin' => '03-21', 'dias_anticipacion' => 30],
+            ['nombre' => 'Día del Trabajo', 'fecha_inicio' => '05-01', 'fecha_fin' => '05-01', 'dias_anticipacion' => 30],
+            ['nombre' => 'Independencia de México', 'fecha_inicio' => '09-16', 'fecha_fin' => '09-16', 'dias_anticipacion' => 30],
+            ['nombre' => 'Día de Muertos', 'fecha_inicio' => '11-01', 'fecha_fin' => '11-02', 'dias_anticipacion' => 30],
+            ['nombre' => 'Revolución Mexicana', 'fecha_inicio' => '11-20', 'fecha_fin' => '11-20', 'dias_anticipacion' => 30],
             ['nombre' => 'Temporada decembrina', 'fecha_inicio' => '12-12', 'fecha_fin' => '01-06', 'dias_anticipacion' => 30],
         ];
     }

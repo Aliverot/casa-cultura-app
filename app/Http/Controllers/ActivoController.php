@@ -89,7 +89,7 @@ class ActivoController extends Controller
 
         if ($activo->estado_actual === 'No disponible' && in_array($estadoCondicion, ['En reparacion', 'Baja definitiva'], true)) {
             throw ValidationException::withMessages([
-                'estado_condicion' => 'No puedes mandar a reparacion o baja un instrumento mientras tiene un prestamo activo.',
+                'estado_condicion' => 'No puedes mandar a reparación o baja un instrumento mientras tiene un préstamo activo.',
             ]);
         }
 
@@ -123,7 +123,7 @@ class ActivoController extends Controller
 
         if ($activo->estado_actual === 'No disponible') {
             throw ValidationException::withMessages([
-                'activo' => 'No puedes dar de baja un instrumento mientras tiene un prestamo activo.',
+                'activo' => 'No puedes dar de baja un instrumento mientras tiene un préstamo activo.',
             ]);
         }
 
