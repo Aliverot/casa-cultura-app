@@ -69,6 +69,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/prestamos/{id_detalle}/devolver', [PrestamoController::class, 'devolver'])->name('prestamos.devolver');
     Route::post('/prestamos/liquidar/{id}', [PrestamoController::class, 'liquidarPago'])->name('prestamos.liquidar');
     Route::get('/historial', [PrestamoController::class, 'historial'])->name('prestamos.historial');
+    Route::get('/historial/reporte.csv', [PrestamoController::class, 'exportarHistorialCsv'])->name('prestamos.historial.csv');
 
     Route::get('/mantenimiento', [MantenimientoController::class, 'index'])->name('mantenimientos.index');
     Route::post('/mantenimiento', [MantenimientoController::class, 'store'])->name('mantenimiento.store');

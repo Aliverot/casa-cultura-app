@@ -303,3 +303,144 @@ it('creates a replacement report when repairs exceed the configured value limit'
         'estado' => 'Pendiente',
     ]);
 });
+
+it('filters the loan history by period instrument and requester', function () {
+    $user = User::factory()->create();
+    $guitarra = Activo::create([
+        'codigo_qr' => 'QR-FILTRO-1',
+        'nombre' => 'Guitarra filtro',
+        'categoria' => 'Instrumentos de Cuerda',
+        'estado_actual' => 'Disponible',
+        'horas_uso' => 0,
+        'limite_mantenimiento' => 100,
+    ]);
+    $flauta = Activo::create([
+        'codigo_qr' => 'QR-FILTRO-2',
+        'nombre' => 'Flauta filtro',
+        'categoria' => 'Instrumentos de Viento',
+        'estado_actual' => 'Disponible',
+        'horas_uso' => 0,
+        'limite_mantenimiento' => 100,
+    ]);
+
+    $prestamoFiltrado = Prestamo::create([
+        'id_usuario' => $user->id_usuario,
+        'fecha_salida' => Carbon::parse('2026-05-05 10:00:00'),
+        'fecha_devolucion_prevista' => Carbon::parse('2026-05-06 10:00:00'),
+        'nombre_solicitante' => 'Ana Rivera',
+        'contacto_solicitante' => 'MAT-CSV-1',
+        'condiciones_entrega' => 'En buen estado',
+        'condiciones_devolucion' => 'Regresó con desgaste normal.',
+        'costo_reparacion' => 125.50,
+        'estado_pago' => 'Pendiente',
+    ]);
+
+    DetallePrestamo::create([
+        'id_prestamo' => $prestamoFiltrado->id_prestamo,
+        'id_activo' => $guitarra->id_activo,
+        'estado_salida' => 'Prestado',
+        'estado_retorno' => 'Con atraso',
+        'fecha_devolucion_real' => Carbon::parse('2026-05-05 14:00:00'),
+    ]);
+
+    $prestamoFuera = Prestamo::create([
+        'id_usuario' => $user->id_usuario,
+        'fecha_salida' => Carbon::parse('2026-04-01 10:00:00'),
+        'fecha_devolucion_prevista' => Carbon::parse('2026-04-02 10:00:00'),
+        'nombre_solicitante' => 'Luis Ramos',
+        'contacto_solicitante' => 'MAT-CSV-2',
+        'condiciones_entrega' => 'En buen estado',
+        'condiciones_devolucion' => 'Sin detalles.',
+        'costo_reparacion' => 0,
+        'estado_pago' => 'Sin cargos',
+    ]);
+
+    DetallePrestamo::create([
+        'id_prestamo' => $prestamoFuera->id_prestamo,
+        'id_activo' => $flauta->id_activo,
+        'estado_salida' => 'Prestado',
+        'estado_retorno' => 'En tiempo y forma',
+        'fecha_devolucion_real' => Carbon::parse('2026-04-01 12:00:00'),
+    ]);
+
+    $this->actingAs($user)->get(route('prestamos.historial', [
+        'desde' => '2026-05-01',
+        'hasta' => '2026-05-31',
+        'id_activo' => $guitarra->id_activo,
+        'solicitante' => 'Ana',
+    ]))
+        ->assertOk()
+        ->assertSee('Ana Rivera')
+        ->assertSee('Guitarra filtro')
+        ->assertSee('$125.50 MXN')
+        ->assertDontSee('Luis Ramos')
+        ->assertDontSee('MAT-CSV-2');
+});
+
+it('exports the loan history as csv for the selected period', function () {
+    $user = User::factory()->create();
+    $activo = Activo::create([
+        'codigo_qr' => 'QR-CSV-1',
+        'nombre' => 'Piano CSV',
+        'categoria' => 'Instrumentos de Cuerda',
+        'estado_actual' => 'Disponible',
+        'horas_uso' => 0,
+        'limite_mantenimiento' => 100,
+    ]);
+
+    $prestamoIncluido = Prestamo::create([
+        'id_usuario' => $user->id_usuario,
+        'fecha_salida' => Carbon::parse('2026-05-10 09:00:00'),
+        'fecha_devolucion_prevista' => Carbon::parse('2026-05-11 09:00:00'),
+        'nombre_solicitante' => 'Ana Rivera',
+        'contacto_solicitante' => 'MAT-CSV-3',
+        'condiciones_entrega' => 'En buen estado',
+        'condiciones_devolucion' => 'Regresó completo.',
+        'costo_reparacion' => 75,
+        'estado_pago' => 'Pagado',
+    ]);
+
+    DetallePrestamo::create([
+        'id_prestamo' => $prestamoIncluido->id_prestamo,
+        'id_activo' => $activo->id_activo,
+        'estado_salida' => 'Prestado',
+        'estado_retorno' => 'En tiempo y forma',
+        'fecha_devolucion_real' => Carbon::parse('2026-05-10 12:00:00'),
+    ]);
+
+    $prestamoExcluido = Prestamo::create([
+        'id_usuario' => $user->id_usuario,
+        'fecha_salida' => Carbon::parse('2026-06-10 09:00:00'),
+        'fecha_devolucion_prevista' => Carbon::parse('2026-06-11 09:00:00'),
+        'nombre_solicitante' => 'Luis Ramos',
+        'contacto_solicitante' => 'MAT-CSV-4',
+        'condiciones_entrega' => 'En buen estado',
+        'condiciones_devolucion' => 'Sin detalles.',
+        'costo_reparacion' => 0,
+        'estado_pago' => 'Sin cargos',
+    ]);
+
+    DetallePrestamo::create([
+        'id_prestamo' => $prestamoExcluido->id_prestamo,
+        'id_activo' => $activo->id_activo,
+        'estado_salida' => 'Prestado',
+        'estado_retorno' => 'En tiempo y forma',
+        'fecha_devolucion_real' => Carbon::parse('2026-06-10 12:00:00'),
+    ]);
+
+    $response = $this->actingAs($user)->get(route('prestamos.historial.csv', [
+        'desde' => '2026-05-01',
+        'hasta' => '2026-05-31',
+    ]));
+
+    $response->assertOk();
+
+    $csv = $response->streamedContent();
+
+    expect($csv)
+        ->toContain('Préstamo registrado')
+        ->toContain('Ana Rivera')
+        ->toContain('Piano CSV')
+        ->toContain('75.00')
+        ->not->toContain('Luis Ramos');
+});

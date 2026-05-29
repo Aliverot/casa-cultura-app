@@ -9,8 +9,107 @@
         <div class="module-page-shell">
             <x-module-nav current="historial" />
 
+            @if ($errors->any())
+                <div class="mb-8 rounded-r border-l-4 border-red-500 bg-red-100 p-4 text-red-800 shadow-sm">
+                    <p class="mb-2 font-black uppercase tracking-widest">No se pudo generar la consulta</p>
+                    <ul class="list-disc list-inside text-sm font-medium">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <section class="module-card mb-8">
+                <div class="flex flex-col gap-4 border-b border-gray-100 pb-4 lg:flex-row lg:items-end lg:justify-between">
+                    <div>
+                        <h3 class="text-2xl font-black uppercase tracking-tight text-gray-900">Filtros del histórico</h3>
+                    </div>
+                    <a href="{{ route('prestamos.historial') }}" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-black uppercase tracking-widest text-slate-700 transition hover:bg-slate-50">
+                        Limpiar
+                    </a>
+                </div>
+
+                <form method="GET" action="{{ route('prestamos.historial') }}" class="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-[0.85fr_0.85fr_1.4fr_1.2fr_auto]">
+                    <div>
+                        <label class="mb-2 block text-xs font-black uppercase tracking-widest text-gray-500">Desde</label>
+                        <input
+                            type="date"
+                            name="desde"
+                            value="{{ $filtros['desde'] }}"
+                            class="w-full rounded-xl border-gray-300 bg-white p-3 text-base text-gray-900 shadow-sm focus:ring-2 focus:ring-cultura-500"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="mb-2 block text-xs font-black uppercase tracking-widest text-gray-500">Hasta</label>
+                        <input
+                            type="date"
+                            name="hasta"
+                            value="{{ $filtros['hasta'] }}"
+                            class="w-full rounded-xl border-gray-300 bg-white p-3 text-base text-gray-900 shadow-sm focus:ring-2 focus:ring-cultura-500"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="mb-2 block text-xs font-black uppercase tracking-widest text-gray-500">Instrumento</label>
+                        <select name="id_activo" class="w-full rounded-xl border-gray-300 bg-white p-3 text-base text-gray-900 shadow-sm focus:ring-2 focus:ring-cultura-500">
+                            <option value="">Todos los instrumentos</option>
+                            @foreach ($activosFiltro as $activoFiltro)
+                                <option value="{{ $activoFiltro->id_activo }}" @selected((string) $filtros['id_activo'] === (string) $activoFiltro->id_activo)>
+                                    {{ $activoFiltro->nombre }} - {{ $activoFiltro->codigo_qr }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="mb-2 block text-xs font-black uppercase tracking-widest text-gray-500">Solicitante</label>
+                        <input
+                            type="text"
+                            name="solicitante"
+                            value="{{ $filtros['solicitante'] }}"
+                            placeholder="Nombre del solicitante"
+                            class="w-full rounded-xl border-gray-300 bg-white p-3 text-base text-gray-900 shadow-sm focus:ring-2 focus:ring-cultura-500"
+                        >
+                    </div>
+
+                    <div class="flex flex-col gap-3 sm:flex-row xl:flex-col xl:justify-end">
+                        <button type="submit" class="rounded-xl bg-cultura-600 px-5 py-3 text-sm font-black uppercase tracking-widest text-white shadow transition hover:bg-cultura-700">
+                            Filtrar
+                        </button>
+                        <button
+                            type="submit"
+                            formaction="{{ route('prestamos.historial.csv') }}"
+                            class="rounded-xl border border-green-200 bg-green-50 px-5 py-3 text-sm font-black uppercase tracking-widest text-green-800 transition hover:bg-green-100"
+                        >
+                            Generar CSV
+                        </button>
+                    </div>
+                </form>
+            </section>
+
             <div class="module-card">
                 <h3 class="text-2xl font-black text-gray-900 mb-6">Registro histórico de préstamos</h3>
+
+                <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
+                    <div class="rounded-2xl border border-blue-100 bg-blue-50 p-4">
+                        <p class="text-xs font-black uppercase tracking-widest text-blue-700">Registros</p>
+                        <p class="mt-2 text-3xl font-black text-blue-950">{{ $resumen['registros'] }}</p>
+                    </div>
+                    <div class="rounded-2xl border border-green-100 bg-green-50 p-4">
+                        <p class="text-xs font-black uppercase tracking-widest text-green-700">Horas</p>
+                        <p class="mt-2 text-3xl font-black text-green-950">{{ number_format($resumen['horas'], 2) }}</p>
+                    </div>
+                    <div class="rounded-2xl border border-red-100 bg-red-50 p-4">
+                        <p class="text-xs font-black uppercase tracking-widest text-red-700">Cargos</p>
+                        <p class="mt-2 text-3xl font-black text-red-950">${{ number_format($resumen['cargos'], 2) }} MXN</p>
+                    </div>
+                    <div class="rounded-2xl border border-amber-100 bg-amber-50 p-4">
+                        <p class="text-xs font-black uppercase tracking-widest text-amber-700">Pagos pendientes</p>
+                        <p class="mt-2 text-3xl font-black text-amber-950">{{ $resumen['pendientes'] }}</p>
+                    </div>
+                </div>
 
                 <div class="mb-6 rounded-2xl border border-cultura-100 bg-cultura-50 p-4 text-sm text-cultura-900">
                     <p><span class="font-black">Préstamo registrado:</span> momento en que el instrumento salió.</p>

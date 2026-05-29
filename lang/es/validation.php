@@ -1,12 +1,14 @@
 <?php
 
 return [
+    'after_or_equal' => 'El campo :attribute debe ser igual o posterior a :date.',
     'confirmed' => 'La confirmación de :attribute no coincide.',
     'current_password' => 'La contraseña actual no es correcta.',
     'date' => 'El campo :attribute debe ser una fecha válida.',
     'email' => 'El campo :attribute debe ser un correo válido.',
     'exists' => 'El valor seleccionado en :attribute no es válido.',
     'in' => 'El valor seleccionado en :attribute no es válido.',
+    'integer' => 'El campo :attribute debe ser un número entero.',
     'max' => [
         'string' => 'El campo :attribute no debe tener más de :max caracteres.',
     ],
@@ -35,6 +37,9 @@ return [
         'current_password' => 'contraseña actual',
         'fecha_devolucion_prevista' => 'fecha de devolución prevista',
         'id_activo' => 'instrumento',
+        'desde' => 'fecha inicial',
+        'hasta' => 'fecha final',
+        'solicitante' => 'solicitante',
         'nombre_solicitante' => 'nombre del solicitante',
         'contacto_solicitante' => 'contacto del solicitante',
         'condiciones_entrega' => 'condiciones de entrega',

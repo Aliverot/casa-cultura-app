@@ -186,13 +186,132 @@ class PrestamoController extends Controller
         return redirect()->route('prestamos.activos')->with('success', 'El pago ha sido registrado.');
     }
 
-    public function historial()
+    public function historial(Request $request)
     {
-        $historial = DetallePrestamo::with(['prestamo', 'activo'])
-            ->whereNotNull('fecha_devolucion_real')
-            ->orderByDesc('fecha_devolucion_real')
-            ->get();
+        $filtros = $this->filtrosHistorial($request);
+        $historial = $this->consultaHistorial($filtros)->get();
+        $activosFiltro = Activo::orderBy('nombre')->get(['id_activo', 'nombre', 'codigo_qr']);
+        $resumen = $this->resumenHistorial($historial);
 
-        return view('historial', compact('historial'));
+        return view('historial', compact('historial', 'activosFiltro', 'filtros', 'resumen'));
+    }
+
+    public function exportarHistorialCsv(Request $request)
+    {
+        $filtros = $this->filtrosHistorial($request, true);
+        $historial = $this->consultaHistorial($filtros)->get();
+        $nombreArchivo = 'historial-prestamos-'.$filtros['desde'].'_'.$filtros['hasta'].'.csv';
+
+        return response()->streamDownload(function () use ($historial) {
+            $archivo = fopen('php://output', 'w');
+            fwrite($archivo, "\xEF\xBB\xBF");
+            fputcsv($archivo, [
+                'Préstamo registrado',
+                'Fecha límite de devolución',
+                'Devolución recibida',
+                'Instrumento',
+                'Código QR',
+                'Solicitante',
+                'Contacto',
+                'Resultado',
+                'Tiempo de uso (horas)',
+                'Cargo (MXN)',
+                'Estado de pago',
+                'Condiciones de retorno',
+                'Contexto',
+                'Entorno',
+                'Accesorios de protección',
+            ]);
+
+            foreach ($historial as $log) {
+                fputcsv($archivo, [
+                    $log->prestamo->fecha_salida?->format('d/m/Y H:i'),
+                    $log->prestamo->fecha_devolucion_prevista?->format('d/m/Y H:i'),
+                    $log->fecha_devolucion_real?->format('d/m/Y H:i'),
+                    $log->activo?->nombre,
+                    $log->activo?->codigo_qr,
+                    $log->prestamo->nombre_solicitante,
+                    $log->prestamo->contacto_solicitante,
+                    $this->estadoRetornoLegible($log->estado_retorno),
+                    number_format($this->horasDePrestamo($log), 2, '.', ''),
+                    number_format((float) $log->prestamo->costo_reparacion, 2, '.', ''),
+                    $log->prestamo->estado_pago,
+                    $log->prestamo->condiciones_devolucion ?: 'Sin condiciones registradas',
+                    $log->contexto_incidente ?: '',
+                    $log->entorno_uso ?: '',
+                    $log->accesorios_proteccion ?: '',
+                ]);
+            }
+
+            fclose($archivo);
+        }, $nombreArchivo, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
+
+    private function filtrosHistorial(Request $request, bool $requierePeriodo = false): array
+    {
+        $reglasHasta = [$requierePeriodo ? 'required' : 'nullable', 'date'];
+
+        if ($request->filled('desde')) {
+            $reglasHasta[] = 'after_or_equal:desde';
+        }
+
+        $data = $request->validate([
+            'desde' => [$requierePeriodo ? 'required' : 'nullable', 'date'],
+            'hasta' => $reglasHasta,
+            'id_activo' => ['nullable', 'integer', 'exists:activos,id_activo'],
+            'solicitante' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        return [
+            'desde' => $data['desde'] ?? null,
+            'hasta' => $data['hasta'] ?? null,
+            'id_activo' => $data['id_activo'] ?? null,
+            'solicitante' => isset($data['solicitante']) ? trim($data['solicitante']) : null,
+        ];
+    }
+
+    private function consultaHistorial(array $filtros)
+    {
+        return DetallePrestamo::with(['prestamo', 'activo'])
+            ->whereNotNull('fecha_devolucion_real')
+            ->when($filtros['desde'], fn ($query, $desde) => $query->whereDate('fecha_devolucion_real', '>=', $desde))
+            ->when($filtros['hasta'], fn ($query, $hasta) => $query->whereDate('fecha_devolucion_real', '<=', $hasta))
+            ->when($filtros['id_activo'], fn ($query, $idActivo) => $query->where('id_activo', $idActivo))
+            ->when($filtros['solicitante'], function ($query, $solicitante) {
+                $query->whereHas('prestamo', function ($prestamoQuery) use ($solicitante) {
+                    $prestamoQuery->whereRaw('LOWER(nombre_solicitante) LIKE ?', ['%'.strtolower($solicitante).'%']);
+                });
+            })
+            ->orderByDesc('fecha_devolucion_real');
+    }
+
+    private function resumenHistorial($historial): array
+    {
+        return [
+            'registros' => $historial->count(),
+            'horas' => $historial->sum(fn ($log) => $this->horasDePrestamo($log)),
+            'cargos' => $historial->sum(fn ($log) => (float) $log->prestamo->costo_reparacion),
+            'pendientes' => $historial->filter(fn ($log) => $log->prestamo->estado_pago === 'Pendiente')->count(),
+        ];
+    }
+
+    private function horasDePrestamo(DetallePrestamo $log): float
+    {
+        if (! $log->prestamo->fecha_salida || ! $log->fecha_devolucion_real) {
+            return 0.0;
+        }
+
+        return round($log->prestamo->fecha_salida->diffInSeconds($log->fecha_devolucion_real) / 3600, 2);
+    }
+
+    private function estadoRetornoLegible(?string $estado): string
+    {
+        return match ($estado) {
+            'Danado', 'Dañado' => 'Dañado',
+            'Perdida total' => 'Pérdida total',
+            default => $estado ?: 'Sin registro',
+        };
     }
 }

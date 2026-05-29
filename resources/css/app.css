@@ -32,11 +32,11 @@
 
 @layer components {
     .module-nav-shell {
-        @apply mx-auto mb-10 max-w-7xl overflow-x-auto rounded-2xl border border-gray-200 bg-white/95 px-4 py-4 shadow-sm backdrop-blur sm:px-6;
+        @apply mx-auto mb-10 w-full max-w-screen-2xl overflow-visible rounded-2xl border border-gray-200 bg-white/95 px-4 py-4 shadow-sm backdrop-blur sm:px-6;
     }
 
     .module-nav-list {
-        @apply mx-auto flex min-w-max flex-nowrap items-center justify-center gap-3;
+        @apply mx-auto flex min-w-0 flex-wrap items-center justify-start gap-3 xl:justify-center;
     }
 
     .module-nav-link {
@@ -48,7 +48,7 @@
     }
 
     .module-page-shell {
-        @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+        @apply mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8;
     }
 
     .module-card {
