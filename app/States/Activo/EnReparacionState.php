@@ -15,7 +15,7 @@ class EnReparacionState implements ActivoEstado
     public function registrarPrestamo(Activo $activo): void
     {
         throw ValidationException::withMessages([
-            'id_activo' => 'El activo esta en reparacion y no puede prestarse.',
+            'id_activo' => 'El activo está en reparación y no puede prestarse.',
         ]);
     }
 }

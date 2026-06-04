@@ -1,10 +1,4 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-hueso-50 leading-tight">
-            {{ __('Gestión de inventario - Casa de la Cultura') }}
-        </h2>
-    </x-slot>
-
     <div class="py-12 bg-hueso-100 min-h-screen">
         <div class="module-page-shell">
             <x-module-nav current="catalogo" />
@@ -18,7 +12,7 @@
                         placeholder="Buscar por nombre, modelo o código QR..."
                         class="w-full border-cantera-300 bg-hueso-50 text-anil-900 placeholder-cantera-500 p-4 text-lg focus:ring-2 focus:ring-ocre-400 focus:outline-none"
                     >
-                    <button type="submit" class="bg-cultura-600 hover:bg-cultura-700 text-hueso-50 px-8 py-2 font-black transition uppercase tracking-widest">
+                    <button type="submit" class="btn-primary rounded-none">
                         Buscar
                     </button>
                 </form>
@@ -112,18 +106,29 @@
                                                 type="text"
                                                 name="nombre_solicitante"
                                                 required
+                                                autocomplete="name"
+                                                data-full-name
+                                                pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?:[ '-][A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*(?:\s+[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?:[ '-][A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*)+"
+                                                title="Escribe nombre completo, solo con letras y espacios."
                                                 placeholder="Nombre completo"
                                                 class="block w-full rounded-lg border-cantera-300 bg-hueso-50 text-anil-900 p-3 mt-1 focus:ring-2 focus:ring-ocre-400 focus:border-ocre-500 shadow-sm"
                                             >
                                         </div>
 
                                         <div>
-                                            <label class="text-xs font-black text-cantera-600 uppercase tracking-widest">Contacto o identificador</label>
+                                            <label class="text-xs font-black text-cantera-600 uppercase tracking-widest">Teléfono del solicitante</label>
                                             <input
-                                                type="text"
+                                                type="tel"
                                                 name="contacto_solicitante"
                                                 required
-                                                placeholder="Teléfono, matrícula o control"
+                                                inputmode="numeric"
+                                                autocomplete="tel"
+                                                minlength="10"
+                                                maxlength="10"
+                                                pattern="[0-9]{10}"
+                                                data-digits-only
+                                                title="Escribe un teléfono de 10 dígitos."
+                                                placeholder="10 dígitos"
                                                 class="block w-full rounded-lg border-cantera-300 bg-hueso-50 text-anil-900 p-3 mt-1 focus:ring-2 focus:ring-ocre-400 focus:border-ocre-500 shadow-sm"
                                             >
                                         </div>
@@ -140,6 +145,9 @@
                                                 name="condiciones_entrega"
                                                 required
                                                 rows="3"
+                                                minlength="8"
+                                                maxlength="2000"
+                                                data-no-long-digits
                                                 placeholder="Ej. En perfectas condiciones, con estuche y correa."
                                                 class="block w-full rounded-lg border-cantera-300 bg-hueso-50 text-anil-900 p-3 mt-1 focus:ring-2 focus:ring-ocre-400 focus:border-ocre-500 shadow-sm text-sm"
                                             ></textarea>
@@ -156,7 +164,7 @@
                                             >
                                         </div>
 
-                                        <button type="submit" class="w-full bg-acento-principal hover:bg-acento-hover text-hueso-50 font-black py-4 rounded-xl shadow-lg transition transform active:scale-95 text-lg uppercase tracking-widest">
+                                        <button type="submit" class="btn-primary-wide">
                                             Confirmar préstamo
                                         </button>
                                     </form>

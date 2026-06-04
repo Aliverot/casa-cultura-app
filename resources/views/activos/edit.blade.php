@@ -1,13 +1,12 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-anil-800 leading-tight">
-            {{ __('Modificar artículo del inventario') }}
-        </h2>
-    </x-slot>
-
     <div class="min-h-screen bg-hueso-100 py-12">
         <div class="module-page-shell">
             <x-module-nav current="catalogo" />
+
+            @php
+                $estadoCondicionFormulario = old('estado_condicion', $activo->estadoCondicionEfectiva());
+                $estadoSoloLectura = $activo->tieneEstadoOperativoProtegido();
+            @endphp
 
             @if ($errors->any())
                 <div class="mb-8 rounded-r border-l-4 border-oxido-500 bg-oxido-50 p-4 text-oxido-800 shadow-sm">
@@ -94,21 +93,36 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-anil-700">Estado estandarizado</label>
-                            <select name="estado_condicion" required class="mt-1 block w-full rounded-xl border-cantera-300 shadow-sm focus:border-ocre-500 focus:ring-ocre-400">
-                                @foreach ($estadosCondicion as $estadoCondicion)
-                                    <option value="{{ $estadoCondicion }}" @selected(old('estado_condicion', $activo->estado_condicion) === $estadoCondicion)>
-                                        {{ \App\Models\Activo::etiquetaEstadoCondicion($estadoCondicion) }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            @if ($estadoSoloLectura)
+                                <label class="block text-sm font-medium text-anil-700">Estado actual</label>
+                                <input
+                                    type="text"
+                                    value="{{ $activo->estadoOperativoResumen() }}"
+                                    readonly
+                                    class="mt-1 block w-full rounded-xl border-cantera-300 bg-hueso-100 text-anil-900 shadow-sm"
+                                >
+                                <input type="hidden" name="estado_condicion" value="{{ $estadoCondicionFormulario }}">
+                                <p class="mt-1 text-xs text-cantera-600">Este estado se controla por préstamo, mantenimiento o baja.</p>
+                            @else
+                                <label class="block text-sm font-medium text-anil-700">Estado estandarizado</label>
+                                <select name="estado_condicion" required class="mt-1 block w-full rounded-xl border-cantera-300 shadow-sm focus:border-ocre-500 focus:ring-ocre-400">
+                                    @foreach ($estadosCondicion as $estadoCondicion)
+                                        <option value="{{ $estadoCondicion }}" @selected($estadoCondicionFormulario === $estadoCondicion)>
+                                            {{ \App\Models\Activo::etiquetaEstadoCondicion($estadoCondicion) }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            @endif
                         </div>
                     </div>
 
                     <div class="rounded-2xl border border-cantera-200 bg-hueso-50 p-4">
                         <p class="text-xs font-black uppercase tracking-widest text-cantera-600">Estado actual</p>
-                        <p class="mt-2 text-base font-bold text-anil-900">{{ $activo->estado_actual }}</p>
-                        <p class="mt-1 text-sm text-cantera-700">Condición operativa: <span class="font-bold text-anil-900">{{ $activo->estadoCondicionLegible() }}</span></p>
+                        <p class="mt-2 text-base font-bold text-anil-900">{{ $activo->estadoActualLegible() }}</p>
+                        <p class="mt-1 text-sm text-cantera-700">
+                            {{ $estadoSoloLectura ? 'Situación operativa' : 'Condición operativa' }}:
+                            <span class="font-bold text-anil-900">{{ $activo->estadoOperativoResumen() }}</span>
+                        </p>
                         @if ($activo->estado_actual === 'Baja')
                             <p class="mt-1 text-sm text-cantera-700">Este artículo ya fue dado de baja. Solo se permiten correcciones de registro y consulta de historial.</p>
                         @else
@@ -117,8 +131,8 @@
                     </div>
 
                     <div class="flex items-center justify-end gap-3 pt-2">
-                        <a href="{{ route('activos.index') }}" class="text-sm font-bold text-cantera-700 hover:text-anil-900">Cancelar</a>
-                        <button type="submit" class="rounded-xl bg-cultura-600 px-6 py-3 text-sm font-black uppercase tracking-widest text-hueso-50 shadow transition hover:bg-cultura-700">
+                        <a href="{{ route('activos.index') }}" class="btn-cancel">Cancelar</a>
+                        <button type="submit" class="btn-primary">
                             Guardar cambios
                         </button>
                     </div>
@@ -132,7 +146,7 @@
                                 <p class="text-sm font-black text-oxido-700">Dar de baja artículo</p>
                                 <p class="text-sm text-cantera-600">Esta acción conserva el historial y evita que el instrumento vuelva a prestarse.</p>
                             </div>
-                            <button type="submit" class="rounded-xl border border-oxido-200 bg-oxido-50 px-5 py-3 text-sm font-black uppercase tracking-widest text-oxido-700 transition hover:bg-oxido-100">
+                            <button type="submit" class="btn-danger">
                                 Dar de baja
                             </button>
                         </div>

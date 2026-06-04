@@ -1,10 +1,4 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-anil-800 leading-tight">
-            {{ __('Gestión de mantenimiento') }}
-        </h2>
-    </x-slot>
-
     <div class="min-h-screen bg-hueso-100 py-12">
         <div class="module-page-shell">
             <x-module-nav current="mantenimiento" />
@@ -56,8 +50,8 @@
                                 <option value="Limpieza profunda"></option>
                                 <option value="Ajuste de puente"></option>
                                 <option value="Cambio de cuerdas"></option>
-                                <option value="Afinacion general"></option>
-                                <option value="Revision electrica"></option>
+                                <option value="Afinación general"></option>
+                                <option value="Revisión eléctrica"></option>
                             </datalist>
                         </div>
 
@@ -110,7 +104,7 @@
                             <span class="text-sm text-anil-700">Mantenimiento preventivo por temporada o alta demanda.</span>
                         </label>
 
-                        <button type="submit" class="w-full rounded-xl bg-cultura-600 py-4 text-sm font-black uppercase tracking-widest text-hueso-50 shadow-lg transition hover:bg-cultura-700">
+                        <button type="submit" class="btn-primary-wide">
                             Finalizar mantenimiento
                         </button>
                     </form>

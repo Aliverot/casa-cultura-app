@@ -1,10 +1,4 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-anil-800 leading-tight">
-            {{ __('Calendario de temporadas') }}
-        </h2>
-    </x-slot>
-
     <div class="min-h-screen bg-hueso-100 py-12">
         <div class="module-page-shell">
             <x-module-nav current="temporadas" />
@@ -90,7 +84,7 @@
                             <span class="text-sm font-semibold text-anil-900">Usar esta fecha para generar alertas de temporada.</span>
                         </label>
 
-                        <button type="submit" class="w-full rounded-xl bg-cultura-600 py-4 text-sm font-black uppercase tracking-widest text-hueso-50 shadow-lg transition hover:bg-cultura-700">
+                        <button type="submit" class="btn-primary-wide">
                             Agregar fecha
                         </button>
                     </form>
@@ -182,7 +176,7 @@
                                         </label>
 
                                         <div class="flex flex-wrap gap-3">
-                                            <button type="submit" class="rounded-lg bg-cultura-600 px-4 py-2 text-xs font-black uppercase tracking-widest text-hueso-50 shadow-sm transition hover:bg-cultura-700">
+                                            <button type="submit" class="btn-primary min-h-10 rounded-lg px-4 py-2 text-xs">
                                                 Guardar cambios
                                             </button>
                                         </div>

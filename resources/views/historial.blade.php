@@ -1,10 +1,4 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-anil-800 leading-tight">
-            {{ __('Bitácora general de préstamos') }}
-        </h2>
-    </x-slot>
-
     <div class="py-12 bg-hueso-100 min-h-screen">
         <div class="module-page-shell">
             <x-module-nav current="historial" />
@@ -25,7 +19,7 @@
                     <div>
                         <h3 class="text-2xl font-black uppercase tracking-tight text-anil-900">Filtros del histórico</h3>
                     </div>
-                    <a href="{{ route('prestamos.historial') }}" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-hueso-50 px-4 py-3 text-sm font-black uppercase tracking-widest text-slate-700 transition hover:bg-slate-50">
+                    <a href="{{ route('prestamos.historial') }}" class="btn-cancel">
                         Limpiar
                     </a>
                 </div>
@@ -75,13 +69,13 @@
                     </div>
 
                     <div class="flex flex-col gap-3 sm:flex-row xl:flex-col xl:justify-end">
-                        <button type="submit" class="rounded-xl bg-cultura-600 px-5 py-3 text-sm font-black uppercase tracking-widest text-hueso-50 shadow transition hover:bg-cultura-700">
+                        <button type="submit" class="btn-primary">
                             Filtrar
                         </button>
                         <button
                             type="submit"
                             formaction="{{ route('prestamos.historial.csv') }}"
-                            class="rounded-xl border border-cantera-200 bg-cantera-50 px-5 py-3 text-sm font-black uppercase tracking-widest text-cantera-800 transition hover:bg-cantera-100"
+                            class="btn-soft min-h-11 px-5 py-3 text-sm"
                         >
                             Generar CSV
                         </button>
@@ -156,7 +150,7 @@
 
                                     <td class="p-4">
                                         <p class="font-bold text-anil-700">{{ $log->prestamo->nombre_solicitante }}</p>
-                                        <p class="text-xs text-cantera-600">{{ $log->prestamo->contacto_solicitante }}</p>
+                                        <p class="text-xs text-cantera-600">Teléfono: {{ $log->prestamo->contacto_solicitante }}</p>
                                     </td>
 
                                     <td class="p-4">

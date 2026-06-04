@@ -114,6 +114,71 @@ it('does not allow repair or baja condition while inventory article is loaned', 
     expect($activo->refresh()->estado_actual)->toBe('No disponible');
 });
 
+it('shows the protected operational state on the edit screen', function () {
+    $user = User::factory()->create();
+    $activo = Activo::create([
+        'codigo_qr' => 'QR-100015',
+        'nombre' => 'Tarola en mantenimiento',
+        'categoria' => 'Percusiones',
+        'estado_actual' => 'Mantenimiento',
+        'estado_condicion' => 'Excelente',
+        'horas_uso' => 15,
+        'limite_mantenimiento' => 50,
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('activos.edit', $activo->id_activo))
+        ->assertOk()
+        ->assertSee('Estado actual')
+        ->assertSee('Mantenimiento')
+        ->assertSee('Situación operativa')
+        ->assertDontSee('Condición operativa: <span class="font-bold text-anil-900">Excelente</span>', false);
+});
+
+it('keeps maintenance status when editing administrative inventory data', function () {
+    $user = User::factory()->create();
+    $activo = Activo::create([
+        'codigo_qr' => 'QR-100016',
+        'nombre' => 'Flauta en taller',
+        'categoria' => 'Instrumentos de Viento',
+        'estado_actual' => 'Mantenimiento',
+        'estado_condicion' => 'Excelente',
+        'horas_uso' => 15,
+        'limite_mantenimiento' => 50,
+    ]);
+
+    $this->actingAs($user)->patch(route('activos.update', $activo->id_activo), [
+        'nombre' => 'Flauta en taller actualizada',
+        'categoria' => 'Instrumentos de Viento',
+        'limite_mantenimiento' => 55,
+    ])->assertRedirect(route('activos.index'));
+
+    expect($activo->refresh()->estado_actual)->toBe('Mantenimiento')
+        ->and($activo->estado_condicion)->toBe('En reparacion');
+});
+
+it('keeps baja status when editing administrative inventory data', function () {
+    $user = User::factory()->create();
+    $activo = Activo::create([
+        'codigo_qr' => 'QR-100017',
+        'nombre' => 'Vestuario dado de baja',
+        'categoria' => 'Vestuario',
+        'estado_actual' => 'Baja',
+        'estado_condicion' => 'Excelente',
+        'horas_uso' => 15,
+        'limite_mantenimiento' => 50,
+    ]);
+
+    $this->actingAs($user)->patch(route('activos.update', $activo->id_activo), [
+        'nombre' => 'Vestuario dado de baja actualizado',
+        'categoria' => 'Vestuario',
+        'limite_mantenimiento' => 55,
+    ])->assertRedirect(route('activos.index'));
+
+    expect($activo->refresh()->estado_actual)->toBe('Baja')
+        ->and($activo->estado_condicion)->toBe('Baja definitiva');
+});
+
 it('can resolve an operational alert manually', function () {
     $user = User::factory()->create();
     $alerta = AlertaOperativa::create([

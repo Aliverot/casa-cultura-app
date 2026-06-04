@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class PrestamoController extends Controller
@@ -36,18 +37,55 @@ class PrestamoController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'fecha_devolucion_prevista' => 'required|date',
-            'id_activo' => 'required|exists:activos,id_activo',
-            'nombre_solicitante' => 'required|string|max:255',
-            'contacto_solicitante' => 'required|string|max:255',
-            'condiciones_entrega' => 'required|string',
+        $request->merge([
+            'nombre_solicitante' => preg_replace('/\s+/', ' ', trim((string) $request->input('nombre_solicitante'))),
+            'contacto_solicitante' => trim((string) $request->input('contacto_solicitante')),
+            'condiciones_entrega' => trim((string) $request->input('condiciones_entrega')),
         ]);
 
-        DB::transaction(function () use ($request) {
-            $activo = Activo::lockForUpdate()->findOrFail($request->id_activo);
+        $data = $request->validate([
+            'fecha_devolucion_prevista' => ['required', 'date'],
+            'id_activo' => ['required', 'exists:activos,id_activo'],
+            'nombre_solicitante' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[\pL]+(?:[ \'-][\pL]+)*(?:\s+[\pL]+(?:[ \'-][\pL]+)*)+$/u',
+            ],
+            'contacto_solicitante' => [
+                'required',
+                'digits:10',
+                'not_regex:/^(\d)\1{9}$/',
+                Rule::notIn(['0123456789', '1234567890', '9876543210', '0987654321']),
+            ],
+            'condiciones_entrega' => [
+                'required',
+                'string',
+                'min:8',
+                'max:2000',
+                'regex:/\pL/u',
+                'not_regex:/\d{6,}/',
+            ],
+        ], [
+            'nombre_solicitante.regex' => 'Escribe el nombre completo del solicitante, solo con letras y espacios.',
+            'contacto_solicitante.digits' => 'El teléfono del solicitante debe tener exactamente 10 dígitos.',
+            'contacto_solicitante.not_regex' => 'El teléfono del solicitante no puede ser una serie repetida.',
+            'contacto_solicitante.not_in' => 'El teléfono del solicitante no puede ser una secuencia numérica continua.',
+            'condiciones_entrega.min' => 'Las condiciones iniciales deben describirse con al menos 8 caracteres.',
+            'condiciones_entrega.regex' => 'Las condiciones iniciales deben incluir texto descriptivo.',
+            'condiciones_entrega.not_regex' => 'Las condiciones iniciales no deben contener números continuos.',
+        ], [
+            'fecha_devolucion_prevista' => 'devolución prevista',
+            'id_activo' => 'instrumento',
+            'nombre_solicitante' => 'nombre del solicitante',
+            'contacto_solicitante' => 'teléfono del solicitante',
+            'condiciones_entrega' => 'condiciones iniciales',
+        ]);
+
+        DB::transaction(function () use ($data) {
+            $activo = Activo::lockForUpdate()->findOrFail($data['id_activo']);
             $fechaSalida = now();
-            $fechaDevolucionPrevista = Carbon::parse($request->fecha_devolucion_prevista);
+            $fechaDevolucionPrevista = Carbon::parse($data['fecha_devolucion_prevista']);
 
             if ($fechaDevolucionPrevista->lt($fechaSalida->copy()->startOfMinute())) {
                 throw ValidationException::withMessages([
@@ -59,9 +97,9 @@ class PrestamoController extends Controller
                 'id_usuario' => Auth::id(),
                 'fecha_salida' => $fechaSalida,
                 'fecha_devolucion_prevista' => $fechaDevolucionPrevista,
-                'nombre_solicitante' => $request->nombre_solicitante,
-                'contacto_solicitante' => $request->contacto_solicitante,
-                'condiciones_entrega' => trim($request->condiciones_entrega),
+                'nombre_solicitante' => $data['nombre_solicitante'],
+                'contacto_solicitante' => $data['contacto_solicitante'],
+                'condiciones_entrega' => $data['condiciones_entrega'],
             ]);
 
             DetallePrestamo::create([
@@ -178,7 +216,7 @@ class PrestamoController extends Controller
                 'Instrumento',
                 'Código QR',
                 'Solicitante',
-                'Contacto',
+                'Teléfono',
                 'Resultado',
                 'Tiempo de uso (horas)',
                 'Condiciones de retorno',

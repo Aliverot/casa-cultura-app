@@ -26,7 +26,7 @@ it('blocks loans automatically when the asset state is under repair', function (
     $user = User::factory()->create();
     $activo = Activo::create([
         'codigo_qr' => 'QR-STATE-001',
-        'nombre' => 'Marimba en reparacion',
+        'nombre' => 'Marimba en reparación',
         'categoria' => 'Percusiones',
         'estado_actual' => Activo::ESTADO_MANTENIMIENTO,
         'estado_condicion' => Activo::ESTADO_CONDICION_EN_REPARACION,
@@ -39,7 +39,7 @@ it('blocks loans automatically when the asset state is under repair', function (
     $this->actingAs($user)->from(route('prestamos.create'))->post(route('prestamos.store'), [
         'id_activo' => $activo->id_activo,
         'nombre_solicitante' => 'Alumno Demo',
-        'contacto_solicitante' => 'MAT-STATE',
+        'contacto_solicitante' => '9517654321',
         'condiciones_entrega' => 'No debe salir.',
         'fecha_devolucion_prevista' => '2026-06-03T12:00',
     ])->assertSessionHasErrors('id_activo');
@@ -63,7 +63,7 @@ it('fires the daily assistant observer when an asset becomes damaged', function 
     $this->assertDatabaseHas('alertas_operativas', [
         'id_activo' => $activo->id_activo,
         'tipo' => 'Atencion a Dano',
-        'titulo' => 'Tienes objetos en estado Danado que requieren atencion',
+        'titulo' => 'Tienes objetos en estado dañado que requieren atención',
         'estado' => 'Pendiente',
     ]);
 });

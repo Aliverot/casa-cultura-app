@@ -23,6 +23,14 @@ class AlertasOperativasService
     private const REPAIR_COST_PERCENT = 60;
     private const FAILURE_LIMIT = 3;
     private const FAILURE_PERIOD_DAYS = 365;
+    private const ALERT_PRIORITY = [
+        'Atencion a Dano' => 10,
+        'Agenda Diaria de Prestamos' => 20,
+        'Fragilidad/Mal Uso' => 30,
+        'Baja y Adquisicion' => 40,
+        'Preparacion de Temporada' => 50,
+        'Incremento Historico de Prestamos' => 60,
+    ];
 
     public function precargarTemporadasBase(): int
     {
@@ -177,21 +185,15 @@ class AlertasOperativasService
             ->whereNotNull('id_activo')
             ->update(['estado' => 'Resuelta']);
 
-        AlertaOperativa::updateOrCreate(
+        $this->guardarAlertaPendiente(
+            'Preparacion de Temporada',
+            null,
+            'Preparación de temporada',
+            "{$motivo}. Se sugieren los ".self::SEASON_TOP_RESOURCES.' recursos más usados para mantenimiento preventivo.',
             [
-                'tipo' => 'Preparacion de Temporada',
-                'id_activo' => null,
-                'estado' => 'Pendiente',
-            ],
-            [
-                'titulo' => 'Preparación de temporada',
-                'descripcion' => "{$motivo}. Se sugieren los ".self::SEASON_TOP_RESOURCES.' recursos más usados para mantenimiento preventivo.',
-                'datos' => [
-                    'temporada_base' => $temporadaBase,
-                    'limite_recursos' => self::SEASON_TOP_RESOURCES,
-                    'recursos' => $recursos->all(),
-                ],
-                'fecha_alerta' => now(),
+                'temporada_base' => $temporadaBase,
+                'limite_recursos' => self::SEASON_TOP_RESOURCES,
+                'recursos' => $recursos->all(),
             ]
         );
     }
@@ -204,29 +206,32 @@ class AlertasOperativasService
             return;
         }
 
-        AlertaOperativa::updateOrCreate(
-            [
-                'tipo' => 'Incremento Historico de Prestamos',
-                'id_activo' => null,
-                'estado' => 'Pendiente',
-            ],
-            [
-                'titulo' => 'Incremento histórico de préstamos',
-                'descripcion' => "La demanda reciente subió {$datosHistoricos['incremento_porcentaje']}% frente al periodo anterior. Se sugieren los ".self::SEASON_TOP_RESOURCES.' recursos más usados para mantenimiento preventivo.',
-                'datos' => array_merge($datosHistoricos, [
-                    'limite_recursos' => self::SEASON_TOP_RESOURCES,
-                    'recursos' => $recursos->all(),
-                ]),
-                'fecha_alerta' => now(),
-            ]
+        $this->guardarAlertaPendiente(
+            'Incremento Historico de Prestamos',
+            null,
+            'Incremento histórico de préstamos',
+            "La demanda reciente subió {$datosHistoricos['incremento_porcentaje']}% frente al periodo anterior. Se sugieren los ".self::SEASON_TOP_RESOURCES.' recursos más usados para mantenimiento preventivo.',
+            array_merge($datosHistoricos, [
+                'limite_recursos' => self::SEASON_TOP_RESOURCES,
+                'recursos' => $recursos->all(),
+            ])
         );
     }
 
     public function alertasPendientes(int $limite = 6): Collection
     {
+        $prioridadSql = 'CASE tipo '
+            .collect(self::ALERT_PRIORITY)
+                ->map(fn (int $prioridad, string $tipo) => "WHEN '{$tipo}' THEN {$prioridad} ")
+                ->implode('')
+            .'ELSE 99 END';
+
         return AlertaOperativa::with('activo')
             ->where('estado', 'Pendiente')
-            ->orderByDesc('fecha_alerta')
+            ->orderByRaw($prioridadSql)
+            ->orderByRaw('CASE WHEN id_activo IS NULL THEN 1 ELSE 0 END')
+            ->orderBy('id_activo')
+            ->orderBy('id_alerta')
             ->limit($limite)
             ->get();
     }
@@ -240,8 +245,8 @@ class AlertasOperativasService
         return $this->guardarAlerta(
             'Atencion a Dano',
             $activo,
-            'Tienes objetos en estado Danado que requieren atencion',
-            "El recurso {$activo->nombre} esta marcado como danado o en reparacion. Programa revision antes de autorizar otro prestamo.",
+            'Tienes objetos en estado dañado que requieren atención',
+            "El recurso {$activo->nombre} está marcado como dañado o en reparación. Programa revisión antes de autorizar otro préstamo.",
             [
                 'estado_actual' => $activo->estado_actual,
                 'estado_condicion' => $activo->estado_condicion,
@@ -266,6 +271,8 @@ class AlertasOperativasService
             ->whereHas('prestamo', function ($query) use ($hoy) {
                 $query->whereDate('fecha_devolucion_prevista', $hoy);
             })
+            ->orderBy('id_activo')
+            ->orderBy('id_detalle')
             ->get();
 
         if ($materiales->isEmpty()) {
@@ -284,20 +291,14 @@ class AlertasOperativasService
             'fecha_prevista' => $detalle->prestamo?->fecha_devolucion_prevista?->format('Y-m-d H:i'),
         ])->values()->all();
 
-        $alerta = AlertaOperativa::updateOrCreate(
+        $alerta = $this->guardarAlertaPendiente(
+            'Agenda Diaria de Prestamos',
+            null,
+            'Hoy se deben recoger/entregar estos materiales',
+            'El asistente diario encontró préstamos con devolución prevista para hoy.',
             [
-                'tipo' => 'Agenda Diaria de Prestamos',
-                'id_activo' => null,
-                'estado' => 'Pendiente',
-            ],
-            [
-                'titulo' => 'Hoy se deben recoger/entregar estos materiales',
-                'descripcion' => 'El asistente diario encontro prestamos con devolucion prevista para hoy.',
-                'datos' => [
-                    'fecha' => $hoy,
-                    'materiales' => $items,
-                ],
-                'fecha_alerta' => now(),
+                'fecha' => $hoy,
+                'materiales' => $items,
             ]
         );
 
@@ -379,6 +380,7 @@ class AlertasOperativasService
             ->selectRaw('COUNT(*) as total_prestamos')
             ->groupBy('id_activo')
             ->orderByDesc('total_prestamos')
+            ->orderBy('id_activo')
             ->limit(self::SEASON_TOP_RESOURCES)
             ->get();
 
@@ -401,7 +403,11 @@ class AlertasOperativasService
         }
 
         $hoy = now()->startOfDay();
-        $temporadas = DB::table('temporadas_base')->where('activa', true)->get();
+        $temporadas = DB::table('temporadas_base')
+            ->where('activa', true)
+            ->orderBy('fecha_inicio')
+            ->orderBy('nombre')
+            ->get();
 
         foreach ($temporadas as $temporada) {
             foreach ([$hoy->year - 1, $hoy->year, $hoy->year + 1] as $year) {
@@ -470,18 +476,29 @@ class AlertasOperativasService
 
     private function guardarAlerta(string $tipo, Activo $activo, string $titulo, string $descripcion, array $datos): AlertaOperativa
     {
-        return AlertaOperativa::updateOrCreate(
-            [
-                'tipo' => $tipo,
-                'id_activo' => $activo->id_activo,
-                'estado' => 'Pendiente',
-            ],
-            [
-                'titulo' => $titulo,
-                'descripcion' => $descripcion,
-                'datos' => $datos,
-                'fecha_alerta' => now(),
-            ]
-        );
+        return $this->guardarAlertaPendiente($tipo, $activo, $titulo, $descripcion, $datos);
+    }
+
+    private function guardarAlertaPendiente(string $tipo, ?Activo $activo, string $titulo, string $descripcion, array $datos): AlertaOperativa
+    {
+        $alerta = AlertaOperativa::firstOrNew([
+            'tipo' => $tipo,
+            'id_activo' => $activo?->id_activo,
+            'estado' => 'Pendiente',
+        ]);
+
+        $alerta->fill([
+            'titulo' => $titulo,
+            'descripcion' => $descripcion,
+            'datos' => $datos,
+        ]);
+
+        if (! $alerta->exists || ! $alerta->fecha_alerta) {
+            $alerta->fecha_alerta = now();
+        }
+
+        $alerta->save();
+
+        return $alerta;
     }
 }

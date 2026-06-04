@@ -1,10 +1,4 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-anil-800 leading-tight">
-            {{ __('Centro de devoluciones') }}
-        </h2>
-    </x-slot>
-
     <div class="py-12 bg-hueso-100 min-h-screen">
         <div class="module-page-shell">
             <x-module-nav current="devoluciones" />
@@ -39,7 +33,7 @@
                                             Responsable:
                                             <span class="text-anil-900">{{ $item->prestamo->nombre_solicitante }}</span>
                                         </p>
-                                        <p class="text-xs text-cantera-600">Contacto: {{ $item->prestamo->contacto_solicitante }}</p>
+                                        <p class="text-xs text-cantera-600">Teléfono: {{ $item->prestamo->contacto_solicitante }}</p>
                                     </div>
 
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -126,7 +120,7 @@
                                             >{{ old('accesorios_proteccion') }}</textarea>
                                         </div>
 
-                                        <button type="submit" class="w-full bg-cultura-600 hover:bg-cultura-700 text-hueso-50 font-black py-3 rounded-xl shadow-md uppercase text-xs tracking-widest">
+                                        <button type="submit" class="btn-primary-wide py-3 text-xs">
                                             Procesar devolución
                                         </button>
                                     </form>

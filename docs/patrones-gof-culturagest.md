@@ -95,10 +95,10 @@ classDiagram
     AlertasOperativasService --> AlertaOperativa : crea/resuelve
 ```
 
-## Impacto arquitectonico
+## Impacto arquitectónico
 
-- **State** mueve la regla de prestamo al estado del activo. Si el activo esta en reparacion o danado, `registrarPrestamo()` bloquea la operacion automaticamente, sin duplicar condiciones en controladores.
-- **Observer** desacopla el asistente de los flujos de pantalla. Cualquier cambio en `Activo` o alta de `Mantenimiento` dispara la evaluacion de alertas, aunque el cambio venga de un controlador, seeder, job o comando futuro.
-- **Singleton** centraliza el control de avisos en `AlertasOperativasService`. Esto evita multiples estrategias de creacion de alertas y permite auditar en un solo lugar que mensajes se generan, actualizan o resuelven.
-- La trazabilidad mejora porque cada alerta queda persistida con `tipo`, `id_activo`, `datos` y `fecha_alerta`; el personal puede reconstruir por que un bien cultural fue bloqueado, enviado a revision o propuesto para reemplazo.
-- El mantenimiento preventivo mejora porque el sistema ya no depende solo de que alguien revise manualmente el inventario: el asistente registra alertas por dano/reparacion y agenda diaria de prestamos con devolucion prevista para hoy.
+- **State** mueve la regla de préstamo al estado del activo. Si el activo está en reparación o dañado, `registrarPrestamo()` bloquea la operación automáticamente, sin duplicar condiciones en controladores.
+- **Observer** desacopla el asistente de los flujos de pantalla. Cualquier cambio en `Activo` o alta de `Mantenimiento` dispara la evaluación de alertas, aunque el cambio venga de un controlador, seeder, job o comando futuro.
+- **Singleton** centraliza el control de avisos en `AlertasOperativasService`. Esto evita múltiples estrategias de creación de alertas y permite auditar en un solo lugar qué mensajes se generan, actualizan o resuelven.
+- La trazabilidad mejora porque cada alerta queda persistida con `tipo`, `id_activo`, `datos` y `fecha_alerta`; el personal puede reconstruir por qué un bien cultural fue bloqueado, enviado a revisión o propuesto para reemplazo.
+- El mantenimiento preventivo mejora porque el sistema ya no depende solo de que alguien revise manualmente el inventario: el asistente registra alertas por daño/reparación y agenda diaria de préstamos con devolución prevista para hoy.

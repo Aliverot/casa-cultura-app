@@ -1,10 +1,4 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-anil-800 leading-tight">
-            {{ __('Panel de control - Casa de la Cultura') }}
-        </h2>
-    </x-slot>
-
     <div class="py-12 bg-hueso-100 min-h-screen">
         <div class="module-page-shell">
             <x-module-nav />
@@ -45,14 +39,18 @@
                             @php
                                 [$alertaBorde, $alertaFondo, $alertaTexto, $alertaCaja] = match ($alerta->tipo) {
                                     'Fragilidad/Mal Uso' => ['border-oxido-100', 'bg-oxido-50', 'text-oxido-700', 'border-oxido-200'],
+                                    'Atencion a Dano' => ['border-oxido-100', 'bg-oxido-50', 'text-oxido-700', 'border-oxido-200'],
                                     'Preparacion de Temporada' => ['border-anil-100', 'bg-anil-50', 'text-anil-700', 'border-anil-200'],
+                                    'Agenda Diaria de Prestamos' => ['border-anil-100', 'bg-anil-50', 'text-anil-700', 'border-anil-200'],
                                     'Incremento Historico de Prestamos' => ['border-cantera-100', 'bg-cantera-50', 'text-cantera-700', 'border-cantera-200'],
                                     'Baja y Adquisicion' => ['border-ocre-100', 'bg-ocre-50', 'text-ocre-700', 'border-ocre-200'],
                                     default => ['border-hueso-200', 'bg-hueso-50', 'text-anil-700', 'border-hueso-300'],
                                 };
 
                                 $alertaTipo = match ($alerta->tipo) {
+                                    'Atencion a Dano' => 'Atención a daño',
                                     'Preparacion de Temporada' => 'Preparación de temporada',
+                                    'Agenda Diaria de Prestamos' => 'Agenda diaria de préstamos',
                                     'Incremento Historico de Prestamos' => 'Incremento histórico de préstamos',
                                     'Baja y Adquisicion' => 'Baja y adquisición',
                                     default => $alerta->tipo,
@@ -160,7 +158,7 @@
 
                                 <form action="{{ route('alertas.resolver', $alerta->id_alerta) }}" method="POST" class="mt-4 text-right">
                                     @csrf
-                                    <button type="submit" class="rounded-lg bg-hueso-50 px-4 py-2 text-xs font-black uppercase tracking-widest text-cantera-700 shadow-sm transition hover:bg-gray-900 hover:text-hueso-50">
+                                    <button type="submit" class="btn-soft">
                                         Marcar resuelta
                                     </button>
                                 </form>

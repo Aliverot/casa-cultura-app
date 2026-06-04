@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="sticky top-0 z-50 border-b border-ocre-400 bg-anil-900/95 shadow-lg shadow-anil-900/25 backdrop-blur">
+<nav x-data="{ open: false }" class="sticky top-0 z-50 border-b border-ocre-400 bg-cantera-700/95 shadow-lg shadow-cantera-900/25 backdrop-blur">
     <div class="module-page-shell">
         <div class="grid h-16 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
             <div class="min-w-0 flex items-center">
@@ -6,21 +6,15 @@
                     <x-application-logo class="block h-9 w-auto shrink-0 fill-current text-hueso-50" />
                     <span class="hidden min-w-0 flex-col leading-tight md:flex">
                         <span class="text-base font-black text-hueso-50">CulturaGest</span>
-                        <span class="text-xs font-bold uppercase tracking-widest text-ocre-200">Casa de la Cultura Cuil&aacute;pam</span>
+                        <span class="text-xs font-bold uppercase tracking-widest text-ocre-200">Casa de la Cultura Cuilápam</span>
                     </span>
                 </a>
-            </div>
-
-            <div class="hidden min-w-0 justify-self-center md:block">
-                <span class="block max-w-[34rem] truncate rounded-full border border-cantera-500/50 bg-anil-800/80 px-4 py-2 text-center text-xs font-black uppercase tracking-widest text-hueso-50 shadow-inner shadow-anil-900/30 lg:max-w-[42rem]">
-                    Cuilapam de Guerrero - Casa de la Cultura
-                </span>
             </div>
 
             <div class="hidden justify-self-end sm:flex sm:items-center">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
-                        <button class="inline-flex items-center gap-3 rounded-lg border border-ocre-300/60 bg-anil-800 px-3 py-2 text-sm font-bold leading-4 text-hueso-50 transition duration-150 hover:bg-anil-700 focus:outline-none focus:ring-2 focus:ring-ocre-300">
+                        <button class="inline-flex items-center gap-3 rounded-lg border border-ocre-300/60 bg-cantera-800 px-3 py-2 text-sm font-bold leading-4 text-hueso-50 transition duration-150 hover:bg-cantera-700 focus:outline-none focus:ring-2 focus:ring-ocre-300">
                             <span class="grid h-8 w-8 place-items-center rounded-full bg-ocre-400 text-xs font-black text-anil-900">
                                 {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                             </span>
@@ -42,7 +36,7 @@
                             @csrf
                             <x-dropdown-link :href="route('logout')"
                                 onclick="event.preventDefault(); this.closest('form').submit();">
-                                {{ __('Cerrar sesion') }}
+                                {{ __('Cerrar sesión') }}
                             </x-dropdown-link>
                         </form>
                     </x-slot>
@@ -50,7 +44,7 @@
             </div>
 
             <div class="-me-2 flex items-center justify-self-end sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center rounded-lg border border-ocre-300/40 p-2 text-hueso-50 transition duration-150 ease-in-out hover:bg-anil-800 focus:outline-none focus:ring-2 focus:ring-ocre-300" aria-label="Abrir menu">
+                <button @click="open = ! open" class="inline-flex items-center justify-center rounded-lg border border-ocre-300/40 p-2 text-hueso-50 transition duration-150 ease-in-out hover:bg-cantera-800 focus:outline-none focus:ring-2 focus:ring-ocre-300" aria-label="Abrir menú">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{ 'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         <path :class="{ 'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -60,9 +54,9 @@
         </div>
     </div>
 
-    <div :class="{ 'block': open, 'hidden': ! open }" class="hidden border-t border-ocre-400/40 bg-anil-900/95 shadow-xl shadow-anil-900/20 sm:hidden">
+    <div :class="{ 'block': open, 'hidden': ! open }" class="hidden border-t border-ocre-400/40 bg-cantera-700/95 shadow-xl shadow-cantera-900/20 sm:hidden">
         <div class="module-page-shell py-4">
-            <div class="rounded-xl border border-ocre-300/40 bg-anil-800 p-4 text-hueso-50">
+            <div class="rounded-xl border border-ocre-300/40 bg-cantera-800 p-4 text-hueso-50">
                 <div class="text-base font-black">{{ Auth::user()->name }}</div>
                 <div class="text-sm font-medium text-ocre-200">{{ Auth::user()->email }}</div>
             </div>
@@ -74,7 +68,7 @@
                     @csrf
                     <x-responsive-nav-link :href="route('logout')" class="text-hueso-50"
                         onclick="event.preventDefault(); this.closest('form').submit();">
-                        {{ __('Cerrar sesion') }}
+                        {{ __('Cerrar sesión') }}
                     </x-responsive-nav-link>
                 </form>
             </div>

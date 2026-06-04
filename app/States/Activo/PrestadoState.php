@@ -15,7 +15,7 @@ class PrestadoState implements ActivoEstado
     public function registrarPrestamo(Activo $activo): void
     {
         throw ValidationException::withMessages([
-            'id_activo' => 'El instrumento ya tiene un prestamo activo.',
+            'id_activo' => 'El instrumento ya tiene un préstamo activo.',
         ]);
     }
 }

@@ -7,18 +7,18 @@
 
         <title>{{ config('app.name', 'CulturaGest') }}</title>
 
-        <!-- Fonts -->
+        <!-- Fuentes -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-        <!-- Scripts -->
+        <!-- Scripts de la aplicación -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-hueso-100 dark:bg-anil-900">
             @include('layouts.navigation')
 
-            <!-- Page Heading -->
+            <!-- Encabezado de página -->
             @isset($header)
                 <header class="border-b-2 border-cantera-500 bg-hueso-50 shadow">
                     <div class="module-page-shell py-8 [&_h2]:text-3xl [&_h2]:font-bold [&_h2]:leading-tight [&_h2]:tracking-tight [&_h2]:text-anil-900 sm:[&_h2]:text-4xl">
@@ -45,7 +45,7 @@
                 </div>
             @endif
 
-            <!-- Page Content -->
+            <!-- Contenido de página -->
             <main>
                 {{ $slot }}
             </main>

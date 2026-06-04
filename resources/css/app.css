@@ -32,28 +32,38 @@
 
 @layer components {
     .module-nav-shell {
-        @apply sticky top-[4.5rem] z-40 mb-8 grid w-full gap-3 rounded-xl border border-ocre-300/30 bg-anil-900/95 px-3 py-3 shadow-xl shadow-anil-900/25 backdrop-blur md:grid-cols-[minmax(13rem,20rem)_minmax(0,1fr)] md:items-center md:px-5 md:py-4 2xl:grid-cols-[minmax(18rem,28rem)_minmax(0,1fr)];
+        @apply sticky top-[4.5rem] z-40 mb-8 grid w-full gap-3 rounded-xl border border-cantera-300/40 bg-cantera-700/95 px-3 py-3 shadow-xl shadow-cantera-900/25 backdrop-blur md:px-5 md:py-4 2xl:grid-cols-[minmax(0,max-content)_minmax(0,1fr)] 2xl:items-center;
     }
 
     .module-nav-heading {
-        @apply flex min-w-0 items-center border-b border-ocre-300/20 pb-2 md:min-h-12 md:border-b-0 md:border-r md:border-ocre-300/20 md:pb-0 md:pr-6 lg:pr-8;
+        @apply flex min-w-0 items-center border-b border-ocre-300/20 pb-2 2xl:min-h-12 2xl:border-b-0 2xl:border-r 2xl:border-ocre-300/20 2xl:pb-0 2xl:pr-5;
     }
 
     .module-nav-title {
-        @apply truncate text-xl font-black uppercase tracking-tight text-hueso-50 sm:text-2xl lg:text-3xl;
+        @apply truncate text-2xl font-black uppercase tracking-tight text-hueso-50;
     }
 
     .module-nav-list {
-        @apply flex min-w-0 snap-x items-center justify-start gap-2 overflow-x-auto scroll-smooth pb-1 md:pb-0 lg:gap-3 2xl:justify-center;
-        scrollbar-width: none;
+        @apply flex min-w-0 snap-x items-center justify-start gap-2 overflow-x-auto scroll-smooth pb-1 md:grid md:grid-cols-4 md:overflow-visible md:pb-0 xl:grid-cols-7 2xl:justify-center;
+        scrollbar-color: rgba(213, 159, 36, 0.8) transparent;
+        scrollbar-width: thin;
     }
 
     .module-nav-list::-webkit-scrollbar {
-        display: none;
+        height: 0.35rem;
+    }
+
+    .module-nav-list::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .module-nav-list::-webkit-scrollbar-thumb {
+        background: rgba(213, 159, 36, 0.8);
+        border-radius: 9999px;
     }
 
     .module-nav-link {
-        @apply inline-flex min-h-12 shrink-0 snap-start items-center justify-center whitespace-nowrap rounded-lg border px-4 py-2.5 text-sm font-black tracking-wide transition duration-150 lg:min-w-[7.5rem] lg:px-5;
+        @apply inline-flex min-h-12 min-w-[6.25rem] shrink-0 snap-start items-center justify-center whitespace-nowrap rounded-lg border px-3 py-2.5 text-center text-sm font-black leading-tight tracking-wide transition duration-150 md:w-full md:min-w-0 md:shrink md:px-2 lg:px-3;
     }
 
     .module-nav-link-active {
@@ -61,7 +71,7 @@
     }
 
     .module-nav-link-idle {
-        @apply border-cantera-500/50 text-hueso-50 hover:border-ocre-300 hover:bg-anil-800 hover:text-ocre-100;
+        @apply border-cantera-300/50 text-hueso-50 hover:border-ocre-300 hover:bg-cantera-800 hover:text-ocre-100;
     }
 
     .module-page-shell {
@@ -70,5 +80,25 @@
 
     .module-card {
         @apply rounded-xl border border-cantera-200 bg-hueso-50 p-8 shadow-xl shadow-cantera-900/10 lg:p-10;
+    }
+
+    .btn-primary {
+        @apply inline-flex min-h-11 items-center justify-center rounded-xl border border-transparent bg-cultura-600 px-6 py-3 text-sm font-black uppercase tracking-widest text-hueso-50 shadow transition hover:bg-cultura-700 focus:outline-none focus:ring-2 focus:ring-cultura-300 focus:ring-offset-2 focus:ring-offset-hueso-50;
+    }
+
+    .btn-primary-wide {
+        @apply flex w-full min-h-12 items-center justify-center rounded-xl border border-transparent bg-cultura-600 px-6 py-4 text-sm font-black uppercase tracking-widest text-hueso-50 shadow-lg transition hover:bg-cultura-700 focus:outline-none focus:ring-2 focus:ring-cultura-300 focus:ring-offset-2 focus:ring-offset-hueso-50;
+    }
+
+    .btn-cancel {
+        @apply inline-flex min-h-11 items-center justify-center rounded-xl border border-oxido-200 bg-oxido-50 px-5 py-3 text-sm font-black uppercase tracking-widest text-oxido-700 shadow-sm transition hover:bg-oxido-100 hover:text-oxido-800 focus:outline-none focus:ring-2 focus:ring-oxido-200 focus:ring-offset-2 focus:ring-offset-hueso-50;
+    }
+
+    .btn-danger {
+        @apply inline-flex min-h-11 items-center justify-center rounded-xl border border-oxido-300 bg-oxido-50 px-5 py-3 text-sm font-black uppercase tracking-widest text-oxido-700 transition hover:bg-oxido-100 hover:text-oxido-800 focus:outline-none focus:ring-2 focus:ring-oxido-200 focus:ring-offset-2 focus:ring-offset-hueso-50;
+    }
+
+    .btn-soft {
+        @apply inline-flex min-h-10 items-center justify-center rounded-lg border border-cantera-200 bg-hueso-50 px-4 py-2 text-xs font-black uppercase tracking-widest text-cantera-700 shadow-sm transition hover:bg-cantera-100 hover:text-cantera-900 focus:outline-none focus:ring-2 focus:ring-cantera-200 focus:ring-offset-2 focus:ring-offset-hueso-50;
     }
 }

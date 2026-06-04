@@ -84,4 +84,39 @@ class Activo extends Model
     {
         return self::etiquetaEstadoCondicion($this->estado_condicion);
     }
+
+    public function estadoActualLegible(): string
+    {
+        return match ($this->estado_actual) {
+            self::ESTADO_EN_REPARACION => 'En reparación',
+            self::ESTADO_DANADO => 'Dañado',
+            default => $this->estado_actual ?: self::ESTADO_DISPONIBLE,
+        };
+    }
+
+    public function estadoCondicionEfectiva(): string
+    {
+        return match ($this->estado_actual) {
+            self::ESTADO_BAJA => 'Baja definitiva',
+            self::ESTADO_MANTENIMIENTO, self::ESTADO_EN_REPARACION => in_array($this->estado_condicion, [self::ESTADO_DANADO, 'Dañado'], true)
+                ? self::ESTADO_DANADO
+                : self::ESTADO_CONDICION_EN_REPARACION,
+            self::ESTADO_DANADO => self::ESTADO_DANADO,
+            default => $this->estado_condicion ?: 'Excelente',
+        };
+    }
+
+    public function estadoOperativoResumen(): string
+    {
+        return match ($this->estado_actual) {
+            self::ESTADO_DISPONIBLE => self::etiquetaEstadoCondicion($this->estadoCondicionEfectiva()),
+            self::ESTADO_BAJA => 'Baja definitiva',
+            default => $this->estadoActualLegible(),
+        };
+    }
+
+    public function tieneEstadoOperativoProtegido(): bool
+    {
+        return $this->estado_actual !== self::ESTADO_DISPONIBLE;
+    }
 }

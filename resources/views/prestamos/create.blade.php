@@ -1,10 +1,4 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-hueso-50 leading-tight">
-            {{ __('Registrar nuevo préstamo') }}
-        </h2>
-    </x-slot>
-
     <div class="py-12 bg-hueso-100 min-h-screen">
         <div class="module-page-shell">
             <x-module-nav current="prestamos" />
@@ -25,7 +19,7 @@
                     <div class="text-center py-16">
                         <p class="text-2xl font-black text-anil-800">No hay instrumentos disponibles en este momento.</p>
                         <p class="text-cantera-600 mt-3">Revisa el inventario o procesa una devolución para liberar equipo.</p>
-                        <a href="{{ route('activos.index') }}" class="inline-flex items-center mt-6 px-6 py-3 bg-cultura-600 text-hueso-50 rounded-xl font-bold shadow-md hover:bg-cultura-700 transition">
+                        <a href="{{ route('activos.index') }}" class="btn-primary mt-6">
                             Volver al catálogo
                         </a>
                     </div>
@@ -54,20 +48,31 @@
                                         name="nombre_solicitante"
                                         value="{{ old('nombre_solicitante') }}"
                                         required
+                                        autocomplete="name"
+                                        data-full-name
+                                        pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?:[ '-][A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*(?:\s+[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?:[ '-][A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*)+"
+                                        title="Escribe nombre completo, solo con letras y espacios."
                                         class="w-full mt-1 border-cantera-300 focus:border-ocre-500 focus:ring-ocre-400 rounded-md shadow-sm"
-                                        placeholder="Alumno, profesor o responsable"
+                                        placeholder="Nombre completo"
                                     >
                                 </div>
 
                                 <div>
-                                    <label class="block font-medium text-sm text-anil-700">Contacto o identificador</label>
+                                    <label class="block font-medium text-sm text-anil-700">Teléfono del solicitante</label>
                                     <input
-                                        type="text"
+                                        type="tel"
                                         name="contacto_solicitante"
                                         value="{{ old('contacto_solicitante') }}"
                                         required
+                                        inputmode="numeric"
+                                        autocomplete="tel"
+                                        minlength="10"
+                                        maxlength="10"
+                                        pattern="[0-9]{10}"
+                                        data-digits-only
+                                        title="Escribe un teléfono de 10 dígitos."
                                         class="w-full mt-1 border-cantera-300 focus:border-ocre-500 focus:ring-ocre-400 rounded-md shadow-sm"
-                                        placeholder="Teléfono, matrícula o control"
+                                        placeholder="10 dígitos"
                                     >
                                 </div>
                             </div>
@@ -78,6 +83,9 @@
                                     name="condiciones_entrega"
                                     rows="4"
                                     required
+                                    minlength="8"
+                                    maxlength="2000"
+                                    data-no-long-digits
                                     class="w-full border-cantera-300 focus:border-ocre-500 focus:ring-ocre-400 rounded-md shadow-sm p-4 text-anil-700 text-base"
                                     placeholder="Ej. En perfectas condiciones, con funda, arco completo, cuerda floja en la cuarta."
                                 >{{ old('condiciones_entrega') }}</textarea>
@@ -115,8 +123,8 @@
                             </div>
 
                             <div class="flex items-center justify-end gap-3 pt-4">
-                                <a href="{{ route('activos.index') }}" class="text-cantera-700 hover:underline">Cancelar</a>
-                                <button type="submit" class="inline-flex items-center px-6 py-3 bg-cultura-600 border border-transparent rounded-md font-semibold text-hueso-50 uppercase tracking-widest hover:bg-cultura-700 focus:outline-none focus:ring ring-cultura-300 transition shadow-lg">
+                                <a href="{{ route('activos.index') }}" class="btn-cancel">Cancelar</a>
+                                <button type="submit" class="btn-primary">
                                     Confirmar préstamo
                                 </button>
                             </div>

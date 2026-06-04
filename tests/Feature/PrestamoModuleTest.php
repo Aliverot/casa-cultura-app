@@ -26,7 +26,7 @@ it('marks an asset as unavailable when a loan is created', function () {
     $response = $this->actingAs($user)->post(route('prestamos.store'), [
         'id_activo' => $activo->id_activo,
         'nombre_solicitante' => 'Alumno Demo',
-        'contacto_solicitante' => 'MAT-001',
+        'contacto_solicitante' => '9511234567',
         'condiciones_entrega' => 'En perfectas condiciones',
         'fecha_devolucion_prevista' => '2026-04-27T10:00',
     ]);
@@ -45,6 +45,40 @@ it('marks an asset as unavailable when a loan is created', function () {
         'id_activo' => $activo->id_activo,
         'estado_salida' => 'Prestado',
     ]);
+});
+
+it('validates requester name phone and initial conditions when creating a loan', function () {
+    Carbon::setTestNow('2026-04-27 10:00:00');
+
+    $user = User::factory()->create();
+    $activo = Activo::create([
+        'codigo_qr' => 'QR-100019',
+        'nombre' => 'Guitarra validación',
+        'categoria' => 'Instrumentos de Cuerda',
+        'estado_actual' => 'Disponible',
+        'horas_uso' => 0,
+        'limite_mantenimiento' => 100,
+    ]);
+
+    $this->actingAs($user)->post(route('prestamos.store'), [
+        'id_activo' => $activo->id_activo,
+        'nombre_solicitante' => 'Ana123',
+        'contacto_solicitante' => '951ABC1234',
+        'condiciones_entrega' => '123456',
+        'fecha_devolucion_prevista' => '2026-04-27T11:00',
+    ])->assertSessionHasErrors([
+        'nombre_solicitante',
+        'contacto_solicitante',
+        'condiciones_entrega',
+    ]);
+
+    $this->actingAs($user)->post(route('prestamos.store'), [
+        'id_activo' => $activo->id_activo,
+        'nombre_solicitante' => 'Ana Rivera',
+        'contacto_solicitante' => '1234567890',
+        'condiciones_entrega' => 'Sale en buen estado general',
+        'fecha_devolucion_prevista' => '2026-04-27T11:00',
+    ])->assertSessionHasErrors(['contacto_solicitante']);
 });
 
 it('does not force one hour of use when the return is immediate', function () {

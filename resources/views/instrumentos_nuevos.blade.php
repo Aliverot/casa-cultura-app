@@ -1,10 +1,4 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-anil-800 leading-tight">
-            {{ __('Registrar nuevo instrumento / activo') }}
-        </h2>
-    </x-slot>
-
     <div class="min-h-screen bg-hueso-100 py-12">
         <div class="module-page-shell">
             <x-module-nav current="instrumentos" />
@@ -104,7 +98,7 @@
                     </div>
 
                     <div class="flex justify-end">
-                        <button type="submit" class="rounded-xl bg-cultura-600 px-6 py-3 font-bold text-hueso-50 shadow transition hover:bg-cultura-700">
+                        <button type="submit" class="btn-primary">
                             Guardar en inventario
                         </button>
                     </div>

@@ -85,7 +85,16 @@ class ActivoController extends Controller
             'estado_condicion' => 'nullable|in:' . implode(',', Activo::ESTADOS_CONDICION),
         ]);
 
-        $estadoCondicion = $request->input('estado_condicion', $activo->estado_condicion ?: 'Excelente');
+        $estadoCondicion = $request->input('estado_condicion', $activo->estadoCondicionEfectiva());
+
+        if ($activo->estado_actual === Activo::ESTADO_BAJA) {
+            $estadoCondicion = 'Baja definitiva';
+        }
+
+        if (in_array($activo->estado_actual, [Activo::ESTADO_MANTENIMIENTO, Activo::ESTADO_EN_REPARACION], true)
+            && ! in_array($estadoCondicion, [Activo::ESTADO_CONDICION_EN_REPARACION, Activo::ESTADO_DANADO], true)) {
+            $estadoCondicion = Activo::ESTADO_CONDICION_EN_REPARACION;
+        }
 
         if ($activo->estado_actual === 'No disponible' && in_array($estadoCondicion, ['En reparacion', 'Danado', 'Baja definitiva'], true)) {
             throw ValidationException::withMessages([

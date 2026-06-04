@@ -4,7 +4,7 @@
     $items = [
         [
             'key' => 'catalogo',
-            'label' => 'Catalogo',
+            'label' => 'Catálogo',
             'route' => route('activos.index'),
         ],
         [
@@ -14,7 +14,7 @@
         ],
         [
             'key' => 'prestamos',
-            'label' => 'Prestamo',
+            'label' => 'Préstamo',
             'route' => route('prestamos.create'),
         ],
         [
@@ -34,20 +34,20 @@
         ],
         [
             'key' => 'historial',
-            'label' => 'Historico',
+            'label' => 'Histórico',
             'route' => route('prestamos.historial'),
         ],
     ];
 
     $activeItem = collect($items)->firstWhere('key', $current);
     $pageTitle = $title ?? match ($current) {
-        'catalogo' => 'Gestion de inventario',
+        'catalogo' => 'Gestión de inventario',
         'instrumentos' => 'Registro de nuevo activo',
-        'prestamos' => 'Nuevo prestamo',
+        'prestamos' => 'Nuevo préstamo',
         'devoluciones' => 'Centro de devoluciones',
         'mantenimiento' => 'Mantenimiento preventivo',
         'temporadas' => 'Temporadas culturales',
-        'historial' => 'Historico de prestamos',
+        'historial' => 'Histórico de préstamos',
         default => 'Panel de control',
     };
 @endphp
@@ -57,7 +57,7 @@
         <span class="module-nav-title">{{ $pageTitle }}</span>
     </div>
 
-    <nav class="module-nav-list" aria-label="Navegacion principal del sistema">
+    <nav class="module-nav-list" aria-label="Navegación principal del sistema">
         @foreach ($items as $item)
             <a
                 href="{{ $item['route'] }}"

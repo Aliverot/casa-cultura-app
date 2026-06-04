@@ -5,6 +5,7 @@ use App\Models\AlertaOperativa;
 use App\Models\DetallePrestamo;
 use App\Models\Prestamo;
 use App\Models\User;
+use App\Services\AlertasOperativasService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -425,4 +426,51 @@ it('shows pending replacement reports in maintenance', function () {
         ->assertSee('TR-2026')
         ->assertSee('75.0%')
         ->assertSee('Preventivo: $150.00 MXN');
+});
+
+it('keeps operational alerts in a stable priority order', function () {
+    Carbon::setTestNow('2026-06-04 12:00:00');
+
+    $activo = Activo::create([
+        'codigo_qr' => 'QR-ALERTAS-ORDEN',
+        'nombre' => 'Violín con alerta',
+        'categoria' => 'Instrumentos de Cuerda',
+        'estado_actual' => 'Disponible',
+        'estado_condicion' => 'Excelente',
+        'horas_uso' => 0,
+        'limite_mantenimiento' => 20,
+    ]);
+
+    AlertaOperativa::create([
+        'tipo' => 'Incremento Historico de Prestamos',
+        'titulo' => 'Incremento',
+        'descripcion' => 'Prueba',
+        'estado' => 'Pendiente',
+        'fecha_alerta' => now()->addMinutes(5),
+    ]);
+
+    AlertaOperativa::create([
+        'tipo' => 'Agenda Diaria de Prestamos',
+        'titulo' => 'Agenda',
+        'descripcion' => 'Prueba',
+        'estado' => 'Pendiente',
+        'fecha_alerta' => now()->addMinutes(4),
+    ]);
+
+    AlertaOperativa::create([
+        'id_activo' => $activo->id_activo,
+        'tipo' => 'Atencion a Dano',
+        'titulo' => 'Atención',
+        'descripcion' => 'Prueba',
+        'estado' => 'Pendiente',
+        'fecha_alerta' => now(),
+    ]);
+
+    $tipos = app(AlertasOperativasService::class)->alertasPendientes(3)->pluck('tipo')->all();
+
+    expect($tipos)->toBe([
+        'Atencion a Dano',
+        'Agenda Diaria de Prestamos',
+        'Incremento Historico de Prestamos',
+    ]);
 });

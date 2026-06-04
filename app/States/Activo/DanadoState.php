@@ -15,7 +15,7 @@ class DanadoState implements ActivoEstado
     public function registrarPrestamo(Activo $activo): void
     {
         throw ValidationException::withMessages([
-            'id_activo' => 'El activo esta danado y requiere atencion antes de prestarse.',
+            'id_activo' => 'El activo está dañado y requiere atención antes de prestarse.',
         ]);
     }
 }
