@@ -218,7 +218,7 @@ class AlertasOperativasService
         );
     }
 
-    public function alertasPendientes(int $limite = 6): Collection
+    public function alertasPendientes(?int $limite = 6): Collection
     {
         $prioridadSql = 'CASE tipo '
             .collect(self::ALERT_PRIORITY)
@@ -232,7 +232,7 @@ class AlertasOperativasService
             ->orderByRaw('CASE WHEN id_activo IS NULL THEN 1 ELSE 0 END')
             ->orderBy('id_activo')
             ->orderBy('id_alerta')
-            ->limit($limite)
+            ->when($limite, fn ($query) => $query->limit($limite))
             ->get();
     }
 

@@ -10,6 +10,32 @@ const fullNamePattern = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?:[ '-][A-Za-zÁ
 const repeatedPhonePattern = /^(\d)\1{9}$/;
 const sequentialPhones = new Set(['0123456789', '1234567890', '9876543210', '0987654321']);
 
+const validateInitialConditions = (field) => {
+    const value = field.value.trim();
+
+    if (value === '') {
+        field.setCustomValidity('Describe las condiciones iniciales del instrumento.');
+        return;
+    }
+
+    if (value.length < 8) {
+        field.setCustomValidity('Las condiciones iniciales deben tener al menos 8 caracteres.');
+        return;
+    }
+
+    if (!/\p{L}/u.test(value)) {
+        field.setCustomValidity('Las condiciones iniciales deben incluir texto descriptivo.');
+        return;
+    }
+
+    if (/\d{6,}/.test(value)) {
+        field.setCustomValidity('No escribas números continuos en las condiciones iniciales.');
+        return;
+    }
+
+    field.setCustomValidity('');
+};
+
 document.addEventListener('input', (event) => {
     const field = event.target;
 
@@ -35,8 +61,18 @@ document.addEventListener('input', (event) => {
     }
 
     if (field.matches('[data-no-long-digits]')) {
-        field.setCustomValidity(/\d{6,}/.test(field.value)
-            ? 'No escribas números continuos en las condiciones iniciales.'
-            : '');
+        validateInitialConditions(field);
     }
 });
+
+document.addEventListener('invalid', (event) => {
+    const field = event.target;
+
+    if (!(field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement)) {
+        return;
+    }
+
+    if (field.matches('[data-no-long-digits]')) {
+        validateInitialConditions(field);
+    }
+}, true);

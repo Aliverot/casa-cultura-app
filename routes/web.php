@@ -45,7 +45,7 @@ Route::get('/dashboard', function () {
         });
 
     $maxPrestamos = max(1, (int) $metricasDemanda->max('total_prestamos'));
-    $alertasOperativas = $alertas->alertasPendientes();
+    $alertasOperativas = $alertas->alertasPendientes(null);
 
     return view('dashboard', compact('stats', 'metricasDemanda', 'maxPrestamos', 'alertasOperativas'));
 })->middleware(['auth', 'verified'])->name('dashboard');

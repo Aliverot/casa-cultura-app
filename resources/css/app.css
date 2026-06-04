@@ -17,6 +17,10 @@
         @apply bg-hueso-100 text-base text-anil-900;
     }
 
+    [x-cloak] {
+        display: none !important;
+    }
+
     input,
     select,
     textarea,

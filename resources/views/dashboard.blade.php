@@ -26,16 +26,32 @@
             </div>
 
             @if ($alertasOperativas->isNotEmpty())
-                <section class="module-card mb-8">
+                @php
+                    $totalAlertas = $alertasOperativas->count();
+                    $alertasOcultas = max(0, $totalAlertas - 6);
+                @endphp
+
+                <section class="module-card mb-8" x-data="{ mostrarTodas: false }">
                     <div class="flex items-center justify-between gap-4 border-b border-cantera-100 pb-4">
                         <h3 class="text-2xl font-black text-anil-900 uppercase tracking-tighter">Alertas operativas</h3>
-                        <span class="rounded-full bg-oxido-100 px-3 py-1 text-xs font-black uppercase tracking-widest text-oxido-700">
-                            {{ $alertasOperativas->count() }} pendientes
-                        </span>
+
+                        <div class="flex flex-wrap items-center justify-end gap-3">
+                            <span class="rounded-full bg-oxido-100 px-3 py-1 text-xs font-black uppercase tracking-widest text-oxido-700">
+                                {{ $totalAlertas }} pendientes
+                            </span>
+
+                            @if ($alertasOcultas > 0)
+                                <button type="button" class="btn-soft" @click="mostrarTodas = !mostrarTodas">
+                                    <span x-show="!mostrarTodas">Ver todas ({{ $alertasOcultas }} más)</span>
+                                    <span x-show="mostrarTodas" x-cloak>Ver menos</span>
+                                </button>
+                            @endif
+                        </div>
                     </div>
 
-                    <div class="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
-                        @foreach ($alertasOperativas as $alerta)
+                    <div class="mt-5 pr-2" :class="mostrarTodas ? 'max-h-[38rem] overflow-y-auto' : ''">
+                        <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                            @foreach ($alertasOperativas as $alerta)
                             @php
                                 [$alertaBorde, $alertaFondo, $alertaTexto, $alertaCaja] = match ($alerta->tipo) {
                                     'Fragilidad/Mal Uso' => ['border-oxido-100', 'bg-oxido-50', 'text-oxido-700', 'border-oxido-200'],
@@ -56,7 +72,10 @@
                                     default => $alerta->tipo,
                                 };
                             @endphp
-                            <div class="rounded-xl border {{ $alertaBorde }} {{ $alertaFondo }} p-5">
+                            <div
+                                @if ($loop->iteration > 6) x-show="mostrarTodas" x-cloak @endif
+                                class="rounded-xl border {{ $alertaBorde }} {{ $alertaFondo }} p-5"
+                            >
                                 @if ($alerta->activo)
                                     <div class="mb-4 rounded-xl border {{ $alertaCaja }} bg-hueso-50 px-4 py-3">
                                         <p class="text-xs font-black uppercase tracking-widest text-cantera-600">Instrumento afectado</p>
@@ -163,7 +182,8 @@
                                     </button>
                                 </form>
                             </div>
-                        @endforeach
+                            @endforeach
+                        </div>
                     </div>
                 </section>
             @endif
