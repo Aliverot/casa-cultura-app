@@ -1,3 +1,3 @@
 @props(['disabled' => false])
 
-<input @disabled($disabled) {{ $attributes->merge(['class' => 'border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm']) }}>
+<input @disabled($disabled) {{ $attributes->merge(['class' => 'border-cantera-300 bg-hueso-50 text-anil-900 dark:border-anil-700 dark:bg-anil-900 dark:text-hueso-100 focus:border-anil-600 dark:focus:border-ocre-400 focus:ring-ocre-400 dark:focus:ring-ocre-400 rounded-md shadow-sm']) }}>

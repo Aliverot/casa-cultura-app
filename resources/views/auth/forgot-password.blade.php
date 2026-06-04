@@ -1,5 +1,5 @@
 <x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
+    <div class="mb-4 text-sm text-cantera-700 dark:text-cantera-500">
         {{ __('¿Olvidaste tu contraseña? Escribe tu correo electrónico y te enviaremos un enlace para restablecerla.') }}
     </div>
 

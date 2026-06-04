@@ -7,6 +7,7 @@ use App\Http\Controllers\ProfileController;
 use App\Models\Activo;
 use App\Models\AlertaOperativa;
 use App\Services\AlertasOperativasService;
+use App\Services\AsistenteNotificacionesDiario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -17,6 +18,7 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     $alertas = app(AlertasOperativasService::class);
+    app(AsistenteNotificacionesDiario::class)->revisarAgendaDelDia();
     $alertas->registrarTemporadaSiAplica();
     $estadosPrestamo = ['En Prestamo', 'No disponible'];
 
@@ -67,7 +69,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/prestamos/nuevo', [PrestamoController::class, 'create'])->name('prestamos.create');
     Route::post('/prestamos', [PrestamoController::class, 'store'])->name('prestamos.store');
     Route::post('/prestamos/{id_detalle}/devolver', [PrestamoController::class, 'devolver'])->name('prestamos.devolver');
-    Route::post('/prestamos/liquidar/{id}', [PrestamoController::class, 'liquidarPago'])->name('prestamos.liquidar');
     Route::get('/historial', [PrestamoController::class, 'historial'])->name('prestamos.historial');
     Route::get('/historial/reporte.csv', [PrestamoController::class, 'exportarHistorialCsv'])->name('prestamos.historial.csv');
 

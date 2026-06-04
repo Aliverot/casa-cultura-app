@@ -21,20 +21,12 @@ class PrestamoController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        $multasPendientes = DetallePrestamo::with(['prestamo', 'activo'])
-            ->whereNotNull('fecha_devolucion_real')
-            ->whereHas('prestamo', function ($query) {
-                $query->where('estado_pago', 'Pendiente');
-            })
-            ->orderByDesc('fecha_devolucion_real')
-            ->get();
-
-        return view('prestamos_activos', compact('prestamosActivos', 'multasPendientes'));
+        return view('prestamos_activos', compact('prestamosActivos'));
     }
 
     public function create(Request $request)
     {
-        $activos = Activo::where('estado_actual', 'Disponible')
+        $activos = Activo::where('estado_actual', Activo::ESTADO_DISPONIBLE)
             ->orderBy('nombre')
             ->get();
         $activoSeleccionado = $request->integer('id_activo');
@@ -54,13 +46,6 @@ class PrestamoController extends Controller
 
         DB::transaction(function () use ($request) {
             $activo = Activo::lockForUpdate()->findOrFail($request->id_activo);
-
-            if ($activo->estado_actual !== 'Disponible') {
-                throw ValidationException::withMessages([
-                    'id_activo' => 'El instrumento ya no está disponible para préstamo.',
-                ]);
-            }
-
             $fechaSalida = now();
             $fechaDevolucionPrevista = Carbon::parse($request->fecha_devolucion_prevista);
 
@@ -82,10 +67,10 @@ class PrestamoController extends Controller
             DetallePrestamo::create([
                 'id_prestamo' => $prestamo->id_prestamo,
                 'id_activo' => $activo->id_activo,
-                'estado_salida' => 'Prestado',
+                'estado_salida' => Activo::ESTADO_PRESTADO,
             ]);
 
-            $activo->estado_actual = 'No disponible';
+            $activo->registrarPrestamo();
             $activo->save();
         });
 
@@ -102,7 +87,6 @@ class PrestamoController extends Controller
         $request->validate([
             'condiciones_devolucion' => 'required|string',
             'estado_equipo' => 'required|in:Buen estado,Danado,Extraviado,Perdida total',
-            'costo_reparacion' => 'nullable|required_if:estado_equipo,Danado,Extraviado,Perdida total|numeric|min:0',
             'contexto_incidente' => [$requiereDatosDanio ? 'required' : 'nullable', 'string', 'max:2000'],
             'entorno_uso' => [$requiereDatosDanio ? 'required' : 'nullable', 'string', 'max:255'],
             'accesorios_proteccion' => [$requiereDatosDanio ? 'required' : 'nullable', 'string', 'max:2000'],
@@ -125,28 +109,24 @@ class PrestamoController extends Controller
             $instrumentoDanado = $request->estado_equipo === 'Danado';
             $instrumentoExtraviado = $request->estado_equipo === 'Extraviado';
             $instrumentoPerdidaTotal = $request->estado_equipo === 'Perdida total';
-            $costoReparacion = $instrumentoDanado ? (float) ($request->costo_reparacion ?? 0) : 0.0;
-            $costoReposicion = ($instrumentoExtraviado || $instrumentoPerdidaTotal)
-                ? (float) ($request->costo_reparacion ?? 0)
-                : 0.0;
             $entregaATiempo = $fechaDevolucionReal->lessThanOrEqualTo(Carbon::parse($prestamo->fecha_devolucion_prevista));
 
             $activo->horas_uso = round(((float) $activo->horas_uso) + max(0, $horasUsadas), 2);
             $activo->estado_actual = match (true) {
-                $instrumentoPerdidaTotal => 'Baja',
-                $instrumentoExtraviado => 'Extraviado',
-                $instrumentoDanado => 'Mantenimiento',
-                default => 'Disponible',
+                $instrumentoPerdidaTotal => Activo::ESTADO_BAJA,
+                $instrumentoExtraviado => Activo::ESTADO_EXTRAVIADO,
+                $instrumentoDanado => Activo::ESTADO_MANTENIMIENTO,
+                default => Activo::ESTADO_DISPONIBLE,
             };
             $activo->estado_condicion = match (true) {
                 $instrumentoPerdidaTotal || $instrumentoExtraviado => 'Baja definitiva',
-                $instrumentoDanado => 'En reparacion',
+                $instrumentoDanado => Activo::ESTADO_CONDICION_EN_REPARACION,
                 default => 'Excelente',
             };
 
             $prestamo->condiciones_devolucion = trim($request->condiciones_devolucion);
-            $prestamo->costo_reparacion = $instrumentoDanado ? $costoReparacion : $costoReposicion;
-            $prestamo->estado_pago = $prestamo->costo_reparacion > 0 ? 'Pendiente' : 'Sin cargos';
+            $prestamo->costo_reparacion = 0;
+            $prestamo->estado_pago = 'Sin cargos';
 
             $detalle->fecha_devolucion_real = $fechaDevolucionReal;
             $detalle->estado_retorno = match (true) {
@@ -170,20 +150,6 @@ class PrestamoController extends Controller
         });
 
         return redirect()->route('prestamos.activos')->with('success', 'Devolución procesada correctamente.');
-    }
-
-    public function liquidarPago($id_prestamo)
-    {
-        $prestamo = Prestamo::findOrFail($id_prestamo);
-
-        if ($prestamo->estado_pago !== 'Pendiente') {
-            return redirect()->route('prestamos.activos')->with('success', 'Ese cargo ya no está pendiente.');
-        }
-
-        $prestamo->estado_pago = 'Pagado';
-        $prestamo->save();
-
-        return redirect()->route('prestamos.activos')->with('success', 'El pago ha sido registrado.');
     }
 
     public function historial(Request $request)
@@ -215,8 +181,6 @@ class PrestamoController extends Controller
                 'Contacto',
                 'Resultado',
                 'Tiempo de uso (horas)',
-                'Cargo (MXN)',
-                'Estado de pago',
                 'Condiciones de retorno',
                 'Contexto',
                 'Entorno',
@@ -234,8 +198,6 @@ class PrestamoController extends Controller
                     $log->prestamo->contacto_solicitante,
                     $this->estadoRetornoLegible($log->estado_retorno),
                     number_format($this->horasDePrestamo($log), 2, '.', ''),
-                    number_format((float) $log->prestamo->costo_reparacion, 2, '.', ''),
-                    $log->prestamo->estado_pago,
                     $log->prestamo->condiciones_devolucion ?: 'Sin condiciones registradas',
                     $log->contexto_incidente ?: '',
                     $log->entorno_uso ?: '',
@@ -292,8 +254,8 @@ class PrestamoController extends Controller
         return [
             'registros' => $historial->count(),
             'horas' => $historial->sum(fn ($log) => $this->horasDePrestamo($log)),
-            'cargos' => $historial->sum(fn ($log) => (float) $log->prestamo->costo_reparacion),
-            'pendientes' => $historial->filter(fn ($log) => $log->prestamo->estado_pago === 'Pendiente')->count(),
+            'incidencias' => $historial->filter(fn ($log) => in_array($log->estado_retorno, ['Danado', 'Dañado', 'Extraviado', 'Perdida total'], true))->count(),
+            'atrasos' => $historial->filter(fn ($log) => $log->estado_retorno === 'Con atraso')->count(),
         ];
     }
 

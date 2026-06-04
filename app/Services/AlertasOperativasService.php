@@ -102,7 +102,6 @@ class AlertasOperativasService
             ->where('detalle_prestamos.fecha_devolucion_real', '>=', $desde);
 
         $totalFallas = (clone $fallas)->count();
-        $costoIncidentes = (float) (clone $fallas)->sum('prestamos.costo_reparacion');
         $costoMantenimientos = (float) Mantenimiento::whereIn('id_activo', $idsActivos)->sum('costo_servicio');
         $costoMantenimientosPreventivos = (float) Mantenimiento::whereIn('id_activo', $idsActivos)
             ->where('es_preventivo', true)
@@ -110,7 +109,7 @@ class AlertasOperativasService
         $mantenimientosPreventivos = Mantenimiento::whereIn('id_activo', $idsActivos)
             ->where('es_preventivo', true)
             ->count();
-        $costoTotal = $costoIncidentes + $costoMantenimientos;
+        $costoTotal = $costoMantenimientos;
         $valorOriginal = (float) Activo::whereIn('id_activo', $idsActivos)->avg('valor_original');
         $rebasaCosto = $valorOriginal > 0 && $costoTotal >= ($valorOriginal * self::REPAIR_COST_PERCENT / 100);
         $rebasaFrecuencia = $totalFallas >= self::FAILURE_LIMIT;
@@ -120,7 +119,7 @@ class AlertasOperativasService
         }
 
         $motivo = $rebasaCosto
-            ? 'el costo acumulado de reparaciones supera el '.self::REPAIR_COST_PERCENT.'% de su valor original'
+            ? 'el costo acumulado de mantenimiento supera el '.self::REPAIR_COST_PERCENT.'% de su valor original'
             : 'la frecuencia de fallas afecta la disponibilidad operativa';
 
         return $this->guardarAlerta(
@@ -132,7 +131,7 @@ class AlertasOperativasService
                 'referencia_modelo' => $referencia,
                 'fallas' => $totalFallas,
                 'costo_reparaciones' => $costoTotal,
-                'costo_incidentes' => $costoIncidentes,
+                'costo_incidentes' => 0,
                 'costo_mantenimientos' => $costoMantenimientos,
                 'costo_mantenimientos_preventivos' => $costoMantenimientosPreventivos,
                 'mantenimientos_preventivos' => $mantenimientosPreventivos,
@@ -230,6 +229,79 @@ class AlertasOperativasService
             ->orderByDesc('fecha_alerta')
             ->limit($limite)
             ->get();
+    }
+
+    public function registrarAtencionDanio(Activo $activo): ?AlertaOperativa
+    {
+        if (! $this->activoRequiereAtencionPorDanio($activo)) {
+            return null;
+        }
+
+        return $this->guardarAlerta(
+            'Atencion a Dano',
+            $activo,
+            'Tienes objetos en estado Danado que requieren atencion',
+            "El recurso {$activo->nombre} esta marcado como danado o en reparacion. Programa revision antes de autorizar otro prestamo.",
+            [
+                'estado_actual' => $activo->estado_actual,
+                'estado_condicion' => $activo->estado_condicion,
+                'estado_patron' => $activo->estado()->nombre(),
+            ]
+        );
+    }
+
+    public function resolverAtencionDanio(Activo $activo): int
+    {
+        return AlertaOperativa::where('tipo', 'Atencion a Dano')
+            ->where('id_activo', $activo->id_activo)
+            ->where('estado', 'Pendiente')
+            ->update(['estado' => 'Resuelta']);
+    }
+
+    public function registrarAgendaDiaria(): Collection
+    {
+        $hoy = now()->toDateString();
+        $materiales = DetallePrestamo::with(['prestamo', 'activo'])
+            ->whereNull('fecha_devolucion_real')
+            ->whereHas('prestamo', function ($query) use ($hoy) {
+                $query->whereDate('fecha_devolucion_prevista', $hoy);
+            })
+            ->get();
+
+        if ($materiales->isEmpty()) {
+            AlertaOperativa::where('tipo', 'Agenda Diaria de Prestamos')
+                ->where('estado', 'Pendiente')
+                ->update(['estado' => 'Resuelta']);
+
+            return collect();
+        }
+
+        $items = $materiales->map(fn (DetallePrestamo $detalle) => [
+            'id_activo' => $detalle->id_activo,
+            'nombre' => $detalle->activo?->nombre,
+            'codigo_qr' => $detalle->activo?->codigo_qr,
+            'solicitante' => $detalle->prestamo?->nombre_solicitante,
+            'fecha_prevista' => $detalle->prestamo?->fecha_devolucion_prevista?->format('Y-m-d H:i'),
+        ])->values()->all();
+
+        $alerta = AlertaOperativa::updateOrCreate(
+            [
+                'tipo' => 'Agenda Diaria de Prestamos',
+                'id_activo' => null,
+                'estado' => 'Pendiente',
+            ],
+            [
+                'titulo' => 'Hoy se deben recoger/entregar estos materiales',
+                'descripcion' => 'El asistente diario encontro prestamos con devolucion prevista para hoy.',
+                'datos' => [
+                    'fecha' => $hoy,
+                    'materiales' => $items,
+                ],
+                'fecha_alerta' => now(),
+            ]
+        );
+
+        return collect([$alerta]);
     }
 
     private function contarDaniosRecientes(int $idActivo, ?int $exceptoDetalle = null): int
@@ -381,6 +453,19 @@ class AlertasOperativasService
         AlertaOperativa::where('tipo', 'Incremento Historico de Prestamos')
             ->where('estado', 'Pendiente')
             ->update(['estado' => 'Resuelta']);
+    }
+
+    private function activoRequiereAtencionPorDanio(Activo $activo): bool
+    {
+        return in_array($activo->estado_actual, [
+            Activo::ESTADO_DANADO,
+            Activo::ESTADO_MANTENIMIENTO,
+            Activo::ESTADO_EN_REPARACION,
+        ], true)
+            || in_array($activo->estado_condicion, [
+                Activo::ESTADO_DANADO,
+                Activo::ESTADO_CONDICION_EN_REPARACION,
+            ], true);
     }
 
     private function guardarAlerta(string $tipo, Activo $activo, string $titulo, string $descripcion, array $datos): AlertaOperativa

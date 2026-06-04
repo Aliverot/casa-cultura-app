@@ -1,16 +1,16 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-anil-800 leading-tight">
             {{ __('Registrar nuevo instrumento / activo') }}
         </h2>
     </x-slot>
 
-    <div class="min-h-screen bg-gray-100 py-12">
+    <div class="min-h-screen bg-hueso-100 py-12">
         <div class="module-page-shell">
             <x-module-nav current="instrumentos" />
 
             @if ($errors->any())
-                <div class="mb-8 rounded-r border-l-4 border-red-500 bg-red-100 p-4 text-red-800 shadow-sm">
+                <div class="mb-8 rounded-r border-l-4 border-oxido-500 bg-oxido-50 p-4 text-oxido-800 shadow-sm">
                     <p class="mb-2 font-black uppercase tracking-widest">No se pudo guardar el instrumento</p>
                     <ul class="list-disc list-inside text-sm font-medium">
                         @foreach ($errors->all() as $error)
@@ -25,31 +25,31 @@
                     @csrf
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Nombre del instrumento o equipo</label>
+                        <label class="block text-sm font-medium text-anil-700">Nombre del instrumento o equipo</label>
                         <input
                             type="text"
                             name="nombre"
                             value="{{ old('nombre') }}"
                             required
                             placeholder="Ej. Guitarra acústica Yamaha"
-                            class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-cultura-500 focus:ring-cultura-500"
+                            class="mt-1 block w-full rounded-xl border-cantera-300 shadow-sm focus:border-ocre-500 focus:ring-ocre-400"
                         >
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Modelo o referencia</label>
+                        <label class="block text-sm font-medium text-anil-700">Modelo o referencia</label>
                         <input
                             type="text"
                             name="modelo"
                             value="{{ old('modelo') }}"
                             placeholder="Ej. Yamaha C40, Huipil bordado regional"
-                            class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-cultura-500 focus:ring-cultura-500"
+                            class="mt-1 block w-full rounded-xl border-cantera-300 shadow-sm focus:border-ocre-500 focus:ring-ocre-400"
                         >
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Categoría</label>
-                        <select name="categoria" required class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-cultura-500 focus:ring-cultura-500">
+                        <label class="block text-sm font-medium text-anil-700">Categoría</label>
+                        <select name="categoria" required class="mt-1 block w-full rounded-xl border-cantera-300 shadow-sm focus:border-ocre-500 focus:ring-ocre-400">
                             <option value="Instrumentos de Cuerda" @selected(old('categoria') === 'Instrumentos de Cuerda')>Instrumentos de Cuerda</option>
                             <option value="Instrumentos de Viento" @selected(old('categoria') === 'Instrumentos de Viento')>Instrumentos de Viento</option>
                             <option value="Percusiones" @selected(old('categoria') === 'Percusiones')>Percusiones</option>
@@ -59,7 +59,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Límite de horas para mantenimiento</label>
+                        <label class="block text-sm font-medium text-anil-700">Límite de horas para mantenimiento</label>
                         <input
                             type="number"
                             name="limite_mantenimiento"
@@ -68,16 +68,16 @@
                             min="1"
                             step="0.01"
                             placeholder="Ej. 100"
-                            class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-cultura-500 focus:ring-cultura-500"
+                            class="mt-1 block w-full rounded-xl border-cantera-300 shadow-sm focus:border-ocre-500 focus:ring-ocre-400"
                         >
-                        <p class="mt-1 text-xs text-gray-500">Horas estimadas de uso antes de requerir revisión, afinación o limpieza profunda.</p>
+                        <p class="mt-1 text-xs text-cantera-600">Horas estimadas de uso antes de requerir revisión, afinación o limpieza profunda.</p>
                     </div>
 
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Valor original aproximado</label>
+                            <label class="block text-sm font-medium text-anil-700">Valor original aproximado</label>
                             <div class="relative mt-1">
-                                <span class="absolute left-4 top-3 text-gray-500">$</span>
+                                <span class="absolute left-4 top-3 text-cantera-600">$</span>
                                 <input
                                     type="number"
                                     name="valor_original"
@@ -85,15 +85,15 @@
                                     min="0"
                                     step="0.01"
                                     placeholder="Ej. 2500"
-                                    class="block w-full rounded-xl border-gray-300 pl-9 pr-20 shadow-sm focus:border-cultura-500 focus:ring-cultura-500"
+                                    class="block w-full rounded-xl border-cantera-300 pl-9 pr-20 shadow-sm focus:border-ocre-500 focus:ring-ocre-400"
                                 >
-                                <span class="absolute right-4 top-3 text-xs font-black uppercase tracking-widest text-gray-500">MXN</span>
+                                <span class="absolute right-4 top-3 text-xs font-black uppercase tracking-widest text-cantera-600">MXN</span>
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Estado estandarizado</label>
-                            <select name="estado_condicion" required class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-cultura-500 focus:ring-cultura-500">
+                            <label class="block text-sm font-medium text-anil-700">Estado estandarizado</label>
+                            <select name="estado_condicion" required class="mt-1 block w-full rounded-xl border-cantera-300 shadow-sm focus:border-ocre-500 focus:ring-ocre-400">
                                 @foreach ($estadosCondicion as $estadoCondicion)
                                     <option value="{{ $estadoCondicion }}" @selected(old('estado_condicion', 'Excelente') === $estadoCondicion)>
                                         {{ \App\Models\Activo::etiquetaEstadoCondicion($estadoCondicion) }}
@@ -104,7 +104,7 @@
                     </div>
 
                     <div class="flex justify-end">
-                        <button type="submit" class="rounded-xl bg-cultura-600 px-6 py-3 font-bold text-white shadow transition hover:bg-cultura-700">
+                        <button type="submit" class="rounded-xl bg-cultura-600 px-6 py-3 font-bold text-hueso-50 shadow transition hover:bg-cultura-700">
                             Guardar en inventario
                         </button>
                     </div>

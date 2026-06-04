@@ -14,7 +14,7 @@
     }
 
     body {
-        @apply text-base text-gray-900;
+        @apply bg-hueso-100 text-base text-anil-900;
     }
 
     input,
@@ -32,19 +32,36 @@
 
 @layer components {
     .module-nav-shell {
-        @apply mx-auto mb-10 w-full max-w-screen-2xl overflow-visible rounded-2xl border border-gray-200 bg-white/95 px-4 py-4 shadow-sm backdrop-blur sm:px-6;
+        @apply sticky top-[4.5rem] z-40 mb-8 grid w-full gap-3 rounded-xl border border-ocre-300/30 bg-anil-900/95 px-3 py-3 shadow-xl shadow-anil-900/25 backdrop-blur md:grid-cols-[minmax(13rem,20rem)_minmax(0,1fr)] md:items-center md:px-5 md:py-4 2xl:grid-cols-[minmax(18rem,28rem)_minmax(0,1fr)];
+    }
+
+    .module-nav-heading {
+        @apply flex min-w-0 items-center border-b border-ocre-300/20 pb-2 md:min-h-12 md:border-b-0 md:border-r md:border-ocre-300/20 md:pb-0 md:pr-6 lg:pr-8;
+    }
+
+    .module-nav-title {
+        @apply truncate text-xl font-black uppercase tracking-tight text-hueso-50 sm:text-2xl lg:text-3xl;
     }
 
     .module-nav-list {
-        @apply mx-auto flex min-w-0 flex-wrap items-center justify-start gap-3 xl:justify-center;
+        @apply flex min-w-0 snap-x items-center justify-start gap-2 overflow-x-auto scroll-smooth pb-1 md:pb-0 lg:gap-3 2xl:justify-center;
+        scrollbar-width: none;
+    }
+
+    .module-nav-list::-webkit-scrollbar {
+        display: none;
     }
 
     .module-nav-link {
-        @apply inline-flex items-center justify-center whitespace-nowrap rounded-xl border px-5 py-3 text-base font-black tracking-wide transition duration-150 sm:px-6;
+        @apply inline-flex min-h-12 shrink-0 snap-start items-center justify-center whitespace-nowrap rounded-lg border px-4 py-2.5 text-sm font-black tracking-wide transition duration-150 lg:min-w-[7.5rem] lg:px-5;
     }
 
     .module-nav-link-active {
-        @apply bg-cultura-600 text-white shadow-md shadow-cultura-200 hover:bg-cultura-700 hover:text-white;
+        @apply border-ocre-300 bg-ocre-400 text-anil-900 shadow-md shadow-anil-900/20 hover:bg-ocre-300 hover:text-anil-900;
+    }
+
+    .module-nav-link-idle {
+        @apply border-cantera-500/50 text-hueso-50 hover:border-ocre-300 hover:bg-anil-800 hover:text-ocre-100;
     }
 
     .module-page-shell {
@@ -52,6 +69,6 @@
     }
 
     .module-card {
-        @apply rounded-3xl border border-gray-200 bg-white p-8 shadow-xl lg:p-10;
+        @apply rounded-xl border border-cantera-200 bg-hueso-50 p-8 shadow-xl shadow-cantera-900/10 lg:p-10;
     }
 }

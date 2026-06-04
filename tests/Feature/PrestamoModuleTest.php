@@ -141,7 +141,8 @@ it('marks an instrument as extraviado when the return cannot be completed physic
 
     expect($activo->refresh()->estado_actual)->toBe('Extraviado')
         ->and($detalle->refresh()->estado_retorno)->toBe('Extraviado')
-        ->and($prestamo->refresh()->estado_pago)->toBe('Pendiente');
+        ->and($prestamo->refresh()->estado_pago)->toBe('Sin cargos')
+        ->and((float) $prestamo->costo_reparacion)->toBe(0.0);
 });
 
 it('requires incident details and creates a fragility alert after recurrent damage', function () {
@@ -217,6 +218,9 @@ it('requires incident details and creates a fragility alert after recurrent dama
     expect($activo->refresh()->estado_actual)->toBe('Mantenimiento')
         ->and($activo->estado_condicion)->toBe('En reparacion');
 
+    expect($prestamo->refresh()->estado_pago)->toBe('Sin cargos')
+        ->and((float) $prestamo->costo_reparacion)->toBe(0.0);
+
     $this->assertDatabaseHas('alertas_operativas', [
         'id_activo' => $activo->id_activo,
         'tipo' => 'Fragilidad/Mal Uso',
@@ -239,7 +243,7 @@ it('requires incident details and creates a fragility alert after recurrent dama
         ->assertSee('La funda venia abierta.');
 });
 
-it('creates a replacement report when repairs exceed the configured value limit', function () {
+it('creates a replacement report when failures become recurrent', function () {
     Carbon::setTestNow('2026-04-27 12:00:00');
 
     $user = User::factory()->create();
@@ -253,25 +257,27 @@ it('creates a replacement report when repairs exceed the configured value limit'
         'limite_mantenimiento' => 100,
     ]);
 
-    $prestamoHistorico = Prestamo::create([
-        'id_usuario' => $user->id_usuario,
-        'fecha_salida' => now()->subDays(20),
-        'fecha_devolucion_prevista' => now()->subDays(19),
-        'nombre_solicitante' => 'Alumno Demo',
-        'contacto_solicitante' => 'MAT-020',
-        'condiciones_entrega' => 'En buen estado',
-        'condiciones_devolucion' => 'Regreso roto',
-        'costo_reparacion' => 500,
-        'estado_pago' => 'Pendiente',
-    ]);
+    foreach ([20, 18] as $dias) {
+        $prestamoHistorico = Prestamo::create([
+            'id_usuario' => $user->id_usuario,
+            'fecha_salida' => now()->subDays($dias),
+            'fecha_devolucion_prevista' => now()->subDays($dias - 1),
+            'nombre_solicitante' => 'Alumno Demo',
+            'contacto_solicitante' => 'MAT-020-'.$dias,
+            'condiciones_entrega' => 'En buen estado',
+            'condiciones_devolucion' => 'Regreso roto',
+            'costo_reparacion' => 0,
+            'estado_pago' => 'Sin cargos',
+        ]);
 
-    DetallePrestamo::create([
-        'id_prestamo' => $prestamoHistorico->id_prestamo,
-        'id_activo' => $activo->id_activo,
-        'estado_salida' => 'Prestado',
-        'estado_retorno' => 'Danado',
-        'fecha_devolucion_real' => now()->subDays(19),
-    ]);
+        DetallePrestamo::create([
+            'id_prestamo' => $prestamoHistorico->id_prestamo,
+            'id_activo' => $activo->id_activo,
+            'estado_salida' => 'Prestado',
+            'estado_retorno' => 'Danado',
+            'fecha_devolucion_real' => now()->subDays($dias - 1),
+        ]);
+    }
 
     $prestamo = Prestamo::create([
         'id_usuario' => $user->id_usuario,
@@ -295,6 +301,9 @@ it('creates a replacement report when repairs exceed the configured value limit'
         'estado_equipo' => 'Danado',
         'condiciones_devolucion' => 'Regresa con parche roto.',
         'costo_reparacion' => 150,
+        'contexto_incidente' => 'El parche se rompio durante el ensayo.',
+        'entorno_uso' => 'Ensayo',
+        'accesorios_proteccion' => 'Se traslado en funda.',
     ])->assertRedirect(route('prestamos.activos'));
 
     $this->assertDatabaseHas('alertas_operativas', [
@@ -372,7 +381,7 @@ it('filters the loan history by period instrument and requester', function () {
         ->assertOk()
         ->assertSee('Ana Rivera')
         ->assertSee('Guitarra filtro')
-        ->assertSee('$125.50 MXN')
+        ->assertDontSee('$125.50 MXN')
         ->assertDontSee('Luis Ramos')
         ->assertDontSee('MAT-CSV-2');
 });
@@ -441,6 +450,7 @@ it('exports the loan history as csv for the selected period', function () {
         ->toContain('Préstamo registrado')
         ->toContain('Ana Rivera')
         ->toContain('Piano CSV')
-        ->toContain('75.00')
+        ->not->toContain('Cargo')
+        ->not->toContain('75.00')
         ->not->toContain('Luis Ramos');
 });

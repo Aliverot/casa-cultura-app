@@ -52,7 +52,7 @@ class ActivoController extends Controller
             'valor_original' => $request->filled('valor_original') ? $request->valor_original : null,
             'limite_mantenimiento' => $request->limite_mantenimiento,
             'estado_actual' => match ($request->input('estado_condicion', 'Excelente')) {
-                'En reparacion' => 'Mantenimiento',
+                'En reparacion', 'Danado' => 'Mantenimiento',
                 'Baja definitiva' => 'Baja',
                 default => 'Disponible',
             },
@@ -87,7 +87,7 @@ class ActivoController extends Controller
 
         $estadoCondicion = $request->input('estado_condicion', $activo->estado_condicion ?: 'Excelente');
 
-        if ($activo->estado_actual === 'No disponible' && in_array($estadoCondicion, ['En reparacion', 'Baja definitiva'], true)) {
+        if ($activo->estado_actual === 'No disponible' && in_array($estadoCondicion, ['En reparacion', 'Danado', 'Baja definitiva'], true)) {
             throw ValidationException::withMessages([
                 'estado_condicion' => 'No puedes mandar a reparación o baja un instrumento mientras tiene un préstamo activo.',
             ]);
@@ -102,7 +102,7 @@ class ActivoController extends Controller
 
         if ($activo->estado_actual !== 'No disponible') {
             $activo->estado_actual = match ($activo->estado_condicion) {
-                'En reparacion' => 'Mantenimiento',
+                'En reparacion', 'Danado' => 'Mantenimiento',
                 'Baja definitiva' => 'Baja',
                 default => $activo->estado_actual === 'Baja' ? 'Baja' : 'Disponible',
             };

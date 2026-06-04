@@ -27,14 +27,14 @@
         <!-- Remember Me -->
         <div class="block mt-4">
             <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" name="remember">
-                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Recordarme') }}</span>
+                <input id="remember_me" type="checkbox" class="rounded border-cantera-300 text-anil-700 shadow-sm focus:ring-ocre-400 dark:bg-anil-900 dark:border-anil-700 dark:focus:ring-ocre-400 dark:focus:ring-offset-anil-800" name="remember">
+                <span class="ms-2 text-sm text-cantera-700 dark:text-hueso-200">{{ __('Recordarme') }}</span>
             </label>
         </div>
 
         <div class="flex items-center justify-end mt-4">
             @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}">
+                <a class="underline text-sm text-anil-700 dark:text-hueso-200 hover:text-oxido-700 dark:hover:text-ocre-200 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ocre-400 dark:focus:ring-offset-anil-800" href="{{ route('password.request') }}">
                     {{ __('¿Olvidaste tu contraseña?') }}
                 </a>
             @endif

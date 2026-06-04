@@ -14,15 +14,19 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
-            <div>
+    <body class="font-sans text-anil-900 antialiased">
+        <div class="relative min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-hueso-100 dark:bg-anil-900">
+            <div class="absolute inset-x-0 top-0 h-3 bg-ocre-400"></div>
+            <div class="absolute inset-x-0 top-3 h-24 bg-anil-900"></div>
+            <div class="absolute inset-x-0 top-24 h-3 bg-cantera-600"></div>
+
+            <div class="relative rounded-full border-4 border-ocre-300 bg-hueso-50 p-2 shadow-xl shadow-cantera-900/15">
                 <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
+                    <x-application-logo class="w-20 h-20 fill-current text-cantera-600" />
                 </a>
             </div>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
+            <div class="relative w-full sm:max-w-md mt-6 overflow-hidden rounded-xl border border-cantera-200 bg-hueso-50 px-6 py-5 shadow-2xl shadow-cantera-900/15 dark:bg-anil-900">
                 {{ $slot }}
             </div>
         </div>

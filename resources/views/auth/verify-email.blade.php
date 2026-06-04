@@ -1,10 +1,10 @@
 <x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
+    <div class="mb-4 text-sm text-cantera-700 dark:text-cantera-500">
         {{ __('Gracias por registrarte. Antes de continuar, verifica tu correo electrónico con el enlace que acabamos de enviarte. Si no lo recibiste, podemos enviarte otro.') }}
     </div>
 
     @if (session('status') == 'verification-link-sent')
-        <div class="mb-4 font-medium text-sm text-green-600 dark:text-green-400">
+        <div class="mb-4 font-medium text-sm text-cantera-600 dark:text-cantera-400">
             {{ __('Se envió un nuevo enlace de verificación al correo electrónico que usaste durante el registro.') }}
         </div>
     @endif
@@ -23,7 +23,7 @@
         <form method="POST" action="{{ route('logout') }}">
             @csrf
 
-            <button type="submit" class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
+            <button type="submit" class="underline text-sm text-cantera-700 dark:text-cantera-500 hover:text-anil-900 dark:hover:text-hueso-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-anil-500 dark:focus:ring-offset-anil-900">
                 {{ __('Cerrar sesión') }}
             </button>
         </form>

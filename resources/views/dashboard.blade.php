@@ -1,41 +1,41 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-anil-800 leading-tight">
             {{ __('Panel de control - Casa de la Cultura') }}
         </h2>
     </x-slot>
 
-    <div class="py-12 bg-gray-100 min-h-screen">
+    <div class="py-12 bg-hueso-100 min-h-screen">
         <div class="module-page-shell">
             <x-module-nav />
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-                <div class="bg-white p-6 rounded-3xl shadow-lg border-b-4 border-blue-500 transform hover:-translate-y-1 transition duration-300">
-                    <p class="text-xs font-black text-gray-500 uppercase tracking-widest">Total activos</p>
-                    <p class="text-5xl font-black text-gray-900 mt-3">{{ $stats['total'] }}</p>
+                <div class="bg-hueso-50 p-6 rounded-xl shadow-lg shadow-cantera-900/10 border-b-4 border-cantera-600 transform hover:-translate-y-1 transition duration-300">
+                    <p class="text-xs font-black text-cantera-700 uppercase tracking-widest">Total activos</p>
+                    <p class="text-5xl font-black text-anil-900 mt-3">{{ $stats['total'] }}</p>
                 </div>
 
-                <div class="bg-white p-6 rounded-3xl shadow-lg border-b-4 border-green-500 transform hover:-translate-y-1 transition duration-300">
-                    <p class="text-xs font-black text-gray-500 uppercase tracking-widest">Disponibles</p>
-                    <p class="text-5xl font-black text-gray-900 mt-3">{{ $stats['disponibles'] }}</p>
+                <div class="bg-hueso-50 p-6 rounded-xl shadow-lg shadow-cantera-900/10 border-b-4 border-cantera-500 transform hover:-translate-y-1 transition duration-300">
+                    <p class="text-xs font-black text-cantera-700 uppercase tracking-widest">Disponibles</p>
+                    <p class="text-5xl font-black text-cantera-800 mt-3">{{ $stats['disponibles'] }}</p>
                 </div>
 
-                <div class="bg-white p-6 rounded-3xl shadow-lg border-b-4 border-yellow-500 transform hover:-translate-y-1 transition duration-300">
-                    <p class="text-xs font-black text-gray-500 uppercase tracking-widest">Prestados / no disponibles</p>
-                    <p class="text-5xl font-black text-gray-900 mt-3">{{ $stats['prestados'] }}</p>
+                <div class="bg-hueso-50 p-6 rounded-xl shadow-lg shadow-cantera-900/10 border-b-4 border-ocre-400 transform hover:-translate-y-1 transition duration-300">
+                    <p class="text-xs font-black text-ocre-700 uppercase tracking-widest">Prestados / no disponibles</p>
+                    <p class="text-5xl font-black text-ocre-800 mt-3">{{ $stats['prestados'] }}</p>
                 </div>
 
-                <div class="bg-white p-6 rounded-3xl shadow-lg border-b-4 border-red-500 transform hover:-translate-y-1 transition duration-300">
-                    <p class="text-xs font-black text-gray-500 uppercase tracking-widest">Mantenimiento</p>
-                    <p class="text-5xl font-black text-gray-900 mt-3">{{ $stats['mantenimiento'] }}</p>
+                <div class="bg-hueso-50 p-6 rounded-xl shadow-lg shadow-cantera-900/10 border-b-4 border-oxido-500 transform hover:-translate-y-1 transition duration-300">
+                    <p class="text-xs font-black text-oxido-700 uppercase tracking-widest">Mantenimiento</p>
+                    <p class="text-5xl font-black text-oxido-800 mt-3">{{ $stats['mantenimiento'] }}</p>
                 </div>
             </div>
 
             @if ($alertasOperativas->isNotEmpty())
                 <section class="module-card mb-8">
-                    <div class="flex items-center justify-between gap-4 border-b border-gray-100 pb-4">
-                        <h3 class="text-2xl font-black text-gray-900 uppercase tracking-tighter">Alertas operativas</h3>
-                        <span class="rounded-full bg-red-100 px-3 py-1 text-xs font-black uppercase tracking-widest text-red-700">
+                    <div class="flex items-center justify-between gap-4 border-b border-cantera-100 pb-4">
+                        <h3 class="text-2xl font-black text-anil-900 uppercase tracking-tighter">Alertas operativas</h3>
+                        <span class="rounded-full bg-oxido-100 px-3 py-1 text-xs font-black uppercase tracking-widest text-oxido-700">
                             {{ $alertasOperativas->count() }} pendientes
                         </span>
                     </div>
@@ -44,11 +44,11 @@
                         @foreach ($alertasOperativas as $alerta)
                             @php
                                 [$alertaBorde, $alertaFondo, $alertaTexto, $alertaCaja] = match ($alerta->tipo) {
-                                    'Fragilidad/Mal Uso' => ['border-red-100', 'bg-red-50', 'text-red-700', 'border-red-200'],
-                                    'Preparacion de Temporada' => ['border-blue-100', 'bg-blue-50', 'text-blue-700', 'border-blue-200'],
-                                    'Incremento Historico de Prestamos' => ['border-green-100', 'bg-green-50', 'text-green-700', 'border-green-200'],
-                                    'Baja y Adquisicion' => ['border-amber-100', 'bg-amber-50', 'text-amber-700', 'border-amber-200'],
-                                    default => ['border-slate-100', 'bg-slate-50', 'text-slate-700', 'border-slate-200'],
+                                    'Fragilidad/Mal Uso' => ['border-oxido-100', 'bg-oxido-50', 'text-oxido-700', 'border-oxido-200'],
+                                    'Preparacion de Temporada' => ['border-anil-100', 'bg-anil-50', 'text-anil-700', 'border-anil-200'],
+                                    'Incremento Historico de Prestamos' => ['border-cantera-100', 'bg-cantera-50', 'text-cantera-700', 'border-cantera-200'],
+                                    'Baja y Adquisicion' => ['border-ocre-100', 'bg-ocre-50', 'text-ocre-700', 'border-ocre-200'],
+                                    default => ['border-hueso-200', 'bg-hueso-50', 'text-anil-700', 'border-hueso-300'],
                                 };
 
                                 $alertaTipo = match ($alerta->tipo) {
@@ -58,109 +58,109 @@
                                     default => $alerta->tipo,
                                 };
                             @endphp
-                            <div class="rounded-2xl border {{ $alertaBorde }} {{ $alertaFondo }} p-5">
+                            <div class="rounded-xl border {{ $alertaBorde }} {{ $alertaFondo }} p-5">
                                 @if ($alerta->activo)
-                                    <div class="mb-4 rounded-xl border {{ $alertaCaja }} bg-white px-4 py-3">
-                                        <p class="text-xs font-black uppercase tracking-widest text-gray-500">Instrumento afectado</p>
+                                    <div class="mb-4 rounded-xl border {{ $alertaCaja }} bg-hueso-50 px-4 py-3">
+                                        <p class="text-xs font-black uppercase tracking-widest text-cantera-600">Instrumento afectado</p>
                                         <p class="mt-1 text-xl font-black {{ $alertaTexto }}">{{ $alerta->activo->nombre }}</p>
                                     </div>
                                 @endif
                                 <p class="text-xs font-black uppercase tracking-widest {{ $alertaTexto }}">{{ $alertaTipo }}</p>
-                                <p class="mt-2 text-lg font-black text-gray-900">{{ $alerta->titulo }}</p>
-                                <p class="mt-1 text-sm text-gray-700">{{ $alerta->descripcion }}</p>
+                                <p class="mt-2 text-lg font-black text-anil-900">{{ $alerta->titulo }}</p>
+                                <p class="mt-1 text-sm text-anil-700">{{ $alerta->descripcion }}</p>
                                 @if ($alerta->tipo === 'Baja y Adquisicion' && is_array($alerta->datos))
                                     <div class="mt-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
-                                        <div class="rounded-xl bg-white p-3">
-                                            <p class="text-xs font-black uppercase tracking-widest text-gray-400">Valor original</p>
-                                            <p class="mt-1 font-black text-gray-900">${{ number_format((float) ($alerta->datos['valor_original'] ?? 0), 2) }} MXN</p>
+                                        <div class="rounded-xl bg-hueso-50 p-3">
+                                            <p class="text-xs font-black uppercase tracking-widest text-cantera-500">Valor original</p>
+                                            <p class="mt-1 font-black text-anil-900">${{ number_format((float) ($alerta->datos['valor_original'] ?? 0), 2) }} MXN</p>
                                         </div>
-                                        <div class="rounded-xl bg-white p-3">
-                                            <p class="text-xs font-black uppercase tracking-widest text-gray-400">Reparaciones</p>
-                                            <p class="mt-1 font-black text-gray-900">${{ number_format((float) ($alerta->datos['costo_reparaciones'] ?? 0), 2) }} MXN</p>
+                                        <div class="rounded-xl bg-hueso-50 p-3">
+                                            <p class="text-xs font-black uppercase tracking-widest text-cantera-500">Reparaciones</p>
+                                            <p class="mt-1 font-black text-anil-900">${{ number_format((float) ($alerta->datos['costo_reparaciones'] ?? 0), 2) }} MXN</p>
                                         </div>
-                                        <div class="rounded-xl bg-white p-3">
-                                            <p class="text-xs font-black uppercase tracking-widest text-gray-400">Límite</p>
-                                            <p class="mt-1 font-black text-gray-900">{{ $alerta->datos['porcentaje_limite'] ?? 60 }}%</p>
+                                        <div class="rounded-xl bg-hueso-50 p-3">
+                                            <p class="text-xs font-black uppercase tracking-widest text-cantera-500">Límite</p>
+                                            <p class="mt-1 font-black text-anil-900">{{ $alerta->datos['porcentaje_limite'] ?? 60 }}%</p>
                                         </div>
                                     </div>
                                 @elseif ($alerta->tipo === 'Preparacion de Temporada' && is_array($alerta->datos))
-                                    <div class="mt-4 rounded-xl bg-white p-3 text-sm">
-                                        <p class="text-xs font-black uppercase tracking-widest text-gray-400">Base de alerta</p>
+                                    <div class="mt-4 rounded-xl bg-hueso-50 p-3 text-sm">
+                                        <p class="text-xs font-black uppercase tracking-widest text-cantera-500">Base de alerta</p>
                                         @if (! empty($alerta->datos['temporada_base']))
-                                            <p class="mt-1 font-bold text-gray-900">{{ $alerta->datos['temporada_base']['nombre'] }}: {{ $alerta->datos['temporada_base']['rango'] }}</p>
+                                            <p class="mt-1 font-bold text-anil-900">{{ $alerta->datos['temporada_base']['nombre'] }}: {{ $alerta->datos['temporada_base']['rango'] }}</p>
                                         @else
-                                            <p class="mt-1 font-bold text-gray-900">Sin calendario base asociado.</p>
+                                            <p class="mt-1 font-bold text-anil-900">Sin calendario base asociado.</p>
                                         @endif
                                         @if (! empty($alerta->datos['recursos']))
                                             <div class="mt-3 space-y-2">
-                                                <p class="text-xs font-black uppercase tracking-widest text-gray-400">Recursos sugeridos (top {{ $alerta->datos['limite_recursos'] ?? 5 }})</p>
+                                                <p class="text-xs font-black uppercase tracking-widest text-cantera-500">Recursos sugeridos (top {{ $alerta->datos['limite_recursos'] ?? 5 }})</p>
                                                 @foreach ($alerta->datos['recursos'] as $recurso)
-                                                    <div class="rounded-lg bg-blue-50 px-3 py-2">
-                                                        <p class="font-black text-blue-900">{{ $recurso['nombre'] }}</p>
-                                                        <p class="text-xs text-blue-700">{{ $recurso['categoria'] }} - {{ $recurso['total_prestamos'] }} préstamos</p>
+                                                    <div class="rounded-lg bg-anil-50 px-3 py-2">
+                                                        <p class="font-black text-anil-900">{{ $recurso['nombre'] }}</p>
+                                                        <p class="text-xs text-anil-700">{{ $recurso['categoria'] }} - {{ $recurso['total_prestamos'] }} préstamos</p>
                                                     </div>
                                                 @endforeach
                                             </div>
                                         @endif
                                     </div>
                                 @elseif ($alerta->tipo === 'Incremento Historico de Prestamos' && is_array($alerta->datos))
-                                    <div class="mt-4 rounded-xl bg-white p-3 text-sm">
-                                        <p class="text-xs font-black uppercase tracking-widest text-gray-400">Comparación histórica</p>
+                                    <div class="mt-4 rounded-xl bg-hueso-50 p-3 text-sm">
+                                        <p class="text-xs font-black uppercase tracking-widest text-cantera-500">Comparación histórica</p>
                                         <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                                            <div class="rounded-lg bg-green-50 px-3 py-2">
-                                                <p class="text-xs font-black uppercase tracking-widest text-green-500">Periodo anterior</p>
-                                                <p class="mt-1 font-black text-green-900">{{ $alerta->datos['prestamos_anteriores'] ?? 0 }} préstamos</p>
+                                            <div class="rounded-lg bg-cantera-50 px-3 py-2">
+                                                <p class="text-xs font-black uppercase tracking-widest text-cantera-500">Periodo anterior</p>
+                                                <p class="mt-1 font-black text-cantera-900">{{ $alerta->datos['prestamos_anteriores'] ?? 0 }} préstamos</p>
                                                 @if (! empty($alerta->datos['periodo_anterior']))
-                                                    <p class="text-xs text-green-700">{{ $alerta->datos['periodo_anterior']['inicio'] }} a {{ $alerta->datos['periodo_anterior']['fin'] }}</p>
+                                                    <p class="text-xs text-cantera-700">{{ $alerta->datos['periodo_anterior']['inicio'] }} a {{ $alerta->datos['periodo_anterior']['fin'] }}</p>
                                                 @endif
                                             </div>
-                                            <div class="rounded-lg bg-green-50 px-3 py-2">
-                                                <p class="text-xs font-black uppercase tracking-widest text-green-500">Periodo reciente</p>
-                                                <p class="mt-1 font-black text-green-900">{{ $alerta->datos['prestamos_actuales'] ?? 0 }} préstamos</p>
+                                            <div class="rounded-lg bg-cantera-50 px-3 py-2">
+                                                <p class="text-xs font-black uppercase tracking-widest text-cantera-500">Periodo reciente</p>
+                                                <p class="mt-1 font-black text-cantera-900">{{ $alerta->datos['prestamos_actuales'] ?? 0 }} préstamos</p>
                                                 @if (! empty($alerta->datos['periodo_actual']))
-                                                    <p class="text-xs text-green-700">{{ $alerta->datos['periodo_actual']['inicio'] }} a {{ $alerta->datos['periodo_actual']['fin'] }}</p>
+                                                    <p class="text-xs text-cantera-700">{{ $alerta->datos['periodo_actual']['inicio'] }} a {{ $alerta->datos['periodo_actual']['fin'] }}</p>
                                                 @endif
                                             </div>
-                                            <div class="rounded-lg bg-green-50 px-3 py-2">
-                                                <p class="text-xs font-black uppercase tracking-widest text-green-500">Diferencia</p>
-                                                <p class="mt-1 font-black text-green-900">{{ $alerta->datos['diferencia_prestamos'] ?? 0 }} préstamos</p>
+                                            <div class="rounded-lg bg-cantera-50 px-3 py-2">
+                                                <p class="text-xs font-black uppercase tracking-widest text-cantera-500">Diferencia</p>
+                                                <p class="mt-1 font-black text-cantera-900">{{ $alerta->datos['diferencia_prestamos'] ?? 0 }} préstamos</p>
                                             </div>
-                                            <div class="rounded-lg bg-green-50 px-3 py-2">
-                                                <p class="text-xs font-black uppercase tracking-widest text-green-500">Incremento</p>
-                                                <p class="mt-1 font-black text-green-900">{{ $alerta->datos['incremento_porcentaje'] ?? 0 }}%</p>
+                                            <div class="rounded-lg bg-cantera-50 px-3 py-2">
+                                                <p class="text-xs font-black uppercase tracking-widest text-cantera-500">Incremento</p>
+                                                <p class="mt-1 font-black text-cantera-900">{{ $alerta->datos['incremento_porcentaje'] ?? 0 }}%</p>
                                             </div>
-                                            <div class="rounded-lg bg-green-50 px-3 py-2">
-                                                <p class="text-xs font-black uppercase tracking-widest text-green-500">Factor</p>
-                                                <p class="mt-1 font-black text-green-900">{{ $alerta->datos['factor_crecimiento'] ?? 0 }}x</p>
+                                            <div class="rounded-lg bg-cantera-50 px-3 py-2">
+                                                <p class="text-xs font-black uppercase tracking-widest text-cantera-500">Factor</p>
+                                                <p class="mt-1 font-black text-cantera-900">{{ $alerta->datos['factor_crecimiento'] ?? 0 }}x</p>
                                             </div>
-                                            <div class="rounded-lg bg-green-50 px-3 py-2">
-                                                <p class="text-xs font-black uppercase tracking-widest text-green-500">Regla</p>
-                                                <p class="mt-1 font-black text-green-900">{{ $alerta->datos['umbral_incremento'] ?? 25 }}% mínimo</p>
-                                                <p class="text-xs text-green-700">Muestra mínima: {{ $alerta->datos['minimo_prestamos_anteriores'] ?? 2 }} anteriores y {{ $alerta->datos['minimo_prestamos_actuales'] ?? 3 }} recientes</p>
+                                            <div class="rounded-lg bg-cantera-50 px-3 py-2">
+                                                <p class="text-xs font-black uppercase tracking-widest text-cantera-500">Regla</p>
+                                                <p class="mt-1 font-black text-cantera-900">{{ $alerta->datos['umbral_incremento'] ?? 25 }}% mínimo</p>
+                                                <p class="text-xs text-cantera-700">Muestra mínima: {{ $alerta->datos['minimo_prestamos_anteriores'] ?? 2 }} anteriores y {{ $alerta->datos['minimo_prestamos_actuales'] ?? 3 }} recientes</p>
                                             </div>
                                         </div>
                                         @if (! empty($alerta->datos['recursos']))
                                             <div class="mt-3 space-y-2">
-                                                <p class="text-xs font-black uppercase tracking-widest text-gray-400">Recursos sugeridos (top {{ $alerta->datos['limite_recursos'] ?? 5 }})</p>
+                                                <p class="text-xs font-black uppercase tracking-widest text-cantera-500">Recursos sugeridos (top {{ $alerta->datos['limite_recursos'] ?? 5 }})</p>
                                                 @foreach ($alerta->datos['recursos'] as $recurso)
-                                                    <div class="rounded-lg bg-green-50 px-3 py-2">
-                                                        <p class="font-black text-green-900">{{ $recurso['nombre'] }}</p>
-                                                        <p class="text-xs text-green-700">{{ $recurso['categoria'] }} - {{ $recurso['total_prestamos'] }} préstamos</p>
+                                                    <div class="rounded-lg bg-cantera-50 px-3 py-2">
+                                                        <p class="font-black text-cantera-900">{{ $recurso['nombre'] }}</p>
+                                                        <p class="text-xs text-cantera-700">{{ $recurso['categoria'] }} - {{ $recurso['total_prestamos'] }} préstamos</p>
                                                     </div>
                                                 @endforeach
                                             </div>
                                         @endif
                                     </div>
                                 @elseif ($alerta->tipo === 'Fragilidad/Mal Uso' && is_array($alerta->datos))
-                                    <div class="mt-4 rounded-xl bg-white p-3 text-sm">
-                                        <p class="text-xs font-black uppercase tracking-widest text-gray-400">Daños recientes</p>
-                                        <p class="mt-1 font-bold text-gray-900">{{ $alerta->datos['danios_recientes'] ?? 0 }} en {{ $alerta->datos['periodo_dias'] ?? 90 }} días</p>
+                                    <div class="mt-4 rounded-xl bg-hueso-50 p-3 text-sm">
+                                        <p class="text-xs font-black uppercase tracking-widest text-cantera-500">Daños recientes</p>
+                                        <p class="mt-1 font-bold text-anil-900">{{ $alerta->datos['danios_recientes'] ?? 0 }} en {{ $alerta->datos['periodo_dias'] ?? 90 }} días</p>
                                     </div>
                                 @endif
 
                                 <form action="{{ route('alertas.resolver', $alerta->id_alerta) }}" method="POST" class="mt-4 text-right">
                                     @csrf
-                                    <button type="submit" class="rounded-lg bg-white px-4 py-2 text-xs font-black uppercase tracking-widest text-gray-600 shadow-sm transition hover:bg-gray-900 hover:text-white">
+                                    <button type="submit" class="rounded-lg bg-hueso-50 px-4 py-2 text-xs font-black uppercase tracking-widest text-cantera-700 shadow-sm transition hover:bg-gray-900 hover:text-hueso-50">
                                         Marcar resuelta
                                     </button>
                                 </form>
@@ -172,46 +172,46 @@
 
             <div class="grid grid-cols-1 xl:grid-cols-[1.1fr_0.9fr] gap-8">
                 <section class="module-card overflow-hidden">
-                    <h3 class="text-2xl font-black mb-6 text-gray-900 border-b border-gray-100 pb-4 uppercase tracking-tighter">Acciones operativas</h3>
+                    <h3 class="text-2xl font-black mb-6 text-anil-900 border-b border-cantera-100 pb-4 uppercase tracking-tighter">Acciones operativas</h3>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <a href="{{ route('activos.index') }}" class="flex flex-col items-center p-6 bg-blue-50 rounded-2xl border border-blue-100 hover:bg-blue-100 hover:scale-105 hover:shadow-md transition transform text-center">
+                        <a href="{{ route('activos.index') }}" class="flex flex-col items-center p-6 bg-anil-50 rounded-xl border border-anil-100 hover:bg-anil-100 hover:scale-105 hover:shadow-md transition transform text-center">
                             <span class="text-4xl mb-3">Catálogo</span>
-                            <p class="font-black text-blue-900 uppercase tracking-widest text-sm">Inventario</p>
-                            <p class="text-xs text-blue-700 mt-1">Consultar y prestar instrumentos</p>
+                            <p class="font-black text-anil-900 uppercase tracking-widest text-sm">Inventario</p>
+                            <p class="text-xs text-anil-700 mt-1">Consultar y prestar instrumentos</p>
                         </a>
 
-                        <a href="{{ route('prestamos.create') }}" class="flex flex-col items-center p-6 bg-green-50 rounded-2xl border border-green-100 hover:bg-green-100 hover:scale-105 hover:shadow-md transition transform text-center">
+                        <a href="{{ route('prestamos.create') }}" class="flex flex-col items-center p-6 bg-cantera-50 rounded-xl border border-cantera-100 hover:bg-cantera-100 hover:scale-105 hover:shadow-md transition transform text-center">
                             <span class="text-4xl mb-3">Préstamo</span>
-                            <p class="font-black text-green-900 uppercase tracking-widest text-sm">Nuevo préstamo</p>
-                            <p class="text-xs text-green-700 mt-1">Registrar salida con fecha y hora automáticas</p>
+                            <p class="font-black text-cantera-900 uppercase tracking-widest text-sm">Nuevo préstamo</p>
+                            <p class="text-xs text-cantera-700 mt-1">Registrar salida con fecha y hora automáticas</p>
                         </a>
 
-                        <a href="{{ route('prestamos.activos') }}" class="flex flex-col items-center p-6 bg-purple-50 rounded-2xl border border-purple-100 hover:bg-purple-100 hover:scale-105 hover:shadow-md transition transform text-center">
+                        <a href="{{ route('prestamos.activos') }}" class="flex flex-col items-center p-6 bg-oxido-50 rounded-xl border border-oxido-100 hover:bg-oxido-100 hover:scale-105 hover:shadow-md transition transform text-center">
                             <span class="text-4xl mb-3">Devolución</span>
-                            <p class="font-black text-purple-900 uppercase tracking-widest text-sm">Devoluciones</p>
-                            <p class="text-xs text-purple-700 mt-1">Recibir equipo y registrar pagos</p>
+                            <p class="font-black text-oxido-900 uppercase tracking-widest text-sm">Devoluciones</p>
+                            <p class="text-xs text-oxido-700 mt-1">Recibir equipo y registrar incidencias</p>
                         </a>
 
-                        <a href="{{ route('mantenimientos.index') }}" class="flex flex-col items-center p-6 bg-amber-50 rounded-2xl border border-amber-100 hover:bg-amber-100 hover:scale-105 hover:shadow-md transition transform text-center">
+                        <a href="{{ route('mantenimientos.index') }}" class="flex flex-col items-center p-6 bg-ocre-50 rounded-xl border border-ocre-100 hover:bg-ocre-100 hover:scale-105 hover:shadow-md transition transform text-center">
                             <span class="text-4xl mb-3">Servicio</span>
-                            <p class="font-black text-amber-900 uppercase tracking-widest text-sm">Mantenimiento</p>
-                            <p class="text-xs text-amber-700 mt-1">Atender reparaciones y liberar equipo</p>
+                            <p class="font-black text-ocre-900 uppercase tracking-widest text-sm">Mantenimiento</p>
+                            <p class="text-xs text-ocre-700 mt-1">Atender reparaciones y liberar equipo</p>
                         </a>
 
-                        <a href="{{ route('temporadas-base.index') }}" class="flex flex-col items-center p-6 bg-blue-50 rounded-2xl border border-blue-100 hover:bg-blue-100 hover:scale-105 hover:shadow-md transition transform text-center">
+                        <a href="{{ route('temporadas-base.index') }}" class="flex flex-col items-center p-6 bg-anil-50 rounded-xl border border-anil-100 hover:bg-anil-100 hover:scale-105 hover:shadow-md transition transform text-center">
                             <span class="text-4xl mb-3">Calendario</span>
-                            <p class="font-black text-blue-900 uppercase tracking-widest text-sm">Fechas base</p>
-                            <p class="text-xs text-blue-700 mt-1">Administrar temporadas y alertas preventivas</p>
+                            <p class="font-black text-anil-900 uppercase tracking-widest text-sm">Fechas base</p>
+                            <p class="text-xs text-anil-700 mt-1">Administrar temporadas y alertas preventivas</p>
                         </a>
                     </div>
                 </section>
 
                 <section class="module-card overflow-hidden">
-                    <div class="flex items-center justify-between gap-4 border-b border-gray-100 pb-4">
+                    <div class="flex items-center justify-between gap-4 border-b border-cantera-100 pb-4">
                         <div>
-                            <h3 class="text-2xl font-black text-gray-900 uppercase tracking-tighter">Panel de métricas</h3>
-                            <p class="text-sm text-gray-500 mt-1">Instrumentos con mayor demanda por número de préstamos registrados.</p>
+                            <h3 class="text-2xl font-black text-anil-900 uppercase tracking-tighter">Panel de métricas</h3>
+                            <p class="text-sm text-cantera-600 mt-1">Instrumentos con mayor demanda por número de préstamos registrados.</p>
                         </div>
                     </div>
 
@@ -223,18 +223,18 @@
                             <div>
                                 <div class="flex items-end justify-between gap-4 mb-2">
                                     <div>
-                                        <p class="font-black text-gray-900">{{ $item->nombre }}</p>
-                                        <p class="text-xs font-bold uppercase tracking-widest text-gray-500">{{ $item->categoria }}</p>
+                                        <p class="font-black text-anil-900">{{ $item->nombre }}</p>
+                                        <p class="text-xs font-bold uppercase tracking-widest text-cantera-600">{{ $item->categoria }}</p>
                                     </div>
                                     <p class="text-sm font-black text-cultura-700">{{ $item->total_prestamos }} préstamos</p>
                                 </div>
-                                <div class="h-4 rounded-full bg-gray-100 overflow-hidden">
-                                    <div class="h-full rounded-full bg-cultura-600" style="width: {{ $anchoBarra }}%"></div>
+                                <div class="h-4 rounded-full bg-hueso-200 overflow-hidden">
+                                    <div class="h-full rounded-full bg-cantera-600" style="width: {{ $anchoBarra }}%"></div>
                                 </div>
                             </div>
                         @empty
-                            <div class="rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 py-12 text-center">
-                                <p class="font-bold text-gray-500">Todavía no hay datos suficientes para mostrar métricas.</p>
+                            <div class="rounded-xl border-2 border-dashed border-cantera-200 bg-hueso-50 py-12 text-center">
+                                <p class="font-bold text-cantera-600">Todavía no hay datos suficientes para mostrar métricas.</p>
                             </div>
                         @endforelse
                     </div>
